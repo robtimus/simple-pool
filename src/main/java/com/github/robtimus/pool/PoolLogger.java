@@ -25,6 +25,8 @@ import org.slf4j.LoggerFactory;
 /**
  * A logger for events triggered by a {@link Pool} or {@link PoolableObject}.
  * <p>
+ * Instances of this class are thread-safe.
+ * <p>
  * This class needs SLF4J to be present on the class path to work. If it isn't nothing will be logged at all.
  *
  * @author Rob Spoor

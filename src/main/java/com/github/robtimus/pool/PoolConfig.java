@@ -22,6 +22,8 @@ import java.util.Objects;
 
 /**
  * Configuration for a {@link Pool}.
+ * <p>
+ * Instances of this class are immutable and thread-safe.
  *
  * @author Rob Spoor
  */

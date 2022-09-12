@@ -30,6 +30,9 @@ import java.util.function.Supplier;
 /**
  * An object that can be pooled. Note that the functionality to return the object back to the pool it was acquired from is not part of its
  * <em>public</em> API. This allows implementations to call {@link #release()} from other methods, e.g. a {@link Closeable}'s {@code close} method.
+ * <p>
+ * Instances of this class are not expected to be thread-safe. Once acquired from a pool, they should usually be used in only one thread until they
+ * are released and returned back to the pool.
  *
  * @author Rob Spoor
  * @param <X> The type of exception that operations on the object can throw.

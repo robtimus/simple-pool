@@ -34,6 +34,8 @@ import java.util.function.Supplier;
 
 /**
  * A simple object pool implementation.
+ * <p>
+ * Instances of this class are thread-safe.
  *
  * @author Rob Spoor
  * @param <T> The type of objects in the pool.

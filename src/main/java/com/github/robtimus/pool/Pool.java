@@ -367,9 +367,9 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
                 removedObjects = true;
             } else if (object.isIdleTooLong()) {
                 size--;
-                object.clearPool();
                 logger.objectIdleTooLong(object.objectId(), idleObjects.size(), size);
                 object.releaseResourcesQuietly();
+                object.clearPool();
                 removedObjects = true;
             } else {
                 return object;

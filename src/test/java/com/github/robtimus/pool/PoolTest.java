@@ -102,7 +102,8 @@ class PoolTest {
 
             pool.shutdown();
 
-            verify(logger).releasedResources(objectIdCaptor.getValue());
+            verify(logger).releasingObjectResources(objectIdCaptor.getValue());
+            verify(logger).releasedObjectResources(objectIdCaptor.getValue());
             verify(logger).drainedPool(0);
             verify(logger).shutDownPool();
 
@@ -162,14 +163,15 @@ class PoolTest {
             verify(logger).creatingPool(config);
             verify(logger).createdObject(objectIdCaptor.capture());
             verify(logger).failedToCreatePool(error);
-            verify(logger).releasedResources(objectIdCaptor.getValue());
+            verify(logger).releasingObjectResources(objectIdCaptor.getValue());
+            verify(logger).releasedObjectResources(objectIdCaptor.getValue());
 
             verifyNoMoreInteractions(supplier, logger);
         }
 
         @Test
-        @DisplayName("failure for second object with disconnect error")
-        void testFailureForSecondObjectWithDisconnectError() {
+        @DisplayName("failure for second object with release resources error")
+        void testFailureForSecondObjectWithReleaseResourcesError() {
             NumberFormatException error = new NumberFormatException();
             NumberFormatException suppressed = new NumberFormatException();
 
@@ -203,6 +205,7 @@ class PoolTest {
             verify(logger).creatingPool(config);
             verify(logger).createdObject(object.objectId());
             verify(logger).failedToCreatePool(error);
+            verify(logger).releasingObjectResources(object.objectId());
 
             verifyNoMoreInteractions(logger);
         }
@@ -733,19 +736,19 @@ class PoolTest {
                 verify(logger).createdObject(object1.objectId());
                 verify(logger).createdPool(config);
                 // acquire object1; the pool size was 1
-                verify(logger).increasedRefCount(object1.objectId(), 1);
+                verify(logger).increasedObjectRefCount(object1.objectId(), 1);
                 verify(logger).acquiredObject(object1.objectId(), 0, 1);
                 // acquire object2
                 verify(logger).createdObject(object2.objectId());
-                verify(logger).increasedRefCount(object2.objectId(), 1);
+                verify(logger).increasedObjectRefCount(object2.objectId(), 1);
                 verify(logger).acquiredObject(object2.objectId(), 0, 2);
                 // acquire object3
                 verify(logger).createdNonPooledObject(object3.objectId());
                 // release object1
-                verify(logger).decreasedRefCount(object1.objectId(), 0);
+                verify(logger).decreasedObjectRefCount(object1.objectId(), 0);
                 verify(logger).returnedObject(object1.objectId(), 1, 2);
                 // release object2
-                verify(logger).decreasedRefCount(object2.objectId(), 0);
+                verify(logger).decreasedObjectRefCount(object2.objectId(), 0);
                 verify(logger).returnedObject(object2.objectId(), 2, 2);
 
                 verifyNoMoreInteractions(supplier, logger);
@@ -838,17 +841,19 @@ class PoolTest {
         @DisplayName("idle objects are removed")
         void testIdleObjectsAreRemoved() {
             PoolConfig config = PoolConfig.custom()
-                    .withInitialSize(1)
+                    .withInitialSize(0)
                     .withMaxSize(1)
                     .withMaxWaitTime(Duration.ofMillis(100))
                     .withMaxIdleTime(Duration.ofMillis(-1))
                     .build();
             @SuppressWarnings("unchecked")
             Supplier<TestObject> supplier = mock(Supplier.class);
+            PoolLogger logger = mock(PoolLogger.class);
 
-            when(supplier.get()).thenAnswer(i -> spy(new TestObject()));
+            RuntimeException releaseError = new NumberFormatException();
+            when(supplier.get()).thenAnswer(i -> spy(new TestObject(true, () -> releaseError)));
 
-            Pool<TestObject, None> pool = Pool.throwingNone(config, supplier);
+            Pool<TestObject, None> pool = Pool.throwingNone(config, supplier, logger);
 
             TestObject object1 = assertDoesNotThrow(() -> pool.acquire(1, TimeUnit.SECONDS));
 
@@ -859,6 +864,32 @@ class PoolTest {
             assertNotSame(object1, object2);
 
             object2.release();
+
+            verify(supplier, times(2)).get();
+            // logger calls in order
+            // create pool
+            verify(logger).creatingPool(config);
+            verify(logger).createdObject(object1.objectId());
+            verify(logger).createdPool(config);
+            // acquire object1
+            verify(logger).increasedObjectRefCount(object1.objectId(), 1);
+            verify(logger).acquiredObject(object1.objectId(), 0, 1);
+            // release object1
+            verify(logger).decreasedObjectRefCount(object1.objectId(), 0);
+            verify(logger).returnedObject(object1.objectId(), 1, 1);
+            // acquire object2; the size is decreased to 0 which allows a new object to be created
+            verify(logger).objectIdleTooLong(object1.objectId(), 0, 0);
+            verify(logger).releasingObjectResources(object1.objectId());
+            verify(logger).releaseObjectResourcesFailed(object1.objectId(), releaseError);
+            verify(logger).releasedObjectResources(object1.objectId());
+            verify(logger).createdObject(object2.objectId());
+            verify(logger).increasedObjectRefCount(object2.objectId(), 1);
+            verify(logger).acquiredObject(object2.objectId(), 0, 1);
+            // release object2
+            verify(logger).decreasedObjectRefCount(object2.objectId(), 0);
+            verify(logger).returnedObject(object2.objectId(), 1, 1);
+
+            verifyNoMoreInteractions(logger);
 
             // releaseResourcesQuietly is called for object1 when acquiring object2, because the object has been idle for too long
             // object2 is freshly created
@@ -946,10 +977,10 @@ class PoolTest {
                         .withMaxSize(3)
                         .withMaxWaitTime(Duration.ofMillis(100))
                         .build();
-                AtomicInteger counter = new AtomicInteger(0);
                 @SuppressWarnings("unchecked")
                 Supplier<TestObject> supplier = mock(Supplier.class);
 
+                AtomicInteger counter = new AtomicInteger(0);
                 when(supplier.get())
                         .thenAnswer(i -> new TestObject(true, () -> new NumberFormatException(Integer.toString(counter.getAndIncrement()))));
 
@@ -1000,7 +1031,8 @@ class PoolTest {
             // shutdown 1
             verify(logger).drainedPool(0);
             for (long objectId : objectIdCaptor.getAllValues()) {
-                verify(logger).releasedResources(objectId);
+                verify(logger).releasingObjectResources(objectId);
+                verify(logger).releasedObjectResources(objectId);
             }
             verify(logger).shutDownPool();
             // no events for shutdown 2+
@@ -1051,17 +1083,17 @@ class PoolTest {
             verify(logger).drainedPool(0);
             // acquire object1
             verify(logger).createdObject(object1.objectId());
-            verify(logger).increasedRefCount(object1.objectId(), 1);
+            verify(logger).increasedObjectRefCount(object1.objectId(), 1);
             verify(logger).acquiredObject(object1.objectId(), 0, 1);
             // acquire object2
             verify(logger).createdObject(object2.objectId());
-            verify(logger).increasedRefCount(object2.objectId(), 1);
+            verify(logger).increasedObjectRefCount(object2.objectId(), 1);
             verify(logger).acquiredObject(object2.objectId(), 0, 2);
             // release object1
-            verify(logger).decreasedRefCount(object1.objectId(), 0);
+            verify(logger).decreasedObjectRefCount(object1.objectId(), 0);
             verify(logger).returnedObject(object1.objectId(), 1, 2);
             // release object2
-            verify(logger).decreasedRefCount(object2.objectId(), 0);
+            verify(logger).decreasedObjectRefCount(object2.objectId(), 0);
             verify(logger).returnedObject(object2.objectId(), 2, 2);
 
             verifyNoMoreInteractions(supplier, logger, action);
@@ -1084,8 +1116,17 @@ class PoolTest {
             PoolLogger logger = mock(PoolLogger.class);
             @SuppressWarnings("unchecked")
             PoolableObjectConsumer<TestObject, None> action = mock(PoolableObjectConsumer.class);
+            @SuppressWarnings("unchecked")
+            Supplier<String> messageSupplier = mock(Supplier.class);
 
             when(supplier.get()).thenAnswer(i -> spy(new TestObject()));
+            doAnswer(i -> {
+                TestObject object = i.getArgument(0, TestObject.class);
+                object.logEvent("custom event");
+                object.logEvent(messageSupplier);
+                return null;
+            }).when(action).accept(any());
+            when(messageSupplier.get()).thenReturn("custom supplied event");
 
             Pool<TestObject, None> pool = Pool.throwingNone(config, supplier, logger);
 
@@ -1113,26 +1154,30 @@ class PoolTest {
             verify(logger).createdObject(object3.objectId());
             verify(logger).createdPool(config);
             // acquire object1
-            verify(logger).increasedRefCount(object1.objectId(), 1);
+            verify(logger).increasedObjectRefCount(object1.objectId(), 1);
             verify(logger).acquiredObject(object1.objectId(), 2, 3);
             // forAllIdleObjects
             verify(logger).drainedPool(3);
+            verify(logger).objectEvent(object2.objectId(), "custom event");
+            verify(logger).objectEvent(object2.objectId(), messageSupplier);
             verify(logger).returnedObject(object2.objectId(), 1, 3);
+            verify(logger).objectEvent(object3.objectId(), "custom event");
+            verify(logger).objectEvent(object3.objectId(), messageSupplier);
             verify(logger).returnedObject(object3.objectId(), 2, 3);
             // acquire object2
-            verify(logger).increasedRefCount(object2.objectId(), 1);
+            verify(logger).increasedObjectRefCount(object2.objectId(), 1);
             verify(logger).acquiredObject(object2.objectId(), 1, 3);
             // acquire object3
-            verify(logger).increasedRefCount(object3.objectId(), 1);
+            verify(logger).increasedObjectRefCount(object3.objectId(), 1);
             verify(logger).acquiredObject(object3.objectId(), 0, 3);
             // release object1
-            verify(logger).decreasedRefCount(object1.objectId(), 0);
+            verify(logger).decreasedObjectRefCount(object1.objectId(), 0);
             verify(logger).returnedObject(object1.objectId(), 1, 3);
             // release object2
-            verify(logger).decreasedRefCount(object2.objectId(), 0);
+            verify(logger).decreasedObjectRefCount(object2.objectId(), 0);
             verify(logger).returnedObject(object2.objectId(), 2, 3);
             // release object3
-            verify(logger).decreasedRefCount(object3.objectId(), 0);
+            verify(logger).decreasedObjectRefCount(object3.objectId(), 0);
             verify(logger).returnedObject(object3.objectId(), 3, 3);
 
             verifyNoMoreInteractions(supplier, logger, action);
@@ -1197,26 +1242,26 @@ class PoolTest {
             verify(logger).createdObject(object3.objectId());
             verify(logger).createdPool(config);
             // acquire object1
-            verify(logger).increasedRefCount(object1.objectId(), 1);
+            verify(logger).increasedObjectRefCount(object1.objectId(), 1);
             verify(logger).acquiredObject(object1.objectId(), 2, 3);
             // forAllIdleObjects
             verify(logger).drainedPool(3);
             verify(logger).returnedObject(object2.objectId(), 1, 3);
             verify(logger).returnedObject(object3.objectId(), 2, 3);
             // acquire object2
-            verify(logger).increasedRefCount(object2.objectId(), 1);
+            verify(logger).increasedObjectRefCount(object2.objectId(), 1);
             verify(logger).acquiredObject(object2.objectId(), 1, 3);
             // acquire object3
-            verify(logger).increasedRefCount(object3.objectId(), 1);
+            verify(logger).increasedObjectRefCount(object3.objectId(), 1);
             verify(logger).acquiredObject(object3.objectId(), 0, 3);
             // release object1
-            verify(logger).decreasedRefCount(object1.objectId(), 0);
+            verify(logger).decreasedObjectRefCount(object1.objectId(), 0);
             verify(logger).returnedObject(object1.objectId(), 1, 3);
             // release object2
-            verify(logger).decreasedRefCount(object2.objectId(), 0);
+            verify(logger).decreasedObjectRefCount(object2.objectId(), 0);
             verify(logger).returnedObject(object2.objectId(), 2, 3);
             // release object3
-            verify(logger).decreasedRefCount(object3.objectId(), 0);
+            verify(logger).decreasedObjectRefCount(object3.objectId(), 0);
             verify(logger).returnedObject(object3.objectId(), 3, 3);
 
             verifyNoMoreInteractions(supplier, logger, action);

@@ -25,6 +25,7 @@ import java.util.IdentityHashMap;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Supplier;
 
 /**
  * An object that can be pooled. Note that the functionality to return the object back to the pool it was acquired from is not part of its
@@ -56,12 +57,7 @@ public abstract class PoolableObject<X extends Exception> {
         logger = PoolLogger.noopLogger();
     }
 
-    /**
-     * Returns an ID for this object.
-     *
-     * @return An ID for this object.
-     */
-    protected long objectId() {
+    long objectId() {
         return objectId;
     }
 
@@ -99,7 +95,7 @@ public abstract class PoolableObject<X extends Exception> {
     protected final void addReference(Object reference) {
         Objects.requireNonNull(reference);
         if (references.add(reference)) {
-            logger.increasedRefCount(objectId, references.size());
+            logger.increasedObjectRefCount(objectId, references.size());
         }
     }
 
@@ -116,7 +112,7 @@ public abstract class PoolableObject<X extends Exception> {
     protected final void removeReference(Object reference) throws X {
         Objects.requireNonNull(reference);
         if (references.remove(reference)) {
-            logger.decreasedRefCount(objectId, references.size());
+            logger.decreasedObjectRefCount(objectId, references.size());
 
             if (references.isEmpty()) {
                 if (pool != null) {
@@ -150,16 +146,18 @@ public abstract class PoolableObject<X extends Exception> {
      * @throws X If the resources could not be released.
      */
     protected final void releaseResources() throws X {
+        logger.releasingObjectResources(objectId);
         doReleaseResources();
-        logger.releasedResources(objectId);
+        logger.releasedObjectResources(objectId);
     }
 
     /**
      * Releases any resources associated with this object, without throwing exceptions.
      */
     protected final void releaseResourcesQuietly() {
+        logger.releasingObjectResources(objectId);
         doReleaseResourcesQuietly();
-        logger.releasedResources(objectId);
+        logger.releasedObjectResources(objectId);
     }
 
     /**
@@ -178,9 +176,19 @@ public abstract class PoolableObject<X extends Exception> {
     protected void doReleaseResourcesQuietly() {
         try {
             doReleaseResources();
-        } catch (@SuppressWarnings("unused") Exception e) {
-            // ignore
+        } catch (Exception e) {
+            releaseResourcesFailed(e);
         }
+    }
+
+    /**
+     * Logs an event that releasing resources associated with this object failed.
+     * This method should be called from {@link #doReleaseResourcesQuietly()} if an exception occurs.
+     *
+     * @param exception The exception that was thrown while quietly releasing the resources associated to this object.
+     */
+    protected final void releaseResourcesFailed(Exception exception) {
+        logger.releaseObjectResourcesFailed(objectId, exception);
     }
 
     void acquired() {
@@ -195,5 +203,24 @@ public abstract class PoolableObject<X extends Exception> {
      */
     protected void release() throws X {
         removeReference(this);
+    }
+
+    /**
+     * Logs a custom event for this object.
+     * The message should preferably be a compile-time constant; for calculated messages, use {@link #logEvent(Supplier)} instead.
+     *
+     * @param message The event message.
+     */
+    protected final void logEvent(String message) {
+        logger.objectEvent(objectId, message);
+    }
+
+    /**
+     * Logs a custom event for this object.
+     *
+     * @param messageSupplier A supplier for the event message.
+     */
+    protected final void logEvent(Supplier<String> messageSupplier) {
+        logger.objectEvent(objectId, messageSupplier);
     }
 }

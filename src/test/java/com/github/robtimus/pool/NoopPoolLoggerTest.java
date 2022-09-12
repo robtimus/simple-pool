@@ -21,13 +21,16 @@ import static com.github.robtimus.junit.support.util.DisplayNameUtils.getMethodD
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.UUID;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
+@SuppressWarnings("nls")
 class NoopPoolLoggerTest {
 
     @TestFactory
@@ -35,12 +38,13 @@ class NoopPoolLoggerTest {
     Stream<DynamicTest> testDelegatesAllMethods() {
         return Arrays.stream(PoolLogger.class.getMethods())
                 .filter(m -> m.getDeclaringClass() == PoolLogger.class)
+                .filter(m -> !Modifier.isStatic(m.getModifiers()))
                 .map(this::overridesMethod);
     }
 
     private DynamicTest overridesMethod(Method method) {
         return dynamicTest(getMethodDisplayName(method),
-                () -> assertDoesNotThrow(() -> NoopPoolLogger.class.getMethod(method.getName(), method.getParameterTypes())));
+                () -> assertDoesNotThrow(() -> NoopPoolLogger.class.getDeclaredMethod(method.getName(), method.getParameterTypes())));
     }
 
     @TestFactory
@@ -48,6 +52,7 @@ class NoopPoolLoggerTest {
     Stream<DynamicTest> testMethodsDontFail() {
         return Arrays.stream(PoolLogger.class.getMethods())
                 .filter(m -> m.getDeclaringClass() == PoolLogger.class)
+                .filter(m -> !Modifier.isStatic(m.getModifiers()))
                 .map(this::methodDoesNotFail);
     }
 
@@ -73,6 +78,9 @@ class NoopPoolLoggerTest {
         }
         if (type == Exception.class) {
             return new NullPointerException();
+        }
+        if (type == Supplier.class) {
+            return (Supplier<String>) () -> "custom message";
         }
         return UUID.randomUUID().toString();
     }

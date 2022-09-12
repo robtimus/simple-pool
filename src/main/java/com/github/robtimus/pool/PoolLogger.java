@@ -18,6 +18,7 @@
 package com.github.robtimus.pool;
 
 import java.util.Objects;
+import java.util.function.Supplier;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -149,9 +150,9 @@ public class PoolLogger {
      * @param refCount The new number of references, including the {@link PoolableObject} itself.
      * @see PoolableObject#addReference(Object)
      */
-    public void increasedRefCount(long objectId, int refCount) {
+    public void increasedObjectRefCount(long objectId, int refCount) {
         if (logger.isDebugEnabled()) {
-            logger.debug(Messages.PoolLogger.increasedRefCount.get(messagePrefix, objectPrefix, objectId, refCount));
+            logger.debug(Messages.PoolLogger.increasedObjectRefCount.get(messagePrefix, objectPrefix, objectId, refCount));
         }
     }
 
@@ -162,9 +163,22 @@ public class PoolLogger {
      * @param refCount The new number of references, including the {@link PoolableObject} itself.
      * @see PoolableObject#removeReference(Object)
      */
-    public void decreasedRefCount(long objectId, int refCount) {
+    public void decreasedObjectRefCount(long objectId, int refCount) {
         if (logger.isDebugEnabled()) {
-            logger.debug(Messages.PoolLogger.decreasedRefCount.get(messagePrefix, objectPrefix, objectId, refCount));
+            logger.debug(Messages.PoolLogger.decreasedObjectRefCount.get(messagePrefix, objectPrefix, objectId, refCount));
+        }
+    }
+
+    /**
+     * Called before the resources of a {@link PoolableObject} will be released.
+     *
+     * @param objectId The id of the {@link PoolableObject}.
+     * @see PoolableObject#releaseResources()
+     * @see PoolableObject#releaseResourcesQuietly()
+     */
+    public void releasingObjectResources(long objectId) {
+        if (logger.isDebugEnabled()) {
+            logger.debug(Messages.PoolLogger.releasingObjectResources.get(messagePrefix, objectPrefix, objectId));
         }
     }
 
@@ -175,9 +189,22 @@ public class PoolLogger {
      * @see PoolableObject#releaseResources()
      * @see PoolableObject#releaseResourcesQuietly()
      */
-    public void releasedResources(long objectId) {
+    public void releasedObjectResources(long objectId) {
         if (logger.isDebugEnabled()) {
-            logger.debug(Messages.PoolLogger.releasedResources.get(messagePrefix, objectPrefix, objectId));
+            logger.debug(Messages.PoolLogger.releasedObjectResources.get(messagePrefix, objectPrefix, objectId));
+        }
+    }
+
+    /**
+     * Called when an error occurs when quietly releasing the resources of a {@link PoolableObject}.
+     *
+     * @param objectId The id of the {@link PoolableObject}.
+     * @param exception The exception that was thrown while quietly releasing the resources of the {@link PoolableObject}.
+     * @see PoolableObject#releaseResourcesQuietly()
+     */
+    public void releaseObjectResourcesFailed(long objectId, Exception exception) {
+        if (logger.isDebugEnabled()) {
+            logger.debug(Messages.PoolLogger.releaseObjectResourcesFailed.get(messagePrefix, objectPrefix, objectId), exception);
         }
     }
 
@@ -231,6 +258,30 @@ public class PoolLogger {
     public void objectIdleTooLong(long objectId, int idleCount, int poolSize) {
         if (logger.isDebugEnabled()) {
             logger.debug(Messages.PoolLogger.objectIdleTooLong.get(messagePrefix, objectPrefix, objectId, idleCount, poolSize));
+        }
+    }
+
+    /**
+     * Called when {@link PoolableObject#logEvent(String)} is called.
+     *
+     * @param objectId The id of the {@link PoolableObject}.
+     * @param message The event message.
+     */
+    public void objectEvent(long objectId, String message) {
+        if (logger.isDebugEnabled()) {
+            logger.debug(Messages.PoolLogger.objectEvent.get(messagePrefix, objectPrefix, objectId, message));
+        }
+    }
+
+    /**
+     * Called when {@link PoolableObject#logEvent(String)} is called.
+     *
+     * @param objectId The id of the {@link PoolableObject}.
+     * @param messageSupplier A supplier for the event message.
+     */
+    public void objectEvent(long objectId, Supplier<String> messageSupplier) {
+        if (logger.isDebugEnabled()) {
+            logger.debug(Messages.PoolLogger.objectEvent.get(messagePrefix, objectPrefix, objectId, messageSupplier.get()));
         }
     }
 

@@ -17,6 +17,8 @@
 
 package com.github.robtimus.pool;
 
+import java.util.function.Supplier;
+
 final class NoopPoolLogger extends PoolLogger {
 
     static final NoopPoolLogger INSTANCE = new NoopPoolLogger();
@@ -60,17 +62,27 @@ final class NoopPoolLogger extends PoolLogger {
     }
 
     @Override
-    public void increasedRefCount(long objectId, int refCount) {
+    public void increasedObjectRefCount(long objectId, int refCount) {
         // does nothing
     }
 
     @Override
-    public void decreasedRefCount(long objectId, int refCount) {
+    public void decreasedObjectRefCount(long objectId, int refCount) {
         // does nothing
     }
 
     @Override
-    public void releasedResources(long objectId) {
+    public void releasingObjectResources(long objectId) {
+        // does nothing
+    }
+
+    @Override
+    public void releasedObjectResources(long objectId) {
+        // does nothing
+    }
+
+    @Override
+    public void releaseObjectResourcesFailed(long objectId, Exception exception) {
         // does nothing
     }
 
@@ -91,6 +103,16 @@ final class NoopPoolLogger extends PoolLogger {
 
     @Override
     public void objectIdleTooLong(long objectId, int idleCount, int poolSize) {
+        // does nothing
+    }
+
+    @Override
+    public void objectEvent(long objectId, String message) {
+        // does nothing
+    }
+
+    @Override
+    public void objectEvent(long objectId, Supplier<String> messageSupplier) {
         // does nothing
     }
 }

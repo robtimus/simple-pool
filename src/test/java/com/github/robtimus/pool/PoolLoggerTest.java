@@ -125,32 +125,54 @@ class PoolLoggerTest {
         }
 
         @Test
-        @DisplayName("increasedRefCount")
-        void testIncreasedRefCount() {
-            poolLogger.increasedRefCount(4, 2);
+        @DisplayName("increasedObjectRefCount")
+        void testIncreasedObjectRefCount() {
+            poolLogger.increasedObjectRefCount(4, 2);
 
             verify(logger).isDebugEnabled();
-            verify(logger).debug(Messages.PoolLogger.increasedRefCount.get("pool - ", "object-", 4, 2));
+            verify(logger).debug(Messages.PoolLogger.increasedObjectRefCount.get("pool - ", "object-", 4, 2));
             verifyNoMoreInteractions(logger);
         }
 
         @Test
-        @DisplayName("decreasedRefCount")
-        void testDecreasedRefCount() {
-            poolLogger.decreasedRefCount(4, 2);
+        @DisplayName("decreasedObjectRefCount")
+        void testDecreasedObjectRefCount() {
+            poolLogger.decreasedObjectRefCount(4, 2);
 
             verify(logger).isDebugEnabled();
-            verify(logger).debug(Messages.PoolLogger.decreasedRefCount.get("pool - ", "object-", 4, 2));
+            verify(logger).debug(Messages.PoolLogger.decreasedObjectRefCount.get("pool - ", "object-", 4, 2));
             verifyNoMoreInteractions(logger);
         }
 
         @Test
-        @DisplayName("releasedResources")
-        void testReleasedResources() {
-            poolLogger.releasedResources(4);
+        @DisplayName("releasingObjectResources")
+        void testReleasingObjectResources() {
+            poolLogger.releasingObjectResources(4);
 
             verify(logger).isDebugEnabled();
-            verify(logger).debug(Messages.PoolLogger.releasedResources.get("pool - ", "object-", 4));
+            verify(logger).debug(Messages.PoolLogger.releasingObjectResources.get("pool - ", "object-", 4));
+            verifyNoMoreInteractions(logger);
+        }
+
+        @Test
+        @DisplayName("releasedObjectResources")
+        void testReleasedObjectResources() {
+            poolLogger.releasedObjectResources(4);
+
+            verify(logger).isDebugEnabled();
+            verify(logger).debug(Messages.PoolLogger.releasedObjectResources.get("pool - ", "object-", 4));
+            verifyNoMoreInteractions(logger);
+        }
+
+        @Test
+        @DisplayName("releaseObjectResourcesFailed")
+        void testReleaseObjectResourcesFailed() {
+            Exception exception = new NullPointerException();
+
+            poolLogger.releaseObjectResourcesFailed(4, exception);
+
+            verify(logger).isDebugEnabled();
+            verify(logger).debug(Messages.PoolLogger.releaseObjectResourcesFailed.get("pool - ", "object-", 4), exception);
             verifyNoMoreInteractions(logger);
         }
 
@@ -191,6 +213,26 @@ class PoolLoggerTest {
 
             verify(logger).isDebugEnabled();
             verify(logger).debug(Messages.PoolLogger.objectIdleTooLong.get("pool - ", "object-", 4, 2, 10));
+            verifyNoMoreInteractions(logger);
+        }
+
+        @Test
+        @DisplayName("objectEvent(String)")
+        void testObjectEventWithMessage() {
+            poolLogger.objectEvent(4, "custom event");
+
+            verify(logger).isDebugEnabled();
+            verify(logger).debug(Messages.PoolLogger.objectEvent.get("pool - ", "object-", 4, "custom event"));
+            verifyNoMoreInteractions(logger);
+        }
+
+        @Test
+        @DisplayName("objectEvent(Supplier)")
+        void testObjectEventWithMessageSupplier() {
+            poolLogger.objectEvent(4, () -> "custom event");
+
+            verify(logger).isDebugEnabled();
+            verify(logger).debug(Messages.PoolLogger.objectEvent.get("pool - ", "object-", 4, "custom event"));
             verifyNoMoreInteractions(logger);
         }
     }
@@ -280,27 +322,47 @@ class PoolLoggerTest {
         }
 
         @Test
-        @DisplayName("increasedRefCount")
-        void testIncreasedRefCount() {
-            poolLogger.increasedRefCount(4, 2);
+        @DisplayName("increasedObjectRefCount")
+        void testIncreasedObjectRefCount() {
+            poolLogger.increasedObjectRefCount(4, 2);
 
             verify(logger).isDebugEnabled();
             verifyNoMoreInteractions(logger);
         }
 
         @Test
-        @DisplayName("decreasedRefCount")
-        void testDecreasedRefCount() {
-            poolLogger.decreasedRefCount(4, 2);
+        @DisplayName("decreasedObjectRefCount")
+        void testDecreasedObjectRefCount() {
+            poolLogger.decreasedObjectRefCount(4, 2);
 
             verify(logger).isDebugEnabled();
             verifyNoMoreInteractions(logger);
         }
 
         @Test
-        @DisplayName("releasedResources")
-        void testReleasedResources() {
-            poolLogger.releasedResources(4);
+        @DisplayName("releasingObjectResources")
+        void testReleasingObjectResources() {
+            poolLogger.releasingObjectResources(4);
+
+            verify(logger).isDebugEnabled();
+            verifyNoMoreInteractions(logger);
+        }
+
+        @Test
+        @DisplayName("releasedObjectResources")
+        void testReleasedObjectResources() {
+            poolLogger.releasedObjectResources(4);
+
+            verify(logger).isDebugEnabled();
+            verifyNoMoreInteractions(logger);
+        }
+
+        @Test
+        @DisplayName("releaseObjectResourcesFailed")
+        void testReleaseObjectResourcesFailed() {
+            Exception exception = new NullPointerException();
+
+            poolLogger.releaseObjectResourcesFailed(4, exception);
 
             verify(logger).isDebugEnabled();
             verifyNoMoreInteractions(logger);
@@ -341,6 +403,34 @@ class PoolLoggerTest {
             verify(logger).isDebugEnabled();
             verifyNoMoreInteractions(logger);
         }
+
+        @Test
+        @DisplayName("objectEvent(String)")
+        void testObjectEventWithMessage() {
+            poolLogger.objectEvent(4, "custom event");
+
+            verify(logger).isDebugEnabled();
+            verifyNoMoreInteractions(logger);
+        }
+
+        @Test
+        @DisplayName("objectEvent(Supplier)")
+        void testObjectEventWithMessageSupplier() {
+            poolLogger.objectEvent(4, () -> "custom event");
+
+            verify(logger).isDebugEnabled();
+            verifyNoMoreInteractions(logger);
+        }
+    }
+
+    @Test
+    @DisplayName("defaultLogger")
+    void testDefaultLogger() {
+        PoolLogger logger = PoolLogger.defaultLogger();
+
+        assertEquals(Pool.class.getName(), logger.logger().getName());
+        assertEquals("", logger.messagePrefix());
+        assertEquals("object-", logger.objectPrefix());
     }
 
     @Nested

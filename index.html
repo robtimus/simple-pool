@@ -122,14 +122,24 @@ A pool logger can use a custom logger name, log message prefix or object prefix.
 <li><code>isActive</code> can be used to query the state of the pool. It will return <code>true</code> until <code>shutdown</code> is called.</li>
 </ul>
 <p>An acquired object should eventually be released. It is up to the <code>PoolableObject</code> sub class to expose the <code>release</code> method, either by overriding it and making it public, or calling it from a different public method like <code>close</code>.</p>
-<p>For instance, assuming <code>MyObject</code> extends <code>PoolableObject&lt;IOException&gt;</code>, implements <code>Closeable</code>, and calls <code>release</code> from its <code>close</code> method:</p>
+<p>For instance, assuming <code>MyObject</code> extends <code>PoolableObject&lt;IOException&gt;</code>, implements <code>AutoCloseable</code>, and calls <code>release</code> from its <code>close</code> method:</p>
 
 <div class="source"><pre class="prettyprint"><code>Pool&lt;MyObject, IOException&gt; pool = new Pool&lt;&gt;(config, MyObject::new, logger);
 try (MyObject object = pool.acquire()) { // note: may throw InterruptedException
     // use object as needed
 }
 // object.close() will have called object.release(), which means object has been returned to the pool
-</code></pre></div></section>
+</code></pre></div><section>
+<h3><a name="ObjectWrapper"></a>ObjectWrapper</h3>
+<p>To make it easy to create pools of objects that are always valid and don't need any resource cleanup, class <a href="apidocs/com/github/robtimus/pool/ObjectWrapper.html">ObjectWrapper</a> is a <code>PoolableObject</code> sub class that simply wraps a value. It implements <code>AutoCloseable</code>, so it can be used in try-with-resources blocks:</p>
+
+<div class="source"><pre class="prettyprint"><code>Pool&lt;ObjectWrapper&lt;MyObject&gt;, None&gt; pool = ObjectWrapper.newPool(config, MyObject::new, logger);
+try (ObjectWrapper&lt;MyObject&gt; wrapper = pool.acquire()) { // note: may throw InterruptedException
+    MyObject object = wrapper.value();
+    // use object as needed
+}
+// wrapper.close() will have returned the wrapper to the pool
+</code></pre></div></section></section>
         </main>
       </div>
     </div>

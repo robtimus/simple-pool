@@ -496,7 +496,7 @@ class PoolLoggerTest {
                 PoolLogger logger = PoolLogger.custom()
                         .build();
 
-                assertEquals("", logger.objectPrefix());
+                assertEquals("object-", logger.objectPrefix());
             }
 
             @Test
@@ -508,7 +508,7 @@ class PoolLoggerTest {
 
                 PoolLogger logger = builder.build();
 
-                assertEquals("", logger.objectPrefix());
+                assertEquals("object-", logger.objectPrefix());
             }
 
             @Test

@@ -32,6 +32,9 @@ public class PoolLogger {
 
     private static final PoolLogger DEFAULT_LOGGER = custom().build();
 
+    private static final String DEFAULT_MESSAGE_PREFIX = ""; //$NON-NLS-1$
+    private static final String DEFAULT_OBJECT_PREFIX = "object-"; //$NON-NLS-1$
+
     private final Logger logger;
 
     private final String messagePrefix;
@@ -44,7 +47,7 @@ public class PoolLogger {
     }
 
     PoolLogger() {
-        this(null, "", ""); //$NON-NLS-1$ //$NON-NLS-2$
+        this(null, DEFAULT_MESSAGE_PREFIX, DEFAULT_OBJECT_PREFIX);
     }
 
     final Logger logger() {
@@ -272,8 +275,8 @@ public class PoolLogger {
 
         private Builder() {
             loggerName = Pool.class.getName();
-            messagePrefix = ""; //$NON-NLS-1$
-            objectPrefix = ""; //$NON-NLS-1$
+            messagePrefix = DEFAULT_MESSAGE_PREFIX;
+            objectPrefix = DEFAULT_OBJECT_PREFIX;
         }
 
         /**

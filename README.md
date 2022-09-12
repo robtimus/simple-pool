@@ -75,7 +75,7 @@ A pool only has a few methods:
 
 An acquired object should eventually be released. It is up to the `PoolableObject` sub class to expose the `release` method, either by overriding it and making it public, or calling it from a different public method like `close`.
 
-For instance, assuming `MyObject` extends `PoolableObject<IOException>`, implements `Closeable`, and calls `release` from its `close` method:
+For instance, assuming `MyObject` extends `PoolableObject<IOException>`, implements `AutoCloseable`, and calls `release` from its `close` method:
 
 ```
 Pool<MyObject, IOException> pool = new Pool<>(config, MyObject::new, logger);
@@ -83,4 +83,17 @@ try (MyObject object = pool.acquire()) { // note: may throw InterruptedException
     // use object as needed
 }
 // object.close() will have called object.release(), which means object has been returned to the pool
+```
+
+### ObjectWrapper
+
+To make it easy to create pools of objects that are always valid and don't need any resource cleanup, class [ObjectWrapper](https://robtimus.github.io/simple-pool/apidocs/com/github/robtimus/pool/ObjectWrapper.html) is a `PoolableObject` sub class that simply wraps a value. It implements `AutoCloseable`, so it can be used in try-with-resources blocks:
+
+```
+Pool<ObjectWrapper<MyObject>, None> pool = ObjectWrapper.newPool(config, MyObject::new, logger);
+try (ObjectWrapper<MyObject> wrapper = pool.acquire()) { // note: may throw InterruptedException
+    MyObject object = wrapper.value();
+    // use object as needed
+}
+// wrapper.close() will have returned the wrapper to the pool
 ```

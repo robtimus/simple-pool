@@ -1,5 +1,5 @@
 /*
- * NoopPoolListenerTest.java
+ * NoopPoolLoggerTest.java
  * Copyright 2022 Rob Spoor
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,6 +17,7 @@
 
 package com.github.robtimus.pool;
 
+import static com.github.robtimus.junit.support.util.DisplayNameUtils.getMethodDisplayName;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 import java.lang.reflect.Method;
@@ -27,7 +28,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
-class NoopPoolListenerTest {
+class NoopPoolLoggerTest {
 
     @TestFactory
     @DisplayName("overrides all methods")
@@ -38,7 +39,7 @@ class NoopPoolListenerTest {
     }
 
     private DynamicTest overridesMethod(Method method) {
-        return dynamicTest(method.getName(),
+        return dynamicTest(getMethodDisplayName(method),
                 () -> assertDoesNotThrow(() -> NoopPoolLogger.class.getMethod(method.getName(), method.getParameterTypes())));
     }
 
@@ -51,7 +52,7 @@ class NoopPoolListenerTest {
     }
 
     private DynamicTest methodDoesNotFail(Method method) {
-        return dynamicTest(method.getName(), () -> {
+        return dynamicTest(getMethodDisplayName(method), () -> {
             Object[] args = Arrays.stream(method.getParameterTypes())
                     .map(this::getValue)
                     .toArray();

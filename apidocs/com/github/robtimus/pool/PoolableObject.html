@@ -18,7 +18,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":6,"i2":10,"i3":6,"i4":10,"i5":10,"i6":10,"i7":10,"i8":10};
+var methods = {"i0":10,"i1":6,"i2":10,"i3":6,"i4":10,"i5":10,"i6":10,"i7":10,"i8":10,"i9":10,"i10":10};
 var tabs = {65535:["t0","All Methods"],2:["t2","Instance Methods"],4:["t3","Abstract Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -115,7 +115,10 @@ var activeTableTab = "activeTableTab";
 <pre>public abstract class <span class="typeNameLabel">PoolableObject&lt;X extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Exception.html?is-external=true" title="class or interface in java.lang">Exception</a>&gt;</span>
 extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></pre>
 <div class="block">An object that can be pooled. Note that the functionality to return the object back to the pool it was acquired from is not part of its
- <em>public</em> API. This allows implementations to call <a href="../../../../com/github/robtimus/pool/PoolableObject.html#release--"><code>release()</code></a> from other methods, e.g. a <a href="https://docs.oracle.com/javase/8/docs/api/java/io/Closeable.html?is-external=true" title="class or interface in java.io"><code>Closeable</code></a>'s <code>close</code> method.</div>
+ <em>public</em> API. This allows implementations to call <a href="../../../../com/github/robtimus/pool/PoolableObject.html#release--"><code>release()</code></a> from other methods, e.g. a <a href="https://docs.oracle.com/javase/8/docs/api/java/io/Closeable.html?is-external=true" title="class or interface in java.io"><code>Closeable</code></a>'s <code>close</code> method.
+ <p>
+ Instances of this class are not expected to be thread-safe. Once acquired from a pool, they should usually be used in only one thread until they
+ are released and returned back to the pool.</div>
 <dl>
 <dt><span class="simpleTagLabel">Author:</span></dt>
 <dd>Rob Spoor</dd>
@@ -184,30 +187,42 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 </td>
 </tr>
 <tr id="i4" class="altColor">
-<td class="colFirst"><code>protected long</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/github/robtimus/pool/PoolableObject.html#objectId--">objectId</a></span>()</code>
-<div class="block">Returns an ID for this object.</div>
+<td class="colFirst"><code>protected void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/github/robtimus/pool/PoolableObject.html#logEvent-java.lang.String-">logEvent</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;message)</code>
+<div class="block">Logs a custom event for this object.</div>
 </td>
 </tr>
 <tr id="i5" class="rowColor">
+<td class="colFirst"><code>protected void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/github/robtimus/pool/PoolableObject.html#logEvent-java.util.function.Supplier-">logEvent</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Supplier.html?is-external=true" title="class or interface in java.util.function">Supplier</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&gt;&nbsp;messageSupplier)</code>
+<div class="block">Logs a custom event for this object.</div>
+</td>
+</tr>
+<tr id="i6" class="altColor">
 <td class="colFirst"><code>protected void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/github/robtimus/pool/PoolableObject.html#release--">release</a></span>()</code>
 <div class="block">Releases this object.</div>
 </td>
 </tr>
-<tr id="i6" class="altColor">
+<tr id="i7" class="rowColor">
 <td class="colFirst"><code>protected void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/github/robtimus/pool/PoolableObject.html#releaseResources--">releaseResources</a></span>()</code>
 <div class="block">Releases any resources associated with this object.</div>
 </td>
 </tr>
-<tr id="i7" class="rowColor">
+<tr id="i8" class="altColor">
+<td class="colFirst"><code>protected void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/github/robtimus/pool/PoolableObject.html#releaseResourcesFailed-java.lang.Exception-">releaseResourcesFailed</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Exception.html?is-external=true" title="class or interface in java.lang">Exception</a>&nbsp;exception)</code>
+<div class="block">Logs an event that releasing resources associated with this object failed.</div>
+</td>
+</tr>
+<tr id="i9" class="rowColor">
 <td class="colFirst"><code>protected void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/github/robtimus/pool/PoolableObject.html#releaseResourcesQuietly--">releaseResourcesQuietly</a></span>()</code>
 <div class="block">Releases any resources associated with this object, without throwing exceptions.</div>
 </td>
 </tr>
-<tr id="i8" class="altColor">
+<tr id="i10" class="altColor">
 <td class="colFirst"><code>protected void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/github/robtimus/pool/PoolableObject.html#removeReference-java.lang.Object-">removeReference</a></span>(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a>&nbsp;reference)</code>
 <div class="block">Removes a reference to this object.</div>
@@ -253,20 +268,6 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <!--   -->
 </a>
 <h3>Method Detail</h3>
-<a name="objectId--">
-<!--   -->
-</a>
-<ul class="blockList">
-<li class="blockList">
-<h4>objectId</h4>
-<pre>protected&nbsp;long&nbsp;objectId()</pre>
-<div class="block">Returns an ID for this object.</div>
-<dl>
-<dt><span class="returnLabel">Returns:</span></dt>
-<dd>An ID for this object.</dd>
-</dl>
-</li>
-</ul>
 <a name="addReference-java.lang.Object-">
 <!--   -->
 </a>
@@ -378,10 +379,25 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
  <a href="../../../../com/github/robtimus/pool/PoolableObject.html#doReleaseResources--"><code>doReleaseResources()</code></a> contains any try-catch-throw logic, to prevent unnecessarily creating a new exception.</div>
 </li>
 </ul>
+<a name="releaseResourcesFailed-java.lang.Exception-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>releaseResourcesFailed</h4>
+<pre>protected final&nbsp;void&nbsp;releaseResourcesFailed(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Exception.html?is-external=true" title="class or interface in java.lang">Exception</a>&nbsp;exception)</pre>
+<div class="block">Logs an event that releasing resources associated with this object failed.
+ This method should be called from <a href="../../../../com/github/robtimus/pool/PoolableObject.html#doReleaseResourcesQuietly--"><code>doReleaseResourcesQuietly()</code></a> if an exception occurs.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>exception</code> - The exception that was thrown while quietly releasing the resources associated to this object.</dd>
+</dl>
+</li>
+</ul>
 <a name="release--">
 <!--   -->
 </a>
-<ul class="blockListLast">
+<ul class="blockList">
 <li class="blockList">
 <h4>release</h4>
 <pre>protected&nbsp;void&nbsp;release()
@@ -392,6 +408,35 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <dt><span class="throwsLabel">Throws:</span></dt>
 <dd><code>X</code> - If an exception is thrown when calling <a href="../../../../com/github/robtimus/pool/PoolableObject.html#releaseResources--"><code>releaseResources()</code></a>.</dd>
 <dd><code><a href="../../../../com/github/robtimus/pool/PoolableObject.html" title="type parameter in PoolableObject">X</a> extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Exception.html?is-external=true" title="class or interface in java.lang">Exception</a></code></dd>
+</dl>
+</li>
+</ul>
+<a name="logEvent-java.lang.String-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>logEvent</h4>
+<pre>protected final&nbsp;void&nbsp;logEvent(<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;message)</pre>
+<div class="block">Logs a custom event for this object.
+ The message should preferably be a compile-time constant; for calculated messages, use <a href="../../../../com/github/robtimus/pool/PoolableObject.html#logEvent-java.util.function.Supplier-"><code>logEvent(Supplier)</code></a> instead.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>message</code> - The event message.</dd>
+</dl>
+</li>
+</ul>
+<a name="logEvent-java.util.function.Supplier-">
+<!--   -->
+</a>
+<ul class="blockListLast">
+<li class="blockList">
+<h4>logEvent</h4>
+<pre>protected final&nbsp;void&nbsp;logEvent(<a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Supplier.html?is-external=true" title="class or interface in java.util.function">Supplier</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&gt;&nbsp;messageSupplier)</pre>
+<div class="block">Logs a custom event for this object.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>messageSupplier</code> - A supplier for the event message.</dd>
 </dl>
 </li>
 </ul>

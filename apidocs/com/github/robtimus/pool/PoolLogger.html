@@ -18,7 +18,7 @@
     catch(err) {
     }
 //-->
-var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":9,"i6":10,"i7":9,"i8":10,"i9":10,"i10":10,"i11":9,"i12":10,"i13":10,"i14":10,"i15":10,"i16":10};
+var methods = {"i0":10,"i1":10,"i2":10,"i3":10,"i4":10,"i5":9,"i6":10,"i7":9,"i8":10,"i9":10,"i10":10,"i11":9,"i12":10,"i13":10,"i14":10,"i15":10,"i16":10,"i17":10,"i18":10,"i19":10,"i20":10};
 var tabs = {65535:["t0","All Methods"],1:["t1","Static Methods"],2:["t2","Instance Methods"],8:["t4","Concrete Methods"]};
 var altColor = "altColor";
 var rowColor = "rowColor";
@@ -112,6 +112,8 @@ var activeTableTab = "activeTableTab";
 extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html?is-external=true" title="class or interface in java.lang">Object</a></pre>
 <div class="block">A logger for events triggered by a <a href="../../../../com/github/robtimus/pool/Pool.html" title="class in com.github.robtimus.pool"><code>Pool</code></a> or <a href="../../../../com/github/robtimus/pool/PoolableObject.html" title="class in com.github.robtimus.pool"><code>PoolableObject</code></a>.
  <p>
+ Instances of this class are thread-safe.
+ <p>
  This class needs SLF4J to be present on the class path to work. If it isn't nothing will be logged at all.</div>
 <dl>
 <dt><span class="simpleTagLabel">Author:</span></dt>
@@ -197,8 +199,8 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 </tr>
 <tr id="i6" class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/github/robtimus/pool/PoolLogger.html#decreasedRefCount-long-int-">decreasedRefCount</a></span>(long&nbsp;objectId,
-                 int&nbsp;refCount)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/github/robtimus/pool/PoolLogger.html#decreasedObjectRefCount-long-int-">decreasedObjectRefCount</a></span>(long&nbsp;objectId,
+                       int&nbsp;refCount)</code>
 <div class="block">Called when a reference was removed from a <a href="../../../../com/github/robtimus/pool/PoolableObject.html" title="class in com.github.robtimus.pool"><code>PoolableObject</code></a>.</div>
 </td>
 </tr>
@@ -222,8 +224,8 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 </tr>
 <tr id="i10" class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/github/robtimus/pool/PoolLogger.html#increasedRefCount-long-int-">increasedRefCount</a></span>(long&nbsp;objectId,
-                 int&nbsp;refCount)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/github/robtimus/pool/PoolLogger.html#increasedObjectRefCount-long-int-">increasedObjectRefCount</a></span>(long&nbsp;objectId,
+                       int&nbsp;refCount)</code>
 <div class="block">Called when an additional reference was added to a <a href="../../../../com/github/robtimus/pool/PoolableObject.html" title="class in com.github.robtimus.pool"><code>PoolableObject</code></a>.</div>
 </td>
 </tr>
@@ -235,13 +237,27 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 </tr>
 <tr id="i12" class="altColor">
 <td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/github/robtimus/pool/PoolLogger.html#objectEvent-long-java.lang.String-">objectEvent</a></span>(long&nbsp;objectId,
+           <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;message)</code>
+<div class="block">Called when <a href="../../../../com/github/robtimus/pool/PoolableObject.html#logEvent-java.lang.String-"><code>PoolableObject.logEvent(String)</code></a> is called.</div>
+</td>
+</tr>
+<tr id="i13" class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/github/robtimus/pool/PoolLogger.html#objectEvent-long-java.util.function.Supplier-">objectEvent</a></span>(long&nbsp;objectId,
+           <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Supplier.html?is-external=true" title="class or interface in java.util.function">Supplier</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&gt;&nbsp;messageSupplier)</code>
+<div class="block">Called when <a href="../../../../com/github/robtimus/pool/PoolableObject.html#logEvent-java.lang.String-"><code>PoolableObject.logEvent(String)</code></a> is called.</div>
+</td>
+</tr>
+<tr id="i14" class="altColor">
+<td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/github/robtimus/pool/PoolLogger.html#objectIdleTooLong-long-int-int-">objectIdleTooLong</a></span>(long&nbsp;objectId,
                  int&nbsp;idleCount,
                  int&nbsp;poolSize)</code>
 <div class="block">Called when a <a href="../../../../com/github/robtimus/pool/PoolableObject.html" title="class in com.github.robtimus.pool"><code>PoolableObject</code></a> has been idle for too long.</div>
 </td>
 </tr>
-<tr id="i13" class="rowColor">
+<tr id="i15" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/github/robtimus/pool/PoolLogger.html#objectInvalidated-long-int-int-">objectInvalidated</a></span>(long&nbsp;objectId,
                  int&nbsp;idleCount,
@@ -249,13 +265,26 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <div class="block">Called when a <a href="../../../../com/github/robtimus/pool/PoolableObject.html" title="class in com.github.robtimus.pool"><code>PoolableObject</code></a> is no longer valid and has been removed from its <a href="../../../../com/github/robtimus/pool/Pool.html" title="class in com.github.robtimus.pool"><code>Pool</code></a>.</div>
 </td>
 </tr>
-<tr id="i14" class="altColor">
+<tr id="i16" class="altColor">
 <td class="colFirst"><code>void</code></td>
-<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/github/robtimus/pool/PoolLogger.html#releasedResources-long-">releasedResources</a></span>(long&nbsp;objectId)</code>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/github/robtimus/pool/PoolLogger.html#releasedObjectResources-long-">releasedObjectResources</a></span>(long&nbsp;objectId)</code>
 <div class="block">Called when the resources of a <a href="../../../../com/github/robtimus/pool/PoolableObject.html" title="class in com.github.robtimus.pool"><code>PoolableObject</code></a> have been released.</div>
 </td>
 </tr>
-<tr id="i15" class="rowColor">
+<tr id="i17" class="rowColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/github/robtimus/pool/PoolLogger.html#releaseObjectResourcesFailed-long-java.lang.Exception-">releaseObjectResourcesFailed</a></span>(long&nbsp;objectId,
+                            <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Exception.html?is-external=true" title="class or interface in java.lang">Exception</a>&nbsp;exception)</code>
+<div class="block">Called when an error occurs when quietly releasing the resources of a <a href="../../../../com/github/robtimus/pool/PoolableObject.html" title="class in com.github.robtimus.pool"><code>PoolableObject</code></a>.</div>
+</td>
+</tr>
+<tr id="i18" class="altColor">
+<td class="colFirst"><code>void</code></td>
+<td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/github/robtimus/pool/PoolLogger.html#releasingObjectResources-long-">releasingObjectResources</a></span>(long&nbsp;objectId)</code>
+<div class="block">Called before the resources of a <a href="../../../../com/github/robtimus/pool/PoolableObject.html" title="class in com.github.robtimus.pool"><code>PoolableObject</code></a> will be released.</div>
+</td>
+</tr>
+<tr id="i19" class="rowColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/github/robtimus/pool/PoolLogger.html#returnedObject-long-int-int-">returnedObject</a></span>(long&nbsp;objectId,
               int&nbsp;idleCount,
@@ -263,7 +292,7 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <div class="block">Called when a <a href="../../../../com/github/robtimus/pool/PoolableObject.html" title="class in com.github.robtimus.pool"><code>PoolableObject</code></a> is returned to a <a href="../../../../com/github/robtimus/pool/Pool.html" title="class in com.github.robtimus.pool"><code>Pool</code></a>.</div>
 </td>
 </tr>
-<tr id="i16" class="altColor">
+<tr id="i20" class="altColor">
 <td class="colFirst"><code>void</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/github/robtimus/pool/PoolLogger.html#shutDownPool--">shutDownPool</a></span>()</code>
 <div class="block">Called when a <a href="../../../../com/github/robtimus/pool/Pool.html" title="class in com.github.robtimus.pool"><code>Pool</code></a> has shut down.</div>
@@ -386,14 +415,14 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 </dl>
 </li>
 </ul>
-<a name="increasedRefCount-long-int-">
+<a name="increasedObjectRefCount-long-int-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>increasedRefCount</h4>
-<pre>public&nbsp;void&nbsp;increasedRefCount(long&nbsp;objectId,
-                              int&nbsp;refCount)</pre>
+<h4>increasedObjectRefCount</h4>
+<pre>public&nbsp;void&nbsp;increasedObjectRefCount(long&nbsp;objectId,
+                                    int&nbsp;refCount)</pre>
 <div class="block">Called when an additional reference was added to a <a href="../../../../com/github/robtimus/pool/PoolableObject.html" title="class in com.github.robtimus.pool"><code>PoolableObject</code></a>.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
@@ -404,14 +433,14 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 </dl>
 </li>
 </ul>
-<a name="decreasedRefCount-long-int-">
+<a name="decreasedObjectRefCount-long-int-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>decreasedRefCount</h4>
-<pre>public&nbsp;void&nbsp;decreasedRefCount(long&nbsp;objectId,
-                              int&nbsp;refCount)</pre>
+<h4>decreasedObjectRefCount</h4>
+<pre>public&nbsp;void&nbsp;decreasedObjectRefCount(long&nbsp;objectId,
+                                    int&nbsp;refCount)</pre>
 <div class="block">Called when a reference was removed from a <a href="../../../../com/github/robtimus/pool/PoolableObject.html" title="class in com.github.robtimus.pool"><code>PoolableObject</code></a>.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
@@ -422,13 +451,30 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 </dl>
 </li>
 </ul>
-<a name="releasedResources-long-">
+<a name="releasingObjectResources-long-">
 <!--   -->
 </a>
 <ul class="blockList">
 <li class="blockList">
-<h4>releasedResources</h4>
-<pre>public&nbsp;void&nbsp;releasedResources(long&nbsp;objectId)</pre>
+<h4>releasingObjectResources</h4>
+<pre>public&nbsp;void&nbsp;releasingObjectResources(long&nbsp;objectId)</pre>
+<div class="block">Called before the resources of a <a href="../../../../com/github/robtimus/pool/PoolableObject.html" title="class in com.github.robtimus.pool"><code>PoolableObject</code></a> will be released.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>objectId</code> - The id of the <a href="../../../../com/github/robtimus/pool/PoolableObject.html" title="class in com.github.robtimus.pool"><code>PoolableObject</code></a>.</dd>
+<dt><span class="seeLabel">See Also:</span></dt>
+<dd><a href="../../../../com/github/robtimus/pool/PoolableObject.html#releaseResources--"><code>PoolableObject.releaseResources()</code></a>, 
+<a href="../../../../com/github/robtimus/pool/PoolableObject.html#releaseResourcesQuietly--"><code>PoolableObject.releaseResourcesQuietly()</code></a></dd>
+</dl>
+</li>
+</ul>
+<a name="releasedObjectResources-long-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>releasedObjectResources</h4>
+<pre>public&nbsp;void&nbsp;releasedObjectResources(long&nbsp;objectId)</pre>
 <div class="block">Called when the resources of a <a href="../../../../com/github/robtimus/pool/PoolableObject.html" title="class in com.github.robtimus.pool"><code>PoolableObject</code></a> have been released.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
@@ -436,6 +482,24 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <dt><span class="seeLabel">See Also:</span></dt>
 <dd><a href="../../../../com/github/robtimus/pool/PoolableObject.html#releaseResources--"><code>PoolableObject.releaseResources()</code></a>, 
 <a href="../../../../com/github/robtimus/pool/PoolableObject.html#releaseResourcesQuietly--"><code>PoolableObject.releaseResourcesQuietly()</code></a></dd>
+</dl>
+</li>
+</ul>
+<a name="releaseObjectResourcesFailed-long-java.lang.Exception-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>releaseObjectResourcesFailed</h4>
+<pre>public&nbsp;void&nbsp;releaseObjectResourcesFailed(long&nbsp;objectId,
+                                         <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Exception.html?is-external=true" title="class or interface in java.lang">Exception</a>&nbsp;exception)</pre>
+<div class="block">Called when an error occurs when quietly releasing the resources of a <a href="../../../../com/github/robtimus/pool/PoolableObject.html" title="class in com.github.robtimus.pool"><code>PoolableObject</code></a>.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>objectId</code> - The id of the <a href="../../../../com/github/robtimus/pool/PoolableObject.html" title="class in com.github.robtimus.pool"><code>PoolableObject</code></a>.</dd>
+<dd><code>exception</code> - The exception that was thrown while quietly releasing the resources of the <a href="../../../../com/github/robtimus/pool/PoolableObject.html" title="class in com.github.robtimus.pool"><code>PoolableObject</code></a>.</dd>
+<dt><span class="seeLabel">See Also:</span></dt>
+<dd><a href="../../../../com/github/robtimus/pool/PoolableObject.html#releaseResourcesQuietly--"><code>PoolableObject.releaseResourcesQuietly()</code></a></dd>
 </dl>
 </li>
 </ul>
@@ -510,6 +574,38 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <dd><code>objectId</code> - The id of the <a href="../../../../com/github/robtimus/pool/PoolableObject.html" title="class in com.github.robtimus.pool"><code>PoolableObject</code></a>.</dd>
 <dd><code>idleCount</code> - The number of idle <a href="../../../../com/github/robtimus/pool/PoolableObject.html" title="class in com.github.robtimus.pool"><code>PoolableObject</code></a>s after invalidating the <a href="../../../../com/github/robtimus/pool/PoolableObject.html" title="class in com.github.robtimus.pool"><code>PoolableObject</code></a>.</dd>
 <dd><code>poolSize</code> - The total pool size - the number of acquired and idle <a href="../../../../com/github/robtimus/pool/PoolableObject.html" title="class in com.github.robtimus.pool"><code>PoolableObject</code></a>s combined.</dd>
+</dl>
+</li>
+</ul>
+<a name="objectEvent-long-java.lang.String-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>objectEvent</h4>
+<pre>public&nbsp;void&nbsp;objectEvent(long&nbsp;objectId,
+                        <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&nbsp;message)</pre>
+<div class="block">Called when <a href="../../../../com/github/robtimus/pool/PoolableObject.html#logEvent-java.lang.String-"><code>PoolableObject.logEvent(String)</code></a> is called.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>objectId</code> - The id of the <a href="../../../../com/github/robtimus/pool/PoolableObject.html" title="class in com.github.robtimus.pool"><code>PoolableObject</code></a>.</dd>
+<dd><code>message</code> - The event message.</dd>
+</dl>
+</li>
+</ul>
+<a name="objectEvent-long-java.util.function.Supplier-">
+<!--   -->
+</a>
+<ul class="blockList">
+<li class="blockList">
+<h4>objectEvent</h4>
+<pre>public&nbsp;void&nbsp;objectEvent(long&nbsp;objectId,
+                        <a href="https://docs.oracle.com/javase/8/docs/api/java/util/function/Supplier.html?is-external=true" title="class or interface in java.util.function">Supplier</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/java/lang/String.html?is-external=true" title="class or interface in java.lang">String</a>&gt;&nbsp;messageSupplier)</pre>
+<div class="block">Called when <a href="../../../../com/github/robtimus/pool/PoolableObject.html#logEvent-java.lang.String-"><code>PoolableObject.logEvent(String)</code></a> is called.</div>
+<dl>
+<dt><span class="paramLabel">Parameters:</span></dt>
+<dd><code>objectId</code> - The id of the <a href="../../../../com/github/robtimus/pool/PoolableObject.html" title="class in com.github.robtimus.pool"><code>PoolableObject</code></a>.</dd>
+<dd><code>messageSupplier</code> - A supplier for the event message.</dd>
 </dl>
 </li>
 </ul>

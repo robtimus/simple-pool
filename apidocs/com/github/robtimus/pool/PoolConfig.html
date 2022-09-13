@@ -175,7 +175,7 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 </td>
 </tr>
 <tr id="i3" class="rowColor">
-<td class="colFirst"><code><a href="https://docs.oracle.com/javase/8/docs/api/java/time/Duration.html?is-external=true" title="class or interface in java.time">Duration</a></code></td>
+<td class="colFirst"><code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html?is-external=true" title="class or interface in java.util">Optional</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/java/time/Duration.html?is-external=true" title="class or interface in java.time">Duration</a>&gt;</code></td>
 <td class="colLast"><code><span class="memberNameLink"><a href="../../../../com/github/robtimus/pool/PoolConfig.html#maxIdleTime--">maxIdleTime</a></span>()</code>
 <div class="block">Returns the maximum time that objects can be idle.</div>
 </td>
@@ -225,8 +225,8 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>maxWaitTime</h4>
 <pre>public&nbsp;<a href="https://docs.oracle.com/javase/8/docs/api/java/time/Duration.html?is-external=true" title="class or interface in java.time">Duration</a>&nbsp;maxWaitTime()</pre>
-<div class="block">Returns the maximum time to wait when acquiring objects. If <a href="https://docs.oracle.com/javase/8/docs/api/java/time/Duration.html?is-external=true#isZero--" title="class or interface in java.time">Duration.isZero()</a> or <a href="https://docs.oracle.com/javase/8/docs/api/java/time/Duration.html?is-external=true#isNegative--" title="class or interface in java.time">Duration.isNegative()</a>,
- acquiring objects should block until an object becomes available.</div>
+<div class="block">Returns the maximum time to wait when acquiring objects.
+ If <a href="https://docs.oracle.com/javase/8/docs/api/java/time/Duration.html?is-external=true#isNegative--" title="class or interface in java.time">negative</a>, acquiring objects should block until an object is available.</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>The maximum time to wait when acquiring objects.</dd>
@@ -239,11 +239,12 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <ul class="blockList">
 <li class="blockList">
 <h4>maxIdleTime</h4>
-<pre>public&nbsp;<a href="https://docs.oracle.com/javase/8/docs/api/java/time/Duration.html?is-external=true" title="class or interface in java.time">Duration</a>&nbsp;maxIdleTime()</pre>
+<pre>public&nbsp;<a href="https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html?is-external=true" title="class or interface in java.util">Optional</a>&lt;<a href="https://docs.oracle.com/javase/8/docs/api/java/time/Duration.html?is-external=true" title="class or interface in java.time">Duration</a>&gt;&nbsp;maxIdleTime()</pre>
 <div class="block">Returns the maximum time that objects can be idle.</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
-<dd>The maximum time that objects can be idle.</dd>
+<dd>An <a href="https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html?is-external=true" title="class or interface in java.util"><code>Optional</code></a> describing the maximum time that objects can be idle,
+         or <a href="https://docs.oracle.com/javase/8/docs/api/java/util/Optional.html?is-external=true#empty--" title="class or interface in java.util"><code>Optional.empty()</code></a> if objects can be idle indefinitely.</dd>
 </dl>
 </li>
 </ul>

@@ -196,11 +196,11 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>withMaxWaitTime</h4>
 <pre>public&nbsp;<a href="../../../../com/github/robtimus/pool/PoolConfig.Builder.html" title="class in com.github.robtimus.pool">PoolConfig.Builder</a>&nbsp;withMaxWaitTime(<a href="https://docs.oracle.com/javase/8/docs/api/java/time/Duration.html?is-external=true" title="class or interface in java.time">Duration</a>&nbsp;maxWaitTime)</pre>
-<div class="block">Sets the maximum time to wait when acquiring a default <a href="../../../../com/github/robtimus/pool/PoolConfig.html" title="class in com.github.robtimus.pool"><code>PoolConfig</code></a> object. If <a href="https://docs.oracle.com/javase/8/docs/api/java/time/Duration.html?is-external=true#isZero--" title="class or interface in java.time">Duration.isZero()</a> or
- <a href="https://docs.oracle.com/javase/8/docs/api/java/time/Duration.html?is-external=true#isNegative--" title="class or interface in java.time">Duration.isNegative()</a>, acquiring objects should block until an object becomes available. The default is <a href="https://docs.oracle.com/javase/8/docs/api/java/time/Duration.html?is-external=true#ZERO" title="class or interface in java.time"><code>Duration.ZERO</code></a>.</div>
+<div class="block">Sets the maximum time to wait when acquiring a default <a href="../../../../com/github/robtimus/pool/PoolConfig.html" title="class in com.github.robtimus.pool"><code>PoolConfig</code></a> object. If <a href="https://docs.oracle.com/javase/8/docs/api/java/time/Duration.html?is-external=true#isNegative--" title="class or interface in java.time">negative</a>,
+ acquiring objects should block until an object is available. The default is a negative duration.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>maxWaitTime</code> - The maximum wait time, in milliseconds.</dd>
+<dd><code>maxWaitTime</code> - The maximum wait time.</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>This builder.</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
@@ -215,14 +215,12 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>withMaxIdleTime</h4>
 <pre>public&nbsp;<a href="../../../../com/github/robtimus/pool/PoolConfig.Builder.html" title="class in com.github.robtimus.pool">PoolConfig.Builder</a>&nbsp;withMaxIdleTime(<a href="https://docs.oracle.com/javase/8/docs/api/java/time/Duration.html?is-external=true" title="class or interface in java.time">Duration</a>&nbsp;maxIdleTime)</pre>
-<div class="block">Sets the maximum time that objects can be idle. The default is virtually unlimited.</div>
+<div class="block">Sets the maximum time that objects can be idle. The default is indefinitely.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>maxIdleTime</code> - The maximum idle time, in milliseconds.</dd>
+<dd><code>maxIdleTime</code> - The maximum idle time, or <code>null</code> if objects can be idle indefinitely.</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>This builder.</dd>
-<dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/NullPointerException.html?is-external=true" title="class or interface in java.lang">NullPointerException</a></code> - If the given maximum idle time is <code>null</code>.</dd>
 </dl>
 </li>
 </ul>
@@ -233,7 +231,10 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>withInitialSize</h4>
 <pre>public&nbsp;<a href="../../../../com/github/robtimus/pool/PoolConfig.Builder.html" title="class in com.github.robtimus.pool">PoolConfig.Builder</a>&nbsp;withInitialSize(int&nbsp;initialSize)</pre>
-<div class="block">Sets the initial pool size. This is the number of idle objects to start with. The default is 1.</div>
+<div class="block">Sets the initial pool size. This is the number of idle objects to start with. The default is 1.
+ <p>
+ If the <a href="../../../../com/github/robtimus/pool/PoolConfig.Builder.html#withMaxSize-int-">maximum pool size</a> is smaller than the given initial size, it will be set to be equal to the given
+ initial size.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>initialSize</code> - The initial pool size.</dd>
@@ -251,7 +252,10 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <li class="blockList">
 <h4>withMaxSize</h4>
 <pre>public&nbsp;<a href="../../../../com/github/robtimus/pool/PoolConfig.Builder.html" title="class in com.github.robtimus.pool">PoolConfig.Builder</a>&nbsp;withMaxSize(int&nbsp;maxSize)</pre>
-<div class="block">Sets the maximum pool size. This is the maximum number of objects, both idle and currently in use. The default is 5.</div>
+<div class="block">Sets the maximum pool size. This is the maximum number of objects, both idle and currently in use. The default is 5.
+ <p>
+ If the <a href="../../../../com/github/robtimus/pool/PoolConfig.Builder.html#withInitialSize-int-">initial pool size</a> is larger than the given maximum size, it will be set to be equal to the given
+ maximum size.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
 <dd><code>maxSize</code> - The maximum pool size.</dd>
@@ -273,9 +277,6 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>The created <a href="../../../../com/github/robtimus/pool/PoolConfig.html" title="class in com.github.robtimus.pool"><code>PoolConfig</code></a> object.</dd>
-<dt><span class="throwsLabel">Throws:</span></dt>
-<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/IllegalStateException.html?is-external=true" title="class or interface in java.lang">IllegalStateException</a></code> - If the <a href="../../../../com/github/robtimus/pool/PoolConfig.Builder.html#withInitialSize-int-">initial pool size</a> is larger than the
-                                   <a href="../../../../com/github/robtimus/pool/PoolConfig.Builder.html#withMaxSize-int-">maximum pool size</a>.</dd>
 </dl>
 </li>
 </ul>

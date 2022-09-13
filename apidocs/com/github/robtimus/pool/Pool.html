@@ -336,7 +336,7 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
           throws <a href="../../../../com/github/robtimus/pool/Pool.html" title="type parameter in Pool">X</a> extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Exception.html?is-external=true" title="class or interface in java.lang">Exception</a>,
                  <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/InterruptedException.html?is-external=true" title="class or interface in java.lang">InterruptedException</a></pre>
 <div class="block">Acquires an object. This method will block until an object is available or the maximum wait time, as defined in the configuration used to
- create this pool, expires.</div>
+ create this pool, expires. If the configured maximum wait time is negative, this method will block until an object is available.</div>
 <dl>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>The acquired object.</dd>
@@ -361,10 +361,11 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <div class="block">Acquires an object. This method will block until an object is available or the maximum wait time expires.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>maxWaitTime</code> - The maximum wait time.</dd>
+<dd><code>maxWaitTime</code> - The maximum wait time. If <a href="https://docs.oracle.com/javase/8/docs/api/java/time/Duration.html?is-external=true#isNegative--" title="class or interface in java.time">negative</a>, this method will block until an object is available.</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>The acquired object.</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/NullPointerException.html?is-external=true" title="class or interface in java.lang">NullPointerException</a></code> - If the given maximum wait time is <code>null</code>.</dd>
 <dd><code>X</code> - If an error occurs while acquiring an object.</dd>
 <dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/NoSuchElementException.html?is-external=true" title="class or interface in java.util">NoSuchElementException</a></code> - If the maximum wait time expires before an object could be acquired.</dd>
 <dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/InterruptedException.html?is-external=true" title="class or interface in java.lang">InterruptedException</a></code> - If the current thread is interrupted while acquiring an object.</dd>
@@ -386,11 +387,12 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <div class="block">Acquires an object. This method will block until an object is available or the maximum wait time expires.</div>
 <dl>
 <dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>maxWaitTime</code> - The maximum wait time.</dd>
+<dd><code>maxWaitTime</code> - The maximum wait time. If negative, this method will block until an object is available.</dd>
 <dd><code>timeUnit</code> - The time unit for the maximum wait time.</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>The acquired object.</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/NullPointerException.html?is-external=true" title="class or interface in java.lang">NullPointerException</a></code> - If the given time unit is <code>null</code>.</dd>
 <dd><code>X</code> - If an error occurs while acquiring an object.</dd>
 <dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/util/NoSuchElementException.html?is-external=true" title="class or interface in java.util">NoSuchElementException</a></code> - If the maximum wait time expires before an object could be acquired.</dd>
 <dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/InterruptedException.html?is-external=true" title="class or interface in java.lang">InterruptedException</a></code> - If the current thread is interrupted while acquiring an object.</dd>
@@ -410,7 +412,7 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
                                        E extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Exception.html?is-external=true" title="class or interface in java.lang">Exception</a>,
                                        <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/InterruptedException.html?is-external=true" title="class or interface in java.lang">InterruptedException</a></pre>
 <div class="block">Acquires an object. This method will block until an object is available or the maximum wait time, as defined in the configuration used to
- create this pool, expires.</div>
+ create this pool, expires. If the configured maximum wait time is negative, this method will block until an object is available.</div>
 <dl>
 <dt><span class="paramLabel">Type Parameters:</span></dt>
 <dd><code>E</code> - The type of exception to throw if the maximum wait time expires.</dd>
@@ -419,6 +421,7 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>The acquired object.</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/NullPointerException.html?is-external=true" title="class or interface in java.lang">NullPointerException</a></code> - If the given supplier is <code>null</code> and the maximum wait time expires.</dd>
 <dd><code>X</code> - If an error occurs while acquiring an object.</dd>
 <dd><code>E</code> - If the maximum wait time expires before an object could be acquired.</dd>
 <dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/InterruptedException.html?is-external=true" title="class or interface in java.lang">InterruptedException</a></code> - If the current thread is interrupted while acquiring an object.</dd>
@@ -443,11 +446,13 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <dt><span class="paramLabel">Type Parameters:</span></dt>
 <dd><code>E</code> - The type of exception to throw if the maximum wait time expires.</dd>
 <dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>maxWaitTime</code> - The maximum wait time.</dd>
+<dd><code>maxWaitTime</code> - The maximum wait time. If <a href="https://docs.oracle.com/javase/8/docs/api/java/time/Duration.html?is-external=true#isNegative--" title="class or interface in java.time">negative</a>, this method will block until an object is available.</dd>
 <dd><code>errorSupplier</code> - A supplier for the exception to throw if the maximum wait time expires.</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>The acquired object.</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/NullPointerException.html?is-external=true" title="class or interface in java.lang">NullPointerException</a></code> - If the given maximum wait time is <code>null</code>,
+                                  or if the given supplier is <code>null</code> and the maximum wait time expires.</dd>
 <dd><code>X</code> - If an error occurs while acquiring an object.</dd>
 <dd><code>E</code> - If the maximum wait time expires before an object could be acquired.</dd>
 <dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/InterruptedException.html?is-external=true" title="class or interface in java.lang">InterruptedException</a></code> - If the current thread is interrupted while acquiring an object.</dd>
@@ -473,12 +478,14 @@ extends <a href="https://docs.oracle.com/javase/8/docs/api/java/lang/Object.html
 <dt><span class="paramLabel">Type Parameters:</span></dt>
 <dd><code>E</code> - The type of exception to throw if the maximum wait time expires.</dd>
 <dt><span class="paramLabel">Parameters:</span></dt>
-<dd><code>maxWaitTime</code> - The maximum wait time.</dd>
+<dd><code>maxWaitTime</code> - The maximum wait time. If negative, this method will block until an object is available.</dd>
 <dd><code>timeUnit</code> - The time unit for the maximum wait time.</dd>
 <dd><code>errorSupplier</code> - A supplier for the exception to throw if the maximum wait time expires.</dd>
 <dt><span class="returnLabel">Returns:</span></dt>
 <dd>The acquired object.</dd>
 <dt><span class="throwsLabel">Throws:</span></dt>
+<dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/NullPointerException.html?is-external=true" title="class or interface in java.lang">NullPointerException</a></code> - If the given time unit is <code>null</code>.
+                                  or if the given supplier is <code>null</code> and the maximum wait time expires.</dd>
 <dd><code>X</code> - If an error occurs while acquiring an object.</dd>
 <dd><code>E</code> - If the maximum wait time expires before an object could be acquired.</dd>
 <dd><code><a href="https://docs.oracle.com/javase/8/docs/api/java/lang/InterruptedException.html?is-external=true" title="class or interface in java.lang">InterruptedException</a></code> - If the current thread is interrupted while acquiring an object.</dd>

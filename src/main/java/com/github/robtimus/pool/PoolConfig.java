@@ -19,6 +19,7 @@ package com.github.robtimus.pool;
 
 import java.time.Duration;
 import java.util.Objects;
+import java.util.Optional;
 
 /**
  * Configuration for a {@link Pool}.
@@ -33,19 +34,21 @@ public final class PoolConfig {
 
     private final Duration maxWaitTime;
     private final Duration maxIdleTime;
+    private final long maxIdleTimeMillis;
     private final int initialSize;
     private final int maxSize;
 
     private PoolConfig(Builder builder) {
         maxWaitTime = builder.maxWaitTime;
         maxIdleTime = builder.maxIdleTime;
+        maxIdleTimeMillis = maxIdleTime != null ? maxIdleTime.toMillis() : 0;
         initialSize = builder.initialSize;
         maxSize = builder.maxSize;
     }
 
     /**
-     * Returns the maximum time to wait when acquiring objects. If {@linkplain Duration#isZero()} or {@linkplain Duration#isNegative()},
-     * acquiring objects should block until an object becomes available.
+     * Returns the maximum time to wait when acquiring objects.
+     * If {@linkplain Duration#isNegative() negative}, acquiring objects should block until an object is available.
      *
      * @return The maximum time to wait when acquiring objects.
      */
@@ -56,10 +59,15 @@ public final class PoolConfig {
     /**
      * Returns the maximum time that objects can be idle.
      *
-     * @return The maximum time that objects can be idle.
+     * @return An {@link Optional} describing the maximum time that objects can be idle,
+     *         or {@link Optional#empty()} if objects can be idle indefinitely.
      */
-    public Duration maxIdleTime() {
-        return maxIdleTime;
+    public Optional<Duration> maxIdleTime() {
+        return Optional.ofNullable(maxIdleTime);
+    }
+
+    boolean maxIdleTimeExceeded(PoolableObject<?> object) {
+        return maxIdleTime != null && System.currentTimeMillis() - object.idleSince() > maxIdleTimeMillis;
     }
 
     /**
@@ -117,7 +125,7 @@ public final class PoolConfig {
      */
     public static final class Builder {
 
-        private static final Duration DEFAULT_MAX_IDLE_TIME = Duration.ofMillis(Long.MAX_VALUE);
+        private static final Duration DEFAULT_MAX_WAIT_TIME = Duration.ofSeconds(-1);
 
         private Duration maxWaitTime;
         private Duration maxIdleTime;
@@ -125,17 +133,17 @@ public final class PoolConfig {
         private int maxSize;
 
         private Builder() {
-            maxWaitTime = Duration.ZERO;
-            maxIdleTime = DEFAULT_MAX_IDLE_TIME;
+            maxWaitTime = DEFAULT_MAX_WAIT_TIME;
+            maxIdleTime = null;
             initialSize = 1;
             maxSize = 5;
         }
 
         /**
-         * Sets the maximum time to wait when acquiring a default {@link PoolConfig} object. If {@linkplain Duration#isZero()} or
-         * {@linkplain Duration#isNegative()}, acquiring objects should block until an object becomes available. The default is {@link Duration#ZERO}.
+         * Sets the maximum time to wait when acquiring a default {@link PoolConfig} object. If {@linkplain Duration#isNegative() negative},
+         * acquiring objects should block until an object is available. The default is a negative duration.
          *
-         * @param maxWaitTime The maximum wait time, in milliseconds.
+         * @param maxWaitTime The maximum wait time.
          * @return This builder.
          * @throws NullPointerException If the given maximum wait time is {@code null}.
          */
@@ -145,19 +153,21 @@ public final class PoolConfig {
         }
 
         /**
-         * Sets the maximum time that objects can be idle. The default is virtually unlimited.
+         * Sets the maximum time that objects can be idle. The default is indefinitely.
          *
-         * @param maxIdleTime The maximum idle time, in milliseconds.
+         * @param maxIdleTime The maximum idle time, or {@code null} if objects can be idle indefinitely.
          * @return This builder.
-         * @throws NullPointerException If the given maximum idle time is {@code null}.
          */
         public Builder withMaxIdleTime(Duration maxIdleTime) {
-            this.maxIdleTime = Objects.requireNonNull(maxIdleTime);
+            this.maxIdleTime = maxIdleTime;
             return this;
         }
 
         /**
          * Sets the initial pool size. This is the number of idle objects to start with. The default is 1.
+         * <p>
+         * If the {@linkplain #withMaxSize(int) maximum pool size} is smaller than the given initial size, it will be set to be equal to the given
+         * initial size.
          *
          * @param initialSize The initial pool size.
          * @return This builder.
@@ -168,11 +178,15 @@ public final class PoolConfig {
                 throw new IllegalArgumentException(initialSize + " < 0"); //$NON-NLS-1$
             }
             this.initialSize = initialSize;
+            maxSize = Math.max(initialSize, maxSize);
             return this;
         }
 
         /**
          * Sets the maximum pool size. This is the maximum number of objects, both idle and currently in use. The default is 5.
+         * <p>
+         * If the {@linkplain #withInitialSize(int) initial pool size} is larger than the given maximum size, it will be set to be equal to the given
+         * maximum size.
          *
          * @param maxSize The maximum pool size.
          * @return This builder.
@@ -183,6 +197,7 @@ public final class PoolConfig {
                 throw new IllegalArgumentException(initialSize + " <= 0"); //$NON-NLS-1$
             }
             this.maxSize = maxSize;
+            initialSize = Math.min(initialSize, maxSize);
             return this;
         }
 
@@ -190,13 +205,8 @@ public final class PoolConfig {
          * Creates a new {@link PoolConfig} object based on the settings of this builder.
          *
          * @return The created {@link PoolConfig} object.
-         * @throws IllegalStateException If the {@linkplain #withInitialSize(int) initial pool size} is larger than the
-         *                                   {@linkplain #withMaxSize(int) maximum pool size}.
          */
         public PoolConfig build() {
-            if (initialSize > maxSize) {
-                throw new IllegalStateException(initialSize + " > " + maxSize); //$NON-NLS-1$
-            }
             return new PoolConfig(this);
         }
     }

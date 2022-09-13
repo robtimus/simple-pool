@@ -47,7 +47,7 @@ public abstract class PoolableObject<X extends Exception> {
 
     private Pool<PoolableObject<X>, X> pool;
     private PoolLogger logger;
-    private long poolTimestamp;
+    private long idleSince;
 
     /**
      * Creates a new poolable object.
@@ -67,7 +67,7 @@ public abstract class PoolableObject<X extends Exception> {
     void setPool(Pool<PoolableObject<X>, X> pool) {
         this.pool = pool;
         logger = pool.logger();
-        poolTimestamp = System.currentTimeMillis();
+        idleSince = System.currentTimeMillis();
     }
 
     void clearPool() {
@@ -83,8 +83,12 @@ public abstract class PoolableObject<X extends Exception> {
         return references.size();
     }
 
-    void resetPoolTimestamp() {
-        poolTimestamp = System.currentTimeMillis();
+    long idleSince() {
+        return idleSince;
+    }
+
+    void resetIdleSince() {
+        idleSince = System.currentTimeMillis();
     }
 
     /**
@@ -134,14 +138,6 @@ public abstract class PoolableObject<X extends Exception> {
      * @return {@code true} if this object is still valid, or {@code false} otherwise.
      */
     protected abstract boolean isValid();
-
-    boolean isIdleTooLong() {
-        if (pool != null) {
-            long idleTime = System.currentTimeMillis() - poolTimestamp;
-            return idleTime > pool.maxIdleTimeMillis();
-        }
-        return false;
-    }
 
     /**
      * Releases any resources associated with this object.

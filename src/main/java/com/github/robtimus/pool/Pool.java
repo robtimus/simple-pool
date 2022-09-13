@@ -47,7 +47,6 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
             Messages.Pool.maxWaitTimeExpired.get());
 
     private final PoolConfig config;
-    private final long maxIdleTimeMillis;
     private final PoolableObjectFactory<T, X> factory;
     private final PoolLogger logger;
 
@@ -85,8 +84,6 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
         this.factory = Objects.requireNonNull(factory);
         this.logger = logger != null ? logger : PoolLogger.noopLogger();
 
-        maxIdleTimeMillis = config.maxIdleTime().toMillis();
-
         idleObjects = new ArrayDeque<>(config.maxSize());
         size = 0;
 
@@ -96,10 +93,6 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
         fillPool();
 
         active = new AtomicBoolean(true);
-    }
-
-    long maxIdleTimeMillis() {
-        return maxIdleTimeMillis;
     }
 
     PoolLogger logger() {
@@ -141,7 +134,7 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
 
     /**
      * Acquires an object. This method will block until an object is available or the maximum wait time, as defined in the configuration used to
-     * create this pool, expires.
+     * create this pool, expires. If the configured maximum wait time is negative, this method will block until an object is available.
      *
      * @return The acquired object.
      * @throws X If an error occurs while acquiring an object.
@@ -156,8 +149,9 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
     /**
      * Acquires an object. This method will block until an object is available or the maximum wait time expires.
      *
-     * @param maxWaitTime The maximum wait time.
+     * @param maxWaitTime The maximum wait time. If {@linkplain Duration#isNegative() negative}, this method will block until an object is available.
      * @return The acquired object.
+     * @throws NullPointerException If the given maximum wait time is {@code null}.
      * @throws X If an error occurs while acquiring an object.
      * @throws NoSuchElementException If the maximum wait time expires before an object could be acquired.
      * @throws InterruptedException If the current thread is interrupted while acquiring an object.
@@ -170,9 +164,10 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
     /**
      * Acquires an object. This method will block until an object is available or the maximum wait time expires.
      *
-     * @param maxWaitTime The maximum wait time.
+     * @param maxWaitTime The maximum wait time. If negative, this method will block until an object is available.
      * @param timeUnit The time unit for the maximum wait time.
      * @return The acquired object.
+     * @throws NullPointerException If the given time unit is {@code null}.
      * @throws X If an error occurs while acquiring an object.
      * @throws NoSuchElementException If the maximum wait time expires before an object could be acquired.
      * @throws InterruptedException If the current thread is interrupted while acquiring an object.
@@ -184,11 +179,12 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
 
     /**
      * Acquires an object. This method will block until an object is available or the maximum wait time, as defined in the configuration used to
-     * create this pool, expires.
+     * create this pool, expires. If the configured maximum wait time is negative, this method will block until an object is available.
      *
      * @param <E> The type of exception to throw if the maximum wait time expires.
      * @param errorSupplier A supplier for the exception to throw if the maximum wait time expires.
      * @return The acquired object.
+     * @throws NullPointerException If the given supplier is {@code null} and the maximum wait time expires.
      * @throws X If an error occurs while acquiring an object.
      * @throws E If the maximum wait time expires before an object could be acquired.
      * @throws InterruptedException If the current thread is interrupted while acquiring an object.
@@ -203,9 +199,11 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
      * Acquires an object. This method will block until an object is available or the maximum wait time expires.
      *
      * @param <E> The type of exception to throw if the maximum wait time expires.
-     * @param maxWaitTime The maximum wait time.
+     * @param maxWaitTime The maximum wait time. If {@linkplain Duration#isNegative() negative}, this method will block until an object is available.
      * @param errorSupplier A supplier for the exception to throw if the maximum wait time expires.
      * @return The acquired object.
+     * @throws NullPointerException If the given maximum wait time is {@code null},
+     *                                  or if the given supplier is {@code null} and the maximum wait time expires.
      * @throws X If an error occurs while acquiring an object.
      * @throws E If the maximum wait time expires before an object could be acquired.
      * @throws InterruptedException If the current thread is interrupted while acquiring an object.
@@ -220,10 +218,12 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
      * Acquires an object. This method will block until an object is available or the maximum wait time expires.
      *
      * @param <E> The type of exception to throw if the maximum wait time expires.
-     * @param maxWaitTime The maximum wait time.
+     * @param maxWaitTime The maximum wait time. If negative, this method will block until an object is available.
      * @param timeUnit The time unit for the maximum wait time.
      * @param errorSupplier A supplier for the exception to throw if the maximum wait time expires.
      * @return The acquired object.
+     * @throws NullPointerException If the given time unit is {@code null}.
+     *                                  or if the given supplier is {@code null} and the maximum wait time expires.
      * @throws X If an error occurs while acquiring an object.
      * @throws E If the maximum wait time expires before an object could be acquired.
      * @throws InterruptedException If the current thread is interrupted while acquiring an object.
@@ -367,7 +367,7 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
                 object.clearPool();
                 logger.objectInvalidated(object.objectId(), idleObjects.size(), size);
                 removedObjects = true;
-            } else if (object.isIdleTooLong()) {
+            } else if (config.maxIdleTimeExceeded(object)) {
                 size--;
                 logger.objectIdleTooLong(object.objectId(), idleObjects.size(), size);
                 object.releaseResourcesQuietly();
@@ -396,7 +396,7 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
     }
 
     private void awaitPoolNotEmpty(long maxWaitTimeInNanos) throws InterruptedException {
-        if (maxWaitTimeInNanos <= 0) {
+        if (maxWaitTimeInNanos < 0) {
             awaitPoolNotEmptyWithoutTimeout();
         } else {
             awaitPoolNotEmptyWithTimeout(maxWaitTimeInNanos);
@@ -437,7 +437,7 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
         lock.lock();
         try {
             if (isActive() && object.isValid()) {
-                object.resetPoolTimestamp();
+                object.resetIdleSince();
                 idleObjects.add(object);
                 logger.returnedObject(object.objectId(), idleObjects.size(), size);
             } else {

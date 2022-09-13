@@ -324,12 +324,44 @@ class PoolTest {
                 }
 
                 @Test
+                @DisplayName("with zero max wait time")
+                void testWithZeroMaxWaitTime() {
+                    PoolConfig config = PoolConfig.custom()
+                            .withInitialSize(1)
+                            .withMaxSize(2)
+                            .withMaxWaitTime(Duration.ZERO)
+                            .build();
+                    @SuppressWarnings("unchecked")
+                    Supplier<TestObject> supplier = mock(Supplier.class);
+
+                    when(supplier.get()).thenAnswer(i -> spy(new TestObject()));
+
+                    Pool<TestObject, None> pool = Pool.throwingNone(config, supplier);
+
+                    TestObject object1 = assertDoesNotThrow(() -> pool.acquire(1, TimeUnit.SECONDS));
+                    TestObject object2 = assertDoesNotThrow(() -> pool.acquire(Duration.ofSeconds(1)));
+
+                    assertThrows(NoSuchElementException.class, () -> pool.acquire());
+
+                    object1.release();
+                    object2.release();
+
+                    verify(supplier, times(2)).get();
+                    verifyNoMoreInteractions(supplier);
+
+                    verify(object1, never()).releaseResources();
+                    verify(object1, never()).releaseResourcesQuietly();
+                    verify(object2, never()).releaseResources();
+                    verify(object2, never()).releaseResourcesQuietly();
+                }
+
+                @Test
                 @DisplayName("without max wait time")
                 void testWithoutMaxWaitTime() {
                     PoolConfig config = PoolConfig.custom()
                             .withInitialSize(1)
                             .withMaxSize(2)
-                            .withMaxWaitTime(Duration.ZERO)
+                            .withMaxWaitTime(Duration.ofNanos(-1))
                             .build();
                     @SuppressWarnings("unchecked")
                     Supplier<TestObject> supplier = mock(Supplier.class);
@@ -723,7 +755,6 @@ class PoolTest {
 
                 TestObject object3 = pool.acquireOrCreate();
                 assertFalse(object3.isPooled());
-                assertFalse(object3.isIdleTooLong());
 
                 object1.release();
                 object2.release();

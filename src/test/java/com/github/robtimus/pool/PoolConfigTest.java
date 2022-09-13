@@ -20,6 +20,7 @@ package com.github.robtimus.pool;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.time.Duration;
+import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -42,7 +43,7 @@ class PoolConfigTest {
                 PoolConfig config = PoolConfig.custom()
                         .build();
 
-                assertEquals(Duration.ZERO, config.maxWaitTime());
+                assertEquals(Duration.ofSeconds(-1), config.maxWaitTime());
             }
 
             @Test
@@ -54,7 +55,7 @@ class PoolConfigTest {
 
                 PoolConfig config = builder.build();
 
-                assertEquals(Duration.ZERO, config.maxWaitTime());
+                assertEquals(Duration.ofSeconds(-1), config.maxWaitTime());
             }
 
             @Test
@@ -98,19 +99,17 @@ class PoolConfigTest {
                 PoolConfig config = PoolConfig.custom()
                         .build();
 
-                assertEquals(Duration.ofMillis(Long.MAX_VALUE), config.maxIdleTime());
+                assertEquals(Optional.empty(), config.maxIdleTime());
             }
 
             @Test
             @DisplayName("null value")
             void testNullValue() {
-                Builder builder = PoolConfig.custom();
+                PoolConfig config = PoolConfig.custom()
+                        .withMaxIdleTime(null)
+                        .build();
 
-                assertThrows(NullPointerException.class, () -> builder.withMaxIdleTime(null));
-
-                PoolConfig config = builder.build();
-
-                assertEquals(Duration.ofMillis(Long.MAX_VALUE), config.maxIdleTime());
+                assertEquals(Optional.empty(), config.maxIdleTime());
             }
 
             @Test
@@ -120,7 +119,7 @@ class PoolConfigTest {
                         .withMaxIdleTime(Duration.ofNanos(-1))
                         .build();
 
-                assertEquals(Duration.ofNanos(-1), config.maxIdleTime());
+                assertEquals(Optional.of(Duration.ofNanos(-1)), config.maxIdleTime());
             }
 
             @Test
@@ -130,7 +129,7 @@ class PoolConfigTest {
                         .withMaxIdleTime(Duration.ZERO)
                         .build();
 
-                assertEquals(Duration.ZERO, config.maxIdleTime());
+                assertEquals(Optional.of(Duration.ZERO), config.maxIdleTime());
             }
 
             @Test
@@ -140,7 +139,7 @@ class PoolConfigTest {
                         .withMaxIdleTime(Duration.ofNanos(1))
                         .build();
 
-                assertEquals(Duration.ofNanos(1), config.maxIdleTime());
+                assertEquals(Optional.of(Duration.ofNanos(1)), config.maxIdleTime());
             }
         }
 
@@ -155,6 +154,7 @@ class PoolConfigTest {
                         .build();
 
                 assertEquals(1, config.initialSize());
+                assertEquals(5, config.maxSize());
             }
 
             @Test
@@ -167,6 +167,7 @@ class PoolConfigTest {
                 PoolConfig config = builder.build();
 
                 assertEquals(1, config.initialSize());
+                assertEquals(5, config.maxSize());
             }
 
             @Test
@@ -177,6 +178,7 @@ class PoolConfigTest {
                         .build();
 
                 assertEquals(0, config.initialSize());
+                assertEquals(5, config.maxSize());
             }
 
             @Test
@@ -187,6 +189,18 @@ class PoolConfigTest {
                         .build();
 
                 assertEquals(1, config.initialSize());
+                assertEquals(5, config.maxSize());
+            }
+
+            @Test
+            @DisplayName("value larger than maxSize")
+            void testValueLargerThanMaxSize() {
+                PoolConfig config = PoolConfig.custom()
+                        .withInitialSize(10)
+                        .build();
+
+                assertEquals(10, config.initialSize());
+                assertEquals(10, config.maxSize());
             }
         }
 
@@ -201,6 +215,7 @@ class PoolConfigTest {
                         .build();
 
                 assertEquals(5, config.maxSize());
+                assertEquals(1, config.initialSize());
             }
 
             @Test
@@ -213,6 +228,7 @@ class PoolConfigTest {
                 PoolConfig config = builder.build();
 
                 assertEquals(5, config.maxSize());
+                assertEquals(1, config.initialSize());
             }
 
             @Test
@@ -225,6 +241,7 @@ class PoolConfigTest {
                 PoolConfig config = builder.build();
 
                 assertEquals(5, config.maxSize());
+                assertEquals(1, config.initialSize());
             }
 
             @Test
@@ -235,56 +252,44 @@ class PoolConfigTest {
                         .build();
 
                 assertEquals(1, config.maxSize());
-            }
-        }
-
-        @Nested
-        @DisplayName("build")
-        class Build {
-
-            @Test
-            @DisplayName("initialValue < maxValue")
-            void testInitialValueSmallerThanMaxValue() {
-                PoolConfig config = PoolConfig.custom()
-                        .withInitialSize(1)
-                        .withMaxSize(2)
-                        .build();
-
                 assertEquals(1, config.initialSize());
-                assertEquals(2, config.maxSize());
             }
 
             @Test
-            @DisplayName("initialValue == maxValue")
-            void testInitialValueEqualToMaxValue() {
+            @DisplayName("value smaller than initialSize")
+            void testValueSmallerThanInitialSize() {
                 PoolConfig config = PoolConfig.custom()
-                        .withInitialSize(2)
-                        .withMaxSize(2)
+                        .withInitialSize(20)
+                        .withMaxSize(10)
                         .build();
 
-                assertEquals(2, config.initialSize());
-                assertEquals(2, config.maxSize());
-            }
-
-            @Test
-            @DisplayName("initialValue > maxValue")
-            void testInitialValueLArgerThanMaxValue() {
-                Builder builder = PoolConfig.custom()
-                        .withInitialSize(2)
-                        .withMaxSize(1);
-
-                assertThrows(IllegalStateException.class, builder::build);
+                assertEquals(10, config.initialSize());
+                assertEquals(10, config.maxSize());
             }
         }
     }
 
-    @Test
+    @Nested
     @DisplayName("toString")
-    void testToString() {
-        PoolConfig config = PoolConfig.custom()
-                .withMaxIdleTime(Duration.ofSeconds(5))
-                .build();
+    class ToString {
 
-        assertEquals("PoolConfig[maxWaitTime=PT0S,maxIdleTime=PT5S,initialSize=1,maxSize=5]", config.toString());
+        @Test
+        @DisplayName("without maxIdleTime")
+        void testWithoutMaxIdleTime() {
+            PoolConfig config = PoolConfig.custom()
+                    .build();
+
+            assertEquals("PoolConfig[maxWaitTime=PT-1S,maxIdleTime=null,initialSize=1,maxSize=5]", config.toString());
+        }
+
+        @Test
+        @DisplayName("with maxIdleTime")
+        void testWithMaxIdleTime() {
+            PoolConfig config = PoolConfig.custom()
+                    .withMaxIdleTime(Duration.ofSeconds(5))
+                    .build();
+
+            assertEquals("PoolConfig[maxWaitTime=PT-1S,maxIdleTime=PT5S,initialSize=1,maxSize=5]", config.toString());
+        }
     }
 }

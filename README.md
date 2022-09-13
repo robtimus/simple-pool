@@ -25,11 +25,11 @@ Pool<MyObject, None> pool = Pool.throwingNone(config, MyObject::new, logger);
 A `PoolableObject` can have other references added. Instances are only returned to the pool if all references have been removed. This can be used if the object can expose other objects like `InputStream` or `OutputStream`. By adding such objects as references to the object and removing the references when these objects are no longer necessary (e.g. when they are closed), it's possible to delay returning objects to the pool. This allows sub classes to be released without having to worry about these references themselves. For instance:
 
 ```
-class MyConnection {
+class MyConnection extends PoolableObject<IOException> {
 
     ...
 
-    InputStream getInputStream() {
+    InputStream getInputStream() throws IOException {
         InputStream inputStream = ...;
         // when inputStream.close() is called, it should call removeReference(inputStream)
         addReference(customInputStream);

@@ -43,19 +43,17 @@ class PoolConfigTest {
                 PoolConfig config = PoolConfig.custom()
                         .build();
 
-                assertEquals(Duration.ofSeconds(-1), config.maxWaitTime());
+                assertEquals(Optional.empty(), config.maxWaitTime());
             }
 
             @Test
             @DisplayName("null value")
             void testNullValue() {
-                Builder builder = PoolConfig.custom();
+                PoolConfig config = PoolConfig.custom()
+                        .withMaxWaitTime(null)
+                        .build();
 
-                assertThrows(NullPointerException.class, () -> builder.withMaxWaitTime(null));
-
-                PoolConfig config = builder.build();
-
-                assertEquals(Duration.ofSeconds(-1), config.maxWaitTime());
+                assertEquals(Optional.empty(), config.maxWaitTime());
             }
 
             @Test
@@ -65,7 +63,7 @@ class PoolConfigTest {
                         .withMaxWaitTime(Duration.ofNanos(-1))
                         .build();
 
-                assertEquals(Duration.ofNanos(-1), config.maxWaitTime());
+                assertEquals(Optional.empty(), config.maxWaitTime());
             }
 
             @Test
@@ -75,7 +73,7 @@ class PoolConfigTest {
                         .withMaxWaitTime(Duration.ZERO)
                         .build();
 
-                assertEquals(Duration.ZERO, config.maxWaitTime());
+                assertEquals(Optional.of(Duration.ZERO), config.maxWaitTime());
             }
 
             @Test
@@ -85,7 +83,7 @@ class PoolConfigTest {
                         .withMaxWaitTime(Duration.ofNanos(1))
                         .build();
 
-                assertEquals(Duration.ofNanos(1), config.maxWaitTime());
+                assertEquals(Optional.of(Duration.ofNanos(1)), config.maxWaitTime());
             }
         }
 
@@ -274,22 +272,23 @@ class PoolConfigTest {
     class ToString {
 
         @Test
-        @DisplayName("without maxIdleTime")
+        @DisplayName("without maxWaitTime or maxIdleTime")
         void testWithoutMaxIdleTime() {
             PoolConfig config = PoolConfig.custom()
                     .build();
 
-            assertEquals("PoolConfig[maxWaitTime=PT-1S,maxIdleTime=null,initialSize=1,maxSize=5]", config.toString());
+            assertEquals("PoolConfig[maxWaitTime=null,maxIdleTime=null,initialSize=1,maxSize=5]", config.toString());
         }
 
         @Test
-        @DisplayName("with maxIdleTime")
+        @DisplayName("with maxWaitTime and maxIdleTime")
         void testWithMaxIdleTime() {
             PoolConfig config = PoolConfig.custom()
+                    .withMaxWaitTime(Duration.ZERO)
                     .withMaxIdleTime(Duration.ofSeconds(5))
                     .build();
 
-            assertEquals("PoolConfig[maxWaitTime=PT-1S,maxIdleTime=PT5S,initialSize=1,maxSize=5]", config.toString());
+            assertEquals("PoolConfig[maxWaitTime=PT0S,maxIdleTime=PT5S,initialSize=1,maxSize=5]", config.toString());
         }
     }
 }

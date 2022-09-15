@@ -149,9 +149,9 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
     /**
      * Acquires an object. This method will block until an object is available or the maximum wait time expires.
      *
-     * @param maxWaitTime The maximum wait time. If {@linkplain Duration#isNegative() negative}, this method will block until an object is available.
+     * @param maxWaitTime The maximum wait time.
+     *                        If {@code null} or {@linkplain Duration#isNegative() negative}, this method will block until an object is available.
      * @return The acquired object.
-     * @throws NullPointerException If the given maximum wait time is {@code null}.
      * @throws X If an error occurs while acquiring an object.
      * @throws NoSuchElementException If the maximum wait time expires before an object could be acquired.
      * @throws InterruptedException If the current thread is interrupted while acquiring an object.
@@ -191,26 +191,26 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
      * @throws IllegalStateException If this pool has {@linkplain #shutdown shut down}.
      */
     public <E extends Exception> T acquire(Supplier<E> errorSupplier) throws X, E, InterruptedException {
-        Duration maxWaitTime = config.maxWaitTime();
-        return acquire(maxWaitTime, errorSupplier);
+        long maxWaitTimeInNanos = config.maxWaitTimeInNanos();
+        return acquireBlocking(maxWaitTimeInNanos, errorSupplier);
     }
 
     /**
      * Acquires an object. This method will block until an object is available or the maximum wait time expires.
      *
      * @param <E> The type of exception to throw if the maximum wait time expires.
-     * @param maxWaitTime The maximum wait time. If {@linkplain Duration#isNegative() negative}, this method will block until an object is available.
+     * @param maxWaitTime The maximum wait time.
+     *                        If {@code null} or {@linkplain Duration#isNegative() negative}, this method will block until an object is available.
      * @param errorSupplier A supplier for the exception to throw if the maximum wait time expires.
      * @return The acquired object.
-     * @throws NullPointerException If the given maximum wait time is {@code null},
-     *                                  or if the given supplier is {@code null} and the maximum wait time expires.
+     * @throws NullPointerException If the given supplier is {@code null} and the maximum wait time expires.
      * @throws X If an error occurs while acquiring an object.
      * @throws E If the maximum wait time expires before an object could be acquired.
      * @throws InterruptedException If the current thread is interrupted while acquiring an object.
      * @throws IllegalStateException If this pool has {@linkplain #shutdown shut down}.
      */
     public <E extends Exception> T acquire(Duration maxWaitTime, Supplier<E> errorSupplier) throws X, E, InterruptedException {
-        long maxWaitTimeInNanos = maxWaitTime.toNanos();
+        long maxWaitTimeInNanos = maxWaitTime != null ? maxWaitTime.toNanos() : -1;
         return acquireBlocking(maxWaitTimeInNanos, errorSupplier);
     }
 

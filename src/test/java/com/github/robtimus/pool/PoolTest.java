@@ -391,6 +391,43 @@ class PoolTest {
                     verify(object2, never()).releaseResources();
                     verify(object2).releaseResourcesQuietly();
                 }
+
+                @Test
+                @DisplayName("with explicit null max wait time")
+                void testWithNullMaxWaitTime() {
+                    PoolConfig config = PoolConfig.custom()
+                            .withInitialSize(1)
+                            .withMaxSize(2)
+                            .withMaxWaitTime(Duration.ofNanos(-1))
+                            .build();
+                    @SuppressWarnings("unchecked")
+                    Supplier<TestObject> supplier = mock(Supplier.class);
+
+                    when(supplier.get()).thenAnswer(i -> spy(new TestObject()));
+
+                    Pool<TestObject, None> pool = Pool.throwingNone(config, supplier);
+
+                    TestObject object1 = assertDoesNotThrow(() -> pool.acquire(1, TimeUnit.SECONDS));
+                    TestObject object2 = assertDoesNotThrow(() -> pool.acquire(Duration.ofSeconds(1)));
+
+                    // JUnit does not provide any assertions for testing that code takes longer.
+                    // Instead, shutdown the pool after 100ms, and check that the acquire call throws an IllegalStateException
+                    executor.schedule(pool::shutdown, 100, TimeUnit.MILLISECONDS);
+
+                    assertThrows(IllegalStateException.class, () -> pool.acquire((Duration) null));
+
+                    object1.release();
+                    object2.release();
+
+                    verify(supplier, times(2)).get();
+                    verifyNoMoreInteractions(supplier);
+
+                    // releaseResourcesQuietly is called because the pool is no longer active when the objects are returned
+                    verify(object1, never()).releaseResources();
+                    verify(object1).releaseResourcesQuietly();
+                    verify(object2, never()).releaseResources();
+                    verify(object2).releaseResourcesQuietly();
+                }
             }
 
             @Test

@@ -67,7 +67,7 @@ public abstract class PoolableObject<X extends Exception> {
     void setPool(Pool<PoolableObject<X>, X> pool) {
         this.pool = pool;
         logger = pool.logger();
-        idleSince = System.currentTimeMillis();
+        resetIdleSince();
     }
 
     void clearPool() {
@@ -88,7 +88,7 @@ public abstract class PoolableObject<X extends Exception> {
     }
 
     void resetIdleSince() {
-        idleSince = System.currentTimeMillis();
+        idleSince = System.nanoTime();
     }
 
     /**

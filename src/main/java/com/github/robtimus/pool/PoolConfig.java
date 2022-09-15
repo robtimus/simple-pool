@@ -18,11 +18,11 @@
 package com.github.robtimus.pool;
 
 import java.time.Duration;
-import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Supplier;
 
 /**
- * Configuration for a {@link Pool}.
+ * Configuration for {@link Pool} instances.
  * <p>
  * Instances of this class are immutable and thread-safe.
  *
@@ -33,27 +33,32 @@ public final class PoolConfig {
     private static final PoolConfig DEFAULT_CONFIG = custom().build();
 
     private final Duration maxWaitTime;
+    private final long maxWaitTimeInNanos;
     private final Duration maxIdleTime;
-    private final long maxIdleTimeMillis;
+    private final long maxIdleTimeInNanos;
     private final int initialSize;
     private final int maxSize;
 
     private PoolConfig(Builder builder) {
         maxWaitTime = builder.maxWaitTime;
+        maxWaitTimeInNanos = maxWaitTime != null ? maxWaitTime.toNanos() : -1;
         maxIdleTime = builder.maxIdleTime;
-        maxIdleTimeMillis = maxIdleTime != null ? maxIdleTime.toMillis() : 0;
+        maxIdleTimeInNanos = maxIdleTime != null ? maxIdleTime.toNanos() : -1;
         initialSize = builder.initialSize;
         maxSize = builder.maxSize;
     }
 
     /**
      * Returns the maximum time to wait when acquiring objects.
-     * If {@linkplain Duration#isNegative() negative}, acquiring objects should block until an object is available.
      *
-     * @return The maximum time to wait when acquiring objects.
+     * @return An {@link Optional} describing the maximum time to wait when acquiring objects, or {@code Optional#empty()} to wait indefinitely.
      */
-    public Duration maxWaitTime() {
-        return maxWaitTime;
+    public Optional<Duration> maxWaitTime() {
+        return Optional.ofNullable(maxWaitTime);
+    }
+
+    long maxWaitTimeInNanos() {
+        return maxWaitTimeInNanos;
     }
 
     /**
@@ -67,7 +72,7 @@ public final class PoolConfig {
     }
 
     boolean maxIdleTimeExceeded(PoolableObject<?> object) {
-        return maxIdleTime != null && System.currentTimeMillis() - object.idleSince() > maxIdleTimeMillis;
+        return maxIdleTime != null && System.nanoTime() - object.idleSince() > maxIdleTimeInNanos;
     }
 
     /**
@@ -125,30 +130,28 @@ public final class PoolConfig {
      */
     public static final class Builder {
 
-        private static final Duration DEFAULT_MAX_WAIT_TIME = Duration.ofSeconds(-1);
-
         private Duration maxWaitTime;
         private Duration maxIdleTime;
         private int initialSize;
         private int maxSize;
 
         private Builder() {
-            maxWaitTime = DEFAULT_MAX_WAIT_TIME;
+            maxWaitTime = null;
             maxIdleTime = null;
             initialSize = 1;
             maxSize = 5;
         }
 
         /**
-         * Sets the maximum time to wait when acquiring a default {@link PoolConfig} object. If {@linkplain Duration#isNegative() negative},
-         * acquiring objects should block until an object is available. The default is a negative duration.
+         * Sets the maximum time to wait when acquiring objects using {@link Pool#acquire()} or {@link Pool#acquire(Supplier)}.
+         * If {@code null} or {@linkplain Duration#isNegative() negative}, acquiring objects should block until an object is available.
+         * The default is to wait indefinitely.
          *
          * @param maxWaitTime The maximum wait time.
          * @return This builder.
-         * @throws NullPointerException If the given maximum wait time is {@code null}.
          */
         public Builder withMaxWaitTime(Duration maxWaitTime) {
-            this.maxWaitTime = Objects.requireNonNull(maxWaitTime);
+            this.maxWaitTime = maxWaitTime == null || maxWaitTime.isNegative() ? null : maxWaitTime;
             return this;
         }
 

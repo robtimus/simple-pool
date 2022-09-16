@@ -63,26 +63,14 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
      *
      * @param config The configuration to use.
      * @param factory The object factory to use.
-     * @throws NullPointerException If the given configuration or factory is {@code null}.
-     * @throws X If the given config requests a positive initial size, and one or more objects could not be created.
-     */
-    public Pool(PoolConfig config, PoolableObjectFactory<T, X> factory) throws X {
-        this(config, factory, null);
-    }
-
-    /**
-     * Creates a new pool.
-     *
-     * @param config The configuration to use.
-     * @param factory The object factory to use.
-     * @param logger The optional logger to use to log events triggered by the pool or pooled objects.
-     * @throws NullPointerException If the given configuration or factory is {@code null}.
+     * @param logger The logger to use to log events triggered by the pool or pooled objects.
+     * @throws NullPointerException If the given configuration, factory or logger is {@code null}.
      * @throws X If the given config requests a positive initial size, and one or more objects could not be created.
      */
     public Pool(PoolConfig config, PoolableObjectFactory<T, X> factory, PoolLogger logger) throws X {
         this.config = Objects.requireNonNull(config);
         this.factory = Objects.requireNonNull(factory);
-        this.logger = logger != null ? logger : PoolLogger.noopLogger();
+        this.logger = Objects.requireNonNull(logger);
 
         idleObjects = new ArrayDeque<>(config.maxSize());
         size = 0;
@@ -436,17 +424,20 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
 
         lock.lock();
         try {
-            if (isActive() && object.isValid()) {
-                object.resetIdleSince();
-                idleObjects.add(object);
-                logger.returnedObject(object.objectId(), idleObjects.size(), size);
-            } else {
-                object.clearPool();
-                size--;
-                logger.objectInvalidated(object.objectId(), idleObjects.size(), size);
-                if (!isActive()) {
-                    object.releaseResourcesQuietly();
+            if (isActive()) {
+                if (object.isValid()) {
+                    object.resetIdleSince();
+                    idleObjects.add(object);
+                    logger.returnedObject(object.objectId(), idleObjects.size(), size);
+                } else {
+                    object.clearPool();
+                    size--;
+                    logger.objectInvalidated(object.objectId(), idleObjects.size(), size);
                 }
+            } else {
+                size--;
+                object.releaseResourcesQuietly();
+                object.clearPool();
             }
             // Either idleObjects has had an object added or size has been decreased.
             notEmpty.signalAll();
@@ -578,23 +569,9 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
      * @param <T> The type of objects in the pool.
      * @param config The configuration to use.
      * @param supplier A supplier to serve as object factory.
+     * @param logger The logger to use to log events triggered by the pool or pooled objects.
      * @return The created pool.
-     * @throws NullPointerException If the given configuration or supplier is {@code null}.
-     */
-    public static <T extends PoolableObject<None>> Pool<T, None> throwingNone(PoolConfig config, Supplier<T> supplier) {
-        Objects.requireNonNull(supplier);
-        return new Pool<>(config, supplier::get);
-    }
-
-    /**
-     * Creates a new pool that throws no exceptions.
-     *
-     * @param <T> The type of objects in the pool.
-     * @param config The configuration to use.
-     * @param supplier A supplier to serve as object factory.
-     * @param logger The optional logger to use to log events triggered by the pool or pooled objects.
-     * @return The created pool.
-     * @throws NullPointerException If the given configuration or supplier is {@code null}.
+     * @throws NullPointerException If the given configuration, supplier or logger is {@code null}.
      */
     public static <T extends PoolableObject<None>> Pool<T, None> throwingNone(PoolConfig config, Supplier<T> supplier, PoolLogger logger) {
         Objects.requireNonNull(supplier);

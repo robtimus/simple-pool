@@ -39,6 +39,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 import java.time.Duration;
+import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
@@ -206,6 +207,7 @@ class PoolTest {
             verify(logger).createdObject(object.objectId());
             verify(logger).failedToCreatePool(error);
             verify(logger).releasingObjectResources(object.objectId());
+            verify(logger).releaseObjectResourcesFailed(object.objectId(), suppressed);
 
             verifyNoMoreInteractions(logger);
         }
@@ -241,17 +243,30 @@ class PoolTest {
                         .build();
                 @SuppressWarnings("unchecked")
                 Supplier<TestObject> supplier = mock(Supplier.class);
+                PoolLogger logger = mock(PoolLogger.class);
 
                 when(supplier.get()).thenAnswer(i -> spy(new TestObject()));
 
-                Pool<TestObject, None> pool = Pool.throwingNone(config, supplier);
+                Pool<TestObject, None> pool = Pool.throwingNone(config, supplier, logger);
 
                 TestObject object = assertDoesNotThrow(() -> pool.acquire());
 
                 object.release();
 
                 verify(supplier).get();
-                verifyNoMoreInteractions(supplier);
+                // logger calls in order
+                // create pool
+                verify(logger).creatingPool(config);
+                verify(logger).createdObject(object.objectId());
+                verify(logger).createdPool(config);
+                // acquire object
+                verify(logger).increasedObjectRefCount(object.objectId(), 1);
+                verify(logger).acquiredObject(object.objectId(), 0, 1);
+                // release object
+                verify(logger).decreasedObjectRefCount(object.objectId(), 0);
+                verify(logger).returnedObject(object.objectId(), 1, 1);
+
+                verifyNoMoreInteractions(supplier, logger);
 
                 verify(object, never()).releaseResources();
                 verify(object, never()).releaseResourcesQuietly();
@@ -267,10 +282,11 @@ class PoolTest {
                         .build();
                 @SuppressWarnings("unchecked")
                 Supplier<TestObject> supplier = mock(Supplier.class);
+                PoolLogger logger = mock(PoolLogger.class);
 
                 when(supplier.get()).thenAnswer(i -> spy(new TestObject()));
 
-                Pool<TestObject, None> pool = Pool.throwingNone(config, supplier);
+                Pool<TestObject, None> pool = Pool.throwingNone(config, supplier, logger);
 
                 TestObject object1 = assertDoesNotThrow(() -> pool.acquire(1, TimeUnit.SECONDS));
                 TestObject object2 = assertDoesNotThrow(() -> pool.acquire());
@@ -279,7 +295,26 @@ class PoolTest {
                 object2.release();
 
                 verify(supplier, times(2)).get();
-                verifyNoMoreInteractions(supplier);
+                // logger calls in order
+                // create pool
+                verify(logger).creatingPool(config);
+                verify(logger).createdObject(object1.objectId());
+                verify(logger).createdPool(config);
+                // acquire object1
+                verify(logger).increasedObjectRefCount(object1.objectId(), 1);
+                verify(logger).acquiredObject(object1.objectId(), 0, 1);
+                // acquire object2
+                verify(logger).createdObject(object2.objectId());
+                verify(logger).increasedObjectRefCount(object2.objectId(), 1);
+                verify(logger).acquiredObject(object2.objectId(), 0, 2);
+                // release object1
+                verify(logger).decreasedObjectRefCount(object1.objectId(), 0);
+                verify(logger).returnedObject(object1.objectId(), 1, 2);
+                // release object2
+                verify(logger).decreasedObjectRefCount(object2.objectId(), 0);
+                verify(logger).returnedObject(object2.objectId(), 2, 2);
+
+                verifyNoMoreInteractions(supplier, logger);
 
                 verify(object1, never()).releaseResources();
                 verify(object1, never()).releaseResourcesQuietly();
@@ -301,10 +336,11 @@ class PoolTest {
                             .build();
                     @SuppressWarnings("unchecked")
                     Supplier<TestObject> supplier = mock(Supplier.class);
+                    PoolLogger logger = mock(PoolLogger.class);
 
                     when(supplier.get()).thenAnswer(i -> spy(new TestObject()));
 
-                    Pool<TestObject, None> pool = Pool.throwingNone(config, supplier);
+                    Pool<TestObject, None> pool = Pool.throwingNone(config, supplier, logger);
 
                     TestObject object1 = assertDoesNotThrow(() -> pool.acquire(1, TimeUnit.SECONDS));
                     TestObject object2 = assertDoesNotThrow(() -> pool.acquire(Duration.ofSeconds(1)));
@@ -315,7 +351,26 @@ class PoolTest {
                     object2.release();
 
                     verify(supplier, times(2)).get();
-                    verifyNoMoreInteractions(supplier);
+                    // logger calls in order
+                    // create pool
+                    verify(logger).creatingPool(config);
+                    verify(logger).createdObject(object1.objectId());
+                    verify(logger).createdPool(config);
+                    // acquire object1
+                    verify(logger).increasedObjectRefCount(object1.objectId(), 1);
+                    verify(logger).acquiredObject(object1.objectId(), 0, 1);
+                    // acquire object2
+                    verify(logger).createdObject(object2.objectId());
+                    verify(logger).increasedObjectRefCount(object2.objectId(), 1);
+                    verify(logger).acquiredObject(object2.objectId(), 0, 2);
+                    // release object1
+                    verify(logger).decreasedObjectRefCount(object1.objectId(), 0);
+                    verify(logger).returnedObject(object1.objectId(), 1, 2);
+                    // release object2
+                    verify(logger).decreasedObjectRefCount(object2.objectId(), 0);
+                    verify(logger).returnedObject(object2.objectId(), 2, 2);
+
+                    verifyNoMoreInteractions(supplier, logger);
 
                     verify(object1, never()).releaseResources();
                     verify(object1, never()).releaseResourcesQuietly();
@@ -333,10 +388,11 @@ class PoolTest {
                             .build();
                     @SuppressWarnings("unchecked")
                     Supplier<TestObject> supplier = mock(Supplier.class);
+                    PoolLogger logger = mock(PoolLogger.class);
 
                     when(supplier.get()).thenAnswer(i -> spy(new TestObject()));
 
-                    Pool<TestObject, None> pool = Pool.throwingNone(config, supplier);
+                    Pool<TestObject, None> pool = Pool.throwingNone(config, supplier, logger);
 
                     TestObject object1 = assertDoesNotThrow(() -> pool.acquire(1, TimeUnit.SECONDS));
                     TestObject object2 = assertDoesNotThrow(() -> pool.acquire(Duration.ofSeconds(1)));
@@ -347,7 +403,27 @@ class PoolTest {
                     object2.release();
 
                     verify(supplier, times(2)).get();
-                    verifyNoMoreInteractions(supplier);
+
+                    // logger calls in order
+                    // create pool
+                    verify(logger).creatingPool(config);
+                    verify(logger).createdObject(object1.objectId());
+                    verify(logger).createdPool(config);
+                    // acquire object1
+                    verify(logger).increasedObjectRefCount(object1.objectId(), 1);
+                    verify(logger).acquiredObject(object1.objectId(), 0, 1);
+                    // acquire object2
+                    verify(logger).createdObject(object2.objectId());
+                    verify(logger).increasedObjectRefCount(object2.objectId(), 1);
+                    verify(logger).acquiredObject(object2.objectId(), 0, 2);
+                    // release object1
+                    verify(logger).decreasedObjectRefCount(object1.objectId(), 0);
+                    verify(logger).returnedObject(object1.objectId(), 1, 2);
+                    // release object2
+                    verify(logger).decreasedObjectRefCount(object2.objectId(), 0);
+                    verify(logger).returnedObject(object2.objectId(), 2, 2);
+
+                    verifyNoMoreInteractions(supplier, logger);
 
                     verify(object1, never()).releaseResources();
                     verify(object1, never()).releaseResourcesQuietly();
@@ -365,10 +441,11 @@ class PoolTest {
                             .build();
                     @SuppressWarnings("unchecked")
                     Supplier<TestObject> supplier = mock(Supplier.class);
+                    PoolLogger logger = mock(PoolLogger.class);
 
                     when(supplier.get()).thenAnswer(i -> spy(new TestObject()));
 
-                    Pool<TestObject, None> pool = Pool.throwingNone(config, supplier);
+                    Pool<TestObject, None> pool = Pool.throwingNone(config, supplier, logger);
 
                     TestObject object1 = assertDoesNotThrow(() -> pool.acquire(1, TimeUnit.SECONDS));
                     TestObject object2 = assertDoesNotThrow(() -> pool.acquire(Duration.ofSeconds(1)));
@@ -383,7 +460,31 @@ class PoolTest {
                     object2.release();
 
                     verify(supplier, times(2)).get();
-                    verifyNoMoreInteractions(supplier);
+                    // logger calls in order
+                    // create pool
+                    verify(logger).creatingPool(config);
+                    verify(logger).createdObject(object1.objectId());
+                    verify(logger).createdPool(config);
+                    // acquire object1
+                    verify(logger).increasedObjectRefCount(object1.objectId(), 1);
+                    verify(logger).acquiredObject(object1.objectId(), 0, 1);
+                    // acquire object2
+                    verify(logger).createdObject(object2.objectId());
+                    verify(logger).increasedObjectRefCount(object2.objectId(), 1);
+                    verify(logger).acquiredObject(object2.objectId(), 0, 2);
+                    // shutdown - no idle objects available
+                    verify(logger).drainedPool(2);
+                    verify(logger).shutDownPool();
+                    // release object1 - not returned but resources released
+                    verify(logger).decreasedObjectRefCount(object1.objectId(), 0);
+                    verify(logger).releasingObjectResources(object1.objectId());
+                    verify(logger).releasedObjectResources(object1.objectId());
+                    // release object2 - not returned but resources released
+                    verify(logger).decreasedObjectRefCount(object2.objectId(), 0);
+                    verify(logger).releasingObjectResources(object2.objectId());
+                    verify(logger).releasedObjectResources(object2.objectId());
+
+                    verifyNoMoreInteractions(supplier, logger);
 
                     // releaseResourcesQuietly is called because the pool is no longer active when the objects are returned
                     verify(object1, never()).releaseResources();
@@ -402,10 +503,11 @@ class PoolTest {
                             .build();
                     @SuppressWarnings("unchecked")
                     Supplier<TestObject> supplier = mock(Supplier.class);
+                    PoolLogger logger = mock(PoolLogger.class);
 
                     when(supplier.get()).thenAnswer(i -> spy(new TestObject()));
 
-                    Pool<TestObject, None> pool = Pool.throwingNone(config, supplier);
+                    Pool<TestObject, None> pool = Pool.throwingNone(config, supplier, logger);
 
                     TestObject object1 = assertDoesNotThrow(() -> pool.acquire(1, TimeUnit.SECONDS));
                     TestObject object2 = assertDoesNotThrow(() -> pool.acquire(Duration.ofSeconds(1)));
@@ -420,7 +522,31 @@ class PoolTest {
                     object2.release();
 
                     verify(supplier, times(2)).get();
-                    verifyNoMoreInteractions(supplier);
+                    // logger calls in order
+                    // create pool
+                    verify(logger).creatingPool(config);
+                    verify(logger).createdObject(object1.objectId());
+                    verify(logger).createdPool(config);
+                    // acquire object1
+                    verify(logger).increasedObjectRefCount(object1.objectId(), 1);
+                    verify(logger).acquiredObject(object1.objectId(), 0, 1);
+                    // acquire object2
+                    verify(logger).createdObject(object2.objectId());
+                    verify(logger).increasedObjectRefCount(object2.objectId(), 1);
+                    verify(logger).acquiredObject(object2.objectId(), 0, 2);
+                    // shutdown - no idle objects available
+                    verify(logger).drainedPool(2);
+                    verify(logger).shutDownPool();
+                    // release object1 - not returned but resources released
+                    verify(logger).decreasedObjectRefCount(object1.objectId(), 0);
+                    verify(logger).releasingObjectResources(object1.objectId());
+                    verify(logger).releasedObjectResources(object1.objectId());
+                    // release object2 - not returned but resources released
+                    verify(logger).decreasedObjectRefCount(object2.objectId(), 0);
+                    verify(logger).releasingObjectResources(object2.objectId());
+                    verify(logger).releasedObjectResources(object2.objectId());
+
+                    verifyNoMoreInteractions(supplier, logger);
 
                     // releaseResourcesQuietly is called because the pool is no longer active when the objects are returned
                     verify(object1, never()).releaseResources();
@@ -440,6 +566,7 @@ class PoolTest {
                         .build();
                 @SuppressWarnings("unchecked")
                 Supplier<TestObject> supplier = mock(Supplier.class);
+                PoolLogger logger = mock(PoolLogger.class);
 
                 AtomicInteger count = new AtomicInteger(0);
                 when(supplier.get()).thenAnswer(i -> {
@@ -449,7 +576,7 @@ class PoolTest {
                     return spy(new TestObject());
                 });
 
-                Pool<TestObject, None> pool = Pool.throwingNone(config, supplier);
+                Pool<TestObject, None> pool = Pool.throwingNone(config, supplier, logger);
 
                 TestObject object1 = assertDoesNotThrow(() -> pool.acquire(1, TimeUnit.SECONDS));
 
@@ -465,7 +592,26 @@ class PoolTest {
                 object2.release();
 
                 verify(supplier, times(3)).get();
-                verifyNoMoreInteractions(supplier);
+                // logger calls in order
+                // create pool
+                verify(logger).creatingPool(config);
+                verify(logger).createdObject(object1.objectId());
+                verify(logger).createdPool(config);
+                // acquire object1
+                verify(logger).increasedObjectRefCount(object1.objectId(), 1);
+                verify(logger).acquiredObject(object1.objectId(), 0, 1);
+                // acquire object2
+                verify(logger).createdObject(object2.objectId());
+                verify(logger).increasedObjectRefCount(object2.objectId(), 1);
+                verify(logger).acquiredObject(object2.objectId(), 0, 2);
+                // release object1
+                verify(logger).decreasedObjectRefCount(object1.objectId(), 0);
+                verify(logger).returnedObject(object1.objectId(), 1, 2);
+                // release object2
+                verify(logger).decreasedObjectRefCount(object2.objectId(), 0);
+                verify(logger).returnedObject(object2.objectId(), 2, 2);
+
+                verifyNoMoreInteractions(supplier, logger);
 
                 verify(object1, never()).releaseResources();
                 verify(object1, never()).releaseResourcesQuietly();
@@ -487,10 +633,11 @@ class PoolTest {
                             .build();
                     @SuppressWarnings("unchecked")
                     Supplier<TestObject> supplier = mock(Supplier.class);
+                    PoolLogger logger = mock(PoolLogger.class);
 
                     when(supplier.get()).thenAnswer(i -> spy(new TestObject()));
 
-                    Pool<TestObject, None> pool = Pool.throwingNone(config, supplier);
+                    Pool<TestObject, None> pool = Pool.throwingNone(config, supplier, logger);
 
                     TestObject object1 = assertDoesNotThrow(() -> pool.acquire(1, TimeUnit.SECONDS));
 
@@ -501,7 +648,19 @@ class PoolTest {
                     assertSame(object1, object2);
 
                     verify(supplier).get();
-                    verifyNoMoreInteractions(supplier);
+                    // logger calls in order
+                    // create pool
+                    verify(logger).creatingPool(config);
+                    verify(logger).createdObject(object1.objectId());
+                    verify(logger).createdPool(config);
+                    // acquire object1 / object2
+                    verify(logger, times(2)).increasedObjectRefCount(object1.objectId(), 1);
+                    verify(logger, times(2)).acquiredObject(object1.objectId(), 0, 1);
+                    // release object1
+                    verify(logger).decreasedObjectRefCount(object1.objectId(), 0);
+                    verify(logger).returnedObject(object1.objectId(), 1, 1);
+
+                    verifyNoMoreInteractions(supplier, logger);
 
                     verify(object1, never()).releaseResources();
                     verify(object1, never()).releaseResourcesQuietly();
@@ -519,10 +678,11 @@ class PoolTest {
                             .build();
                     @SuppressWarnings("unchecked")
                     Supplier<TestObject> supplier = mock(Supplier.class);
+                    PoolLogger logger = mock(PoolLogger.class);
 
                     when(supplier.get()).thenAnswer(i -> spy(new TestObject()));
 
-                    Pool<TestObject, None> pool = Pool.throwingNone(config, supplier);
+                    Pool<TestObject, None> pool = Pool.throwingNone(config, supplier, logger);
 
                     TestObject object1 = assertDoesNotThrow(() -> pool.acquire(1, TimeUnit.SECONDS));
 
@@ -533,7 +693,19 @@ class PoolTest {
                     assertSame(object1, object2);
 
                     verify(supplier).get();
-                    verifyNoMoreInteractions(supplier);
+                    // logger calls in order
+                    // create pool
+                    verify(logger).creatingPool(config);
+                    verify(logger).createdObject(object1.objectId());
+                    verify(logger).createdPool(config);
+                    // acquire object1 / object2
+                    verify(logger, times(2)).increasedObjectRefCount(object1.objectId(), 1);
+                    verify(logger, times(2)).acquiredObject(object1.objectId(), 0, 1);
+                    // release object1
+                    verify(logger).decreasedObjectRefCount(object1.objectId(), 0);
+                    verify(logger).returnedObject(object1.objectId(), 1, 1);
+
+                    verifyNoMoreInteractions(supplier, logger);
 
                     verify(object1, never()).releaseResources();
                     verify(object1, never()).releaseResourcesQuietly();
@@ -552,10 +724,11 @@ class PoolTest {
                         .build();
                 @SuppressWarnings("unchecked")
                 Supplier<TestObject> supplier = mock(Supplier.class);
+                PoolLogger logger = mock(PoolLogger.class);
 
                 when(supplier.get()).thenAnswer(i -> spy(new TestObject()));
 
-                Pool<TestObject, None> pool = Pool.throwingNone(config, supplier);
+                Pool<TestObject, None> pool = Pool.throwingNone(config, supplier, logger);
 
                 TestObject object = assertDoesNotThrow(() -> pool.acquire(1, TimeUnit.SECONDS));
 
@@ -566,7 +739,23 @@ class PoolTest {
                 object.release();
 
                 verify(supplier).get();
-                verifyNoMoreInteractions(supplier);
+                // logger calls in order
+                // create pool
+                verify(logger).creatingPool(config);
+                verify(logger).createdObject(object.objectId());
+                verify(logger).createdPool(config);
+                // acquire object
+                verify(logger).increasedObjectRefCount(object.objectId(), 1);
+                verify(logger).acquiredObject(object.objectId(), 0, 1);
+                // shutdown
+                verify(logger).drainedPool(1);
+                verify(logger).shutDownPool();
+                // release object
+                verify(logger).decreasedObjectRefCount(object.objectId(), 0);
+                verify(logger).releasingObjectResources(object.objectId());
+                verify(logger).releasedObjectResources(object.objectId());
+
+                verifyNoMoreInteractions(supplier, logger);
 
                 // releaseResourcesQuietly is called because the pool is no longer active when the object is returned
                 verify(object, never()).releaseResources();
@@ -587,17 +776,30 @@ class PoolTest {
                         .build();
                 @SuppressWarnings("unchecked")
                 Supplier<TestObject> supplier = mock(Supplier.class);
+                PoolLogger logger = mock(PoolLogger.class);
 
                 when(supplier.get()).thenAnswer(i -> spy(new TestObject()));
 
-                Pool<TestObject, None> pool = Pool.throwingNone(config, supplier);
+                Pool<TestObject, None> pool = Pool.throwingNone(config, supplier, logger);
 
                 TestObject object = assertIsPresent(pool.acquireNow());
 
                 object.release();
 
                 verify(supplier).get();
-                verifyNoMoreInteractions(supplier);
+                // logger calls in order
+                // create pool
+                verify(logger).creatingPool(config);
+                verify(logger).createdObject(object.objectId());
+                verify(logger).createdPool(config);
+                // acquire object
+                verify(logger).increasedObjectRefCount(object.objectId(), 1);
+                verify(logger).acquiredObject(object.objectId(), 0, 1);
+                // release object
+                verify(logger).decreasedObjectRefCount(object.objectId(), 0);
+                verify(logger).returnedObject(object.objectId(), 1, 1);
+
+                verifyNoMoreInteractions(supplier, logger);
 
                 verify(object, never()).releaseResources();
                 verify(object, never()).releaseResourcesQuietly();
@@ -612,10 +814,11 @@ class PoolTest {
                         .build();
                 @SuppressWarnings("unchecked")
                 Supplier<TestObject> supplier = mock(Supplier.class);
+                PoolLogger logger = mock(PoolLogger.class);
 
                 when(supplier.get()).thenAnswer(i -> spy(new TestObject()));
 
-                Pool<TestObject, None> pool = Pool.throwingNone(config, supplier);
+                Pool<TestObject, None> pool = Pool.throwingNone(config, supplier, logger);
 
                 TestObject object1 = assertIsPresent(pool.acquireNow());
                 TestObject object2 = assertIsPresent(pool.acquireNow());
@@ -624,7 +827,26 @@ class PoolTest {
                 object2.release();
 
                 verify(supplier, times(2)).get();
-                verifyNoMoreInteractions(supplier);
+                // logger calls in order
+                // create pool
+                verify(logger).creatingPool(config);
+                verify(logger).createdObject(object1.objectId());
+                verify(logger).createdPool(config);
+                // acquire object1
+                verify(logger).increasedObjectRefCount(object1.objectId(), 1);
+                verify(logger).acquiredObject(object1.objectId(), 0, 1);
+                // acquire object2
+                verify(logger).createdObject(object2.objectId());
+                verify(logger).increasedObjectRefCount(object2.objectId(), 1);
+                verify(logger).acquiredObject(object2.objectId(), 0, 2);
+                // release object1
+                verify(logger).decreasedObjectRefCount(object1.objectId(), 0);
+                verify(logger).returnedObject(object1.objectId(), 1, 2);
+                // release object2
+                verify(logger).decreasedObjectRefCount(object2.objectId(), 0);
+                verify(logger).returnedObject(object2.objectId(), 2, 2);
+
+                verifyNoMoreInteractions(supplier, logger);
 
                 verify(object1, never()).releaseResources();
                 verify(object1, never()).releaseResourcesQuietly();
@@ -641,10 +863,11 @@ class PoolTest {
                         .build();
                 @SuppressWarnings("unchecked")
                 Supplier<TestObject> supplier = mock(Supplier.class);
+                PoolLogger logger = mock(PoolLogger.class);
 
                 when(supplier.get()).thenAnswer(i -> spy(new TestObject()));
 
-                Pool<TestObject, None> pool = Pool.throwingNone(config, supplier);
+                Pool<TestObject, None> pool = Pool.throwingNone(config, supplier, logger);
 
                 TestObject object1 = assertIsPresent(pool.acquireNow());
                 TestObject object2 = assertIsPresent(pool.acquireNow());
@@ -655,7 +878,26 @@ class PoolTest {
                 object2.release();
 
                 verify(supplier, times(2)).get();
-                verifyNoMoreInteractions(supplier);
+                // logger calls in order
+                // create pool
+                verify(logger).creatingPool(config);
+                verify(logger).createdObject(object1.objectId());
+                verify(logger).createdPool(config);
+                // acquire object1
+                verify(logger).increasedObjectRefCount(object1.objectId(), 1);
+                verify(logger).acquiredObject(object1.objectId(), 0, 1);
+                // acquire object2
+                verify(logger).createdObject(object2.objectId());
+                verify(logger).increasedObjectRefCount(object2.objectId(), 1);
+                verify(logger).acquiredObject(object2.objectId(), 0, 2);
+                // release object1
+                verify(logger).decreasedObjectRefCount(object1.objectId(), 0);
+                verify(logger).returnedObject(object1.objectId(), 1, 2);
+                // release object2
+                verify(logger).decreasedObjectRefCount(object2.objectId(), 0);
+                verify(logger).returnedObject(object2.objectId(), 2, 2);
+
+                verifyNoMoreInteractions(supplier, logger);
 
                 verify(object1, never()).releaseResources();
                 verify(object1, never()).releaseResourcesQuietly();
@@ -674,6 +916,7 @@ class PoolTest {
                 AtomicInteger count = new AtomicInteger(0);
                 @SuppressWarnings("unchecked")
                 Supplier<TestObject> supplier = mock(Supplier.class);
+                PoolLogger logger = mock(PoolLogger.class);
 
                 when(supplier.get()).thenAnswer(i -> {
                     if (count.getAndIncrement() == 1) {
@@ -682,7 +925,7 @@ class PoolTest {
                     return spy(new TestObject());
                 });
 
-                Pool<TestObject, None> pool = Pool.throwingNone(config, supplier);
+                Pool<TestObject, None> pool = Pool.throwingNone(config, supplier, logger);
 
                 TestObject object1 = assertIsPresent(pool.acquireNow());
 
@@ -698,7 +941,26 @@ class PoolTest {
                 object2.release();
 
                 verify(supplier, times(3)).get();
-                verifyNoMoreInteractions(supplier);
+                // logger calls in order
+                // create pool
+                verify(logger).creatingPool(config);
+                verify(logger).createdObject(object1.objectId());
+                verify(logger).createdPool(config);
+                // acquire object1
+                verify(logger).increasedObjectRefCount(object1.objectId(), 1);
+                verify(logger).acquiredObject(object1.objectId(), 0, 1);
+                // acquire object2
+                verify(logger).createdObject(object2.objectId());
+                verify(logger).increasedObjectRefCount(object2.objectId(), 1);
+                verify(logger).acquiredObject(object2.objectId(), 0, 2);
+                // release object1
+                verify(logger).decreasedObjectRefCount(object1.objectId(), 0);
+                verify(logger).returnedObject(object1.objectId(), 1, 2);
+                // release object2
+                verify(logger).decreasedObjectRefCount(object2.objectId(), 0);
+                verify(logger).returnedObject(object2.objectId(), 2, 2);
+
+                verifyNoMoreInteractions(supplier, logger);
 
                 verify(object1, never()).releaseResources();
                 verify(object1, never()).releaseResourcesQuietly();
@@ -720,10 +982,11 @@ class PoolTest {
                         .build();
                 @SuppressWarnings("unchecked")
                 Supplier<TestObject> supplier = mock(Supplier.class);
+                PoolLogger logger = mock(PoolLogger.class);
 
                 when(supplier.get()).thenAnswer(i -> spy(new TestObject()));
 
-                Pool<TestObject, None> pool = Pool.throwingNone(config, supplier);
+                Pool<TestObject, None> pool = Pool.throwingNone(config, supplier, logger);
 
                 TestObject object = pool.acquireOrCreate();
                 assertTrue(object.isPooled());
@@ -731,7 +994,19 @@ class PoolTest {
                 object.release();
 
                 verify(supplier).get();
-                verifyNoMoreInteractions(supplier);
+                // logger calls in order
+                // create pool
+                verify(logger).creatingPool(config);
+                verify(logger).createdObject(object.objectId());
+                verify(logger).createdPool(config);
+                // acquire object
+                verify(logger).increasedObjectRefCount(object.objectId(), 1);
+                verify(logger).acquiredObject(object.objectId(), 0, 1);
+                // release object
+                verify(logger).decreasedObjectRefCount(object.objectId(), 0);
+                verify(logger).returnedObject(object.objectId(), 1, 1);
+
+                verifyNoMoreInteractions(supplier, logger);
 
                 verify(object, never()).releaseResources();
                 verify(object, never()).releaseResourcesQuietly();
@@ -746,10 +1021,11 @@ class PoolTest {
                         .build();
                 @SuppressWarnings("unchecked")
                 Supplier<TestObject> supplier = mock(Supplier.class);
+                PoolLogger logger = mock(PoolLogger.class);
 
                 when(supplier.get()).thenAnswer(i -> spy(new TestObject()));
 
-                Pool<TestObject, None> pool = Pool.throwingNone(config, supplier);
+                Pool<TestObject, None> pool = Pool.throwingNone(config, supplier, logger);
 
                 TestObject object1 = pool.acquireOrCreate();
                 assertTrue(object1.isPooled());
@@ -761,7 +1037,26 @@ class PoolTest {
                 object2.release();
 
                 verify(supplier, times(2)).get();
-                verifyNoMoreInteractions(supplier);
+                // logger calls in order
+                // create pool
+                verify(logger).creatingPool(config);
+                verify(logger).createdObject(object1.objectId());
+                verify(logger).createdPool(config);
+                // acquire object1
+                verify(logger).increasedObjectRefCount(object1.objectId(), 1);
+                verify(logger).acquiredObject(object1.objectId(), 0, 1);
+                // acquire object2
+                verify(logger).createdObject(object2.objectId());
+                verify(logger).increasedObjectRefCount(object2.objectId(), 1);
+                verify(logger).acquiredObject(object2.objectId(), 0, 2);
+                // release object1
+                verify(logger).decreasedObjectRefCount(object1.objectId(), 0);
+                verify(logger).returnedObject(object1.objectId(), 1, 2);
+                // release object2
+                verify(logger).decreasedObjectRefCount(object2.objectId(), 0);
+                verify(logger).returnedObject(object2.objectId(), 2, 2);
+
+                verifyNoMoreInteractions(supplier, logger);
 
                 verify(object1, never()).releaseResources();
                 verify(object1, never()).releaseResourcesQuietly();
@@ -841,6 +1136,7 @@ class PoolTest {
                 AtomicInteger count = new AtomicInteger(0);
                 @SuppressWarnings("unchecked")
                 Supplier<TestObject> supplier = mock(Supplier.class);
+                PoolLogger logger = mock(PoolLogger.class);
 
                 when(supplier.get()).thenAnswer(i -> {
                     if (count.getAndIncrement() == 1) {
@@ -849,7 +1145,7 @@ class PoolTest {
                     return spy(new TestObject());
                 });
 
-                Pool<TestObject, None> pool = Pool.throwingNone(config, supplier);
+                Pool<TestObject, None> pool = Pool.throwingNone(config, supplier, logger);
 
                 TestObject object1 = assertIsPresent(pool.acquireNow());
 
@@ -865,7 +1161,26 @@ class PoolTest {
                 object2.release();
 
                 verify(supplier, times(3)).get();
-                verifyNoMoreInteractions(supplier);
+                // logger calls in order
+                // create pool
+                verify(logger).creatingPool(config);
+                verify(logger).createdObject(object1.objectId());
+                verify(logger).createdPool(config);
+                // acquire object1
+                verify(logger).increasedObjectRefCount(object1.objectId(), 1);
+                verify(logger).acquiredObject(object1.objectId(), 0, 1);
+                // acquire object2
+                verify(logger).createdObject(object2.objectId());
+                verify(logger).increasedObjectRefCount(object2.objectId(), 1);
+                verify(logger).acquiredObject(object2.objectId(), 0, 2);
+                // release object1
+                verify(logger).decreasedObjectRefCount(object1.objectId(), 0);
+                verify(logger).returnedObject(object1.objectId(), 1, 2);
+                // release object2
+                verify(logger).decreasedObjectRefCount(object2.objectId(), 0);
+                verify(logger).returnedObject(object2.objectId(), 2, 2);
+
+                verifyNoMoreInteractions(supplier, logger);
 
                 verify(object1, never()).releaseResources();
                 verify(object1, never()).releaseResourcesQuietly();
@@ -884,10 +1199,11 @@ class PoolTest {
                     .build();
             @SuppressWarnings("unchecked")
             Supplier<TestObject> supplier = mock(Supplier.class);
+            PoolLogger logger = mock(PoolLogger.class);
 
             when(supplier.get()).thenAnswer(i -> spy(new TestObject(false)));
 
-            Pool<TestObject, None> pool = Pool.throwingNone(config, supplier);
+            Pool<TestObject, None> pool = Pool.throwingNone(config, supplier, logger);
 
             TestObject object1 = assertDoesNotThrow(() -> pool.acquire(1, TimeUnit.SECONDS));
 
@@ -898,6 +1214,37 @@ class PoolTest {
             assertNotSame(object1, object2);
 
             object2.release();
+
+            ArgumentCaptor<Long> objectIdCaptor = ArgumentCaptor.forClass(Long.class);
+
+            verify(supplier, times(3)).get();
+            // logger calls in order
+            // create pool
+            verify(logger).creatingPool(config);
+            verify(logger, times(3)).createdObject(objectIdCaptor.capture());
+            List<Long> objectIds = objectIdCaptor.getAllValues();
+            verify(logger).createdObject(objectIds.get(0));
+            verify(logger).createdPool(config);
+            // acquire object1
+            verify(logger).objectInvalidated(objectIds.get(0), 0, 0);
+            verify(logger).createdObject(object1.objectId());
+            verify(logger).increasedObjectRefCount(object1.objectId(), 1);
+            verify(logger).acquiredObject(object1.objectId(), 0, 1);
+            // release object1
+            verify(logger).decreasedObjectRefCount(object1.objectId(), 0);
+            verify(logger).objectInvalidated(object1.objectId(), 0, 0);
+            // acquire object2
+            verify(logger).createdObject(object2.objectId());
+            verify(logger).increasedObjectRefCount(object2.objectId(), 1);
+            verify(logger).acquiredObject(object2.objectId(), 0, 1);
+            // release object2
+            verify(logger).decreasedObjectRefCount(object2.objectId(), 0);
+            verify(logger).objectInvalidated(object2.objectId(), 0, 0);
+
+            verifyNoMoreInteractions(supplier, logger);
+
+            assertEquals(object1.objectId(), objectIds.get(1));
+            assertEquals(object2.objectId(), objectIds.get(2));
 
             verify(object1, never()).releaseResources();
             verify(object1, never()).releaseResourcesQuietly();
@@ -977,10 +1324,11 @@ class PoolTest {
                     .build();
             @SuppressWarnings("unchecked")
             Supplier<TestObject> supplier = mock(Supplier.class);
+            PoolLogger logger = mock(PoolLogger.class);
 
             when(supplier.get()).thenAnswer(i -> spy(new TestObject()));
 
-            Pool<TestObject, None> pool = Pool.throwingNone(config, supplier);
+            Pool<TestObject, None> pool = Pool.throwingNone(config, supplier, logger);
 
             TestObject object1 = assertDoesNotThrow(() -> pool.acquire(1, TimeUnit.SECONDS));
             object1.addReference(pool);
@@ -1005,6 +1353,25 @@ class PoolTest {
 
             object2.release();
 
+            verify(supplier).get();
+            // logger calls in order
+            // create pool
+            verify(logger).creatingPool(config);
+            verify(logger).createdObject(object1.objectId());
+            verify(logger).createdPool(config);
+            // acquire object1 / object2
+            verify(logger, times(2)).increasedObjectRefCount(object1.objectId(), 1);
+            verify(logger, times(2)).acquiredObject(object1.objectId(), 0, 1);
+            // add reference
+            verify(logger).increasedObjectRefCount(object1.objectId(), 2);
+            // release object1
+            verify(logger).decreasedObjectRefCount(object1.objectId(), 1);
+            // remove reference / release object2
+            verify(logger, times(2)).decreasedObjectRefCount(object1.objectId(), 0);
+            verify(logger, times(2)).returnedObject(object1.objectId(), 1, 1);
+
+            verifyNoMoreInteractions(supplier, logger);
+
             verify(object1, never()).releaseResources();
             verify(object1, never()).releaseResourcesQuietly();
             verify(object2, never()).releaseResources();
@@ -1026,15 +1393,32 @@ class PoolTest {
                 AtomicInteger counter = new AtomicInteger(0);
                 @SuppressWarnings("unchecked")
                 Supplier<TestObject> supplier = mock(Supplier.class);
+                PoolLogger logger = mock(PoolLogger.class);
 
                 when(supplier.get())
                         .thenAnswer(i -> new TestObject(true, () -> new NumberFormatException(Integer.toString(counter.getAndIncrement()))));
 
-                Pool<TestObject, None> pool = Pool.throwingNone(config, supplier);
+                Pool<TestObject, None> pool = Pool.throwingNone(config, supplier, logger);
 
                 NumberFormatException exception = assertThrows(NumberFormatException.class, pool::shutdown);
                 assertEquals("0", exception.getMessage());
                 assertEquals(0, exception.getSuppressed().length);
+
+                ArgumentCaptor<Long> objectIdCaptor = ArgumentCaptor.forClass(Long.class);
+
+                verify(supplier).get();
+                // logger calls in order
+                // create pool
+                verify(logger).creatingPool(config);
+                verify(logger).createdObject(objectIdCaptor.capture());
+                verify(logger).createdPool(config);
+                // shutdown
+                verify(logger).drainedPool(0);
+                verify(logger).releasingObjectResources(objectIdCaptor.getValue());
+                verify(logger).releaseObjectResourcesFailed(objectIdCaptor.getValue(), exception);
+                verify(logger).shutDownPool();
+
+                verifyNoMoreInteractions(supplier, logger);
             }
 
             @Test
@@ -1047,12 +1431,13 @@ class PoolTest {
                         .build();
                 @SuppressWarnings("unchecked")
                 Supplier<TestObject> supplier = mock(Supplier.class);
+                PoolLogger logger = mock(PoolLogger.class);
 
                 AtomicInteger counter = new AtomicInteger(0);
                 when(supplier.get())
                         .thenAnswer(i -> new TestObject(true, () -> new NumberFormatException(Integer.toString(counter.getAndIncrement()))));
 
-                Pool<TestObject, None> pool = Pool.throwingNone(config, supplier);
+                Pool<TestObject, None> pool = Pool.throwingNone(config, supplier, logger);
 
                 NumberFormatException exception = assertThrows(NumberFormatException.class, pool::shutdown);
                 assertEquals("0", exception.getMessage());
@@ -1065,6 +1450,27 @@ class PoolTest {
 
                 assertInstanceOf(NumberFormatException.class, suppressed[1]);
                 assertEquals("2", suppressed[1].getMessage());
+
+                ArgumentCaptor<Long> objectIdCaptor = ArgumentCaptor.forClass(Long.class);
+
+                verify(supplier, times(3)).get();
+                // logger calls in order
+                // create pool
+                verify(logger).creatingPool(config);
+                verify(logger, times(3)).createdObject(objectIdCaptor.capture());
+                List<Long> objectIds = objectIdCaptor.getAllValues();
+                verify(logger).createdPool(config);
+                // shutdown
+                verify(logger).drainedPool(0);
+                verify(logger).releasingObjectResources(objectIds.get(0));
+                verify(logger).releaseObjectResourcesFailed(objectIds.get(0), exception);
+                verify(logger).releasingObjectResources(objectIds.get(1));
+                verify(logger).releaseObjectResourcesFailed(objectIds.get(1), (Exception) suppressed[0]);
+                verify(logger).releasingObjectResources(objectIds.get(2));
+                verify(logger).releaseObjectResourcesFailed(objectIds.get(2), (Exception) suppressed[1]);
+                verify(logger).shutDownPool();
+
+                verifyNoMoreInteractions(supplier, logger);
             }
         }
 

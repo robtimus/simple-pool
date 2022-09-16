@@ -146,8 +146,19 @@ public abstract class PoolableObject<X extends Exception> {
      */
     protected final void releaseResources() throws X {
         logger.releasingObjectResources(objectId);
-        doReleaseResources();
-        logger.releasedObjectResources(objectId);
+        try {
+            doReleaseResources();
+            logger.releasedObjectResources(objectId);
+        } catch (Exception e) {
+            logger.releaseObjectResourcesFailed(objectId, e);
+            throw cast(e);
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private X cast(Exception exception) {
+        // Exception will either be compatible with X, or an unchecked exception. That means this unsafe cast is allowed.
+        return (X) exception;
     }
 
     /**

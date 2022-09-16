@@ -35,23 +35,8 @@ import org.mockito.ArgumentCaptor;
 class ObjectWrapperTest {
 
     @Test
-    @DisplayName("test without logger")
-    void testWithoutLogger() {
-        PoolConfig config = PoolConfig.custom()
-                .withInitialSize(1)
-                .withMaxSize(2)
-                .withMaxWaitTime(Duration.ofMillis(100))
-                .build();
-        AtomicInteger counter = new AtomicInteger(0);
-
-        Pool<ObjectWrapper<Integer>, None> pool = ObjectWrapper.newPool(config, counter::getAndIncrement);
-
-        testPool(pool);
-    }
-
-    @Test
-    @DisplayName("test with logger")
-    void testWithLogger() {
+    @DisplayName("test ObjectWrapper")
+    void testObjectWrapper() {
         PoolConfig config = PoolConfig.custom()
                 .withInitialSize(1)
                 .withMaxSize(2)
@@ -72,8 +57,9 @@ class ObjectWrapperTest {
         // create pool
         verify(logger).creatingPool(config);
         verify(logger, times(2)).createdObject(objectIdCaptor.capture());
-        verify(logger).createdPool(config);
         List<Long> objectIds = objectIdCaptor.getAllValues();
+        verify(logger).createdObject(objectIds.get(0));
+        verify(logger).createdPool(config);
         // acquire wrapper / wrapper1
         verify(logger, times(2)).increasedObjectRefCount(objectIds.get(0), 1);
         verify(logger, times(2)).acquiredObject(objectIds.get(0), 0, 1);
@@ -82,6 +68,7 @@ class ObjectWrapperTest {
         verify(logger).returnedObject(objectIds.get(0), 1, 1);
         verify(logger).returnedObject(objectIds.get(0), 2, 2);
         // acquire wrapper2
+        verify(logger).createdObject(objectIds.get(1));
         verify(logger).increasedObjectRefCount(objectIds.get(1), 1);
         verify(logger).acquiredObject(objectIds.get(1), 0, 2);
         // release wrapper2

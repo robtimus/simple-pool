@@ -77,23 +77,9 @@ public final class ObjectWrapper<T> extends PoolableObject<None> implements Auto
      * @param <T> The type of objects wrapped by {@link ObjectWrapper} instances in the pool.
      * @param config The configuration to use.
      * @param supplier A supplier to serve as factory for wrapped objects.
+     * @param logger The logger to use to log events triggered by the pool or pooled objects.
      * @return The created pool.
-     * @throws NullPointerException If the given configuration or supplier is {@code null}.
-     */
-    public static <T> Pool<ObjectWrapper<T>, None> newPool(PoolConfig config, Supplier<T> supplier) {
-        Objects.requireNonNull(supplier);
-        return Pool.throwingNone(config, () -> new ObjectWrapper<>(supplier.get()));
-    }
-
-    /**
-     * Creates a new pool of {@link ObjectWrapper} instances.
-     *
-     * @param <T> The type of objects wrapped by {@link ObjectWrapper} instances in the pool.
-     * @param config The configuration to use.
-     * @param supplier A supplier to serve as factory for wrapped objects.
-     * @param logger The optional logger to use to log events triggered by the pool or pooled objects.
-     * @return The created pool.
-     * @throws NullPointerException If the given configuration or supplier is {@code null}.
+     * @throws NullPointerException If the given configuration, supplier or logger is {@code null}.
      */
     public static <T> Pool<ObjectWrapper<T>, None> newPool(PoolConfig config, Supplier<T> supplier, PoolLogger logger) {
         Objects.requireNonNull(supplier);

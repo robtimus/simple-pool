@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.locks.Condition;
@@ -57,6 +58,7 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
     private final Condition notEmpty;
 
     private final AtomicBoolean active;
+    private final CountDownLatch shutdownLatch;
 
     /**
      * Creates a new pool.
@@ -81,6 +83,7 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
         fillPool();
 
         active = new AtomicBoolean(true);
+        shutdownLatch = new CountDownLatch(1);
     }
 
     PoolLogger logger() {
@@ -503,6 +506,7 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
                 }
             } finally {
                 logger.shutDownPool();
+                shutdownLatch.countDown();
             }
         }
     }
@@ -522,6 +526,10 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
         if (exception != null) {
             throw cast(exception);
         }
+    }
+
+    boolean awaitShutdown(long maxWaitTime, TimeUnit timeUnit) throws InterruptedException {
+        return shutdownLatch.await(maxWaitTime, timeUnit);
     }
 
     @SuppressWarnings("unchecked")

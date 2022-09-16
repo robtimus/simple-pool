@@ -459,6 +459,8 @@ class PoolTest {
                     object1.release();
                     object2.release();
 
+                    assertTrue(assertDoesNotThrow(() -> pool.awaitShutdown(100, TimeUnit.MILLISECONDS)));
+
                     verify(supplier, times(2)).get();
                     // logger calls in order
                     // create pool
@@ -520,6 +522,8 @@ class PoolTest {
 
                     object1.release();
                     object2.release();
+
+                    assertTrue(assertDoesNotThrow(() -> pool.awaitShutdown(100, TimeUnit.MILLISECONDS)));
 
                     verify(supplier, times(2)).get();
                     // logger calls in order
@@ -737,6 +741,8 @@ class PoolTest {
                 assertThrows(IllegalStateException.class, () -> pool.acquire(200, TimeUnit.SECONDS));
 
                 object.release();
+
+                assertTrue(assertDoesNotThrow(() -> pool.awaitShutdown(100, TimeUnit.MILLISECONDS)));
 
                 verify(supplier).get();
                 // logger calls in order

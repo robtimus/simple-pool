@@ -56,7 +56,7 @@ class PoolLoggerTest {
             poolLogger.creatingPool(config);
 
             verify(logger).isDebugEnabled();
-            verify(logger).debug(Messages.PoolLogger.creatingPool.get("pool - ", config));
+            verify(logger).debug(Messages.PoolLogger.creatingPool("pool - ", config));
             verifyNoMoreInteractions(logger);
         }
 
@@ -68,7 +68,7 @@ class PoolLoggerTest {
             poolLogger.createdPool(config);
 
             verify(logger).isDebugEnabled();
-            verify(logger).debug(Messages.PoolLogger.createdPool.get("pool - ", config));
+            verify(logger).debug(Messages.PoolLogger.createdPool("pool - ", config));
             verifyNoMoreInteractions(logger);
         }
 
@@ -80,7 +80,7 @@ class PoolLoggerTest {
             poolLogger.failedToCreatePool(exception);
 
             verify(logger).isDebugEnabled();
-            verify(logger).debug(Messages.PoolLogger.failedToCreatePool.get("pool - "), exception);
+            verify(logger).debug(Messages.PoolLogger.failedToCreatePool("pool - "), exception);
             verifyNoMoreInteractions(logger);
         }
 
@@ -90,7 +90,7 @@ class PoolLoggerTest {
             poolLogger.drainedPool(15);
 
             verify(logger).isDebugEnabled();
-            verify(logger).debug(Messages.PoolLogger.drainedPool.get("pool - ", 15));
+            verify(logger).debug(Messages.PoolLogger.drainedPool("pool - ", 15));
             verifyNoMoreInteractions(logger);
         }
 
@@ -100,7 +100,7 @@ class PoolLoggerTest {
             poolLogger.shutDownPool();
 
             verify(logger).isDebugEnabled();
-            verify(logger).debug(Messages.PoolLogger.shutDownPool.get("pool - "));
+            verify(logger).debug(Messages.PoolLogger.shutDownPool("pool - "));
             verifyNoMoreInteractions(logger);
         }
 
@@ -110,7 +110,7 @@ class PoolLoggerTest {
             poolLogger.createdObject(4);
 
             verify(logger).isDebugEnabled();
-            verify(logger).debug(Messages.PoolLogger.createdObject.get("pool - ", "object-", 4));
+            verify(logger).debug(Messages.PoolLogger.createdObject("pool - ", "object-", 4));
             verifyNoMoreInteractions(logger);
         }
 
@@ -120,7 +120,7 @@ class PoolLoggerTest {
             poolLogger.createdNonPooledObject(4);
 
             verify(logger).isDebugEnabled();
-            verify(logger).debug(Messages.PoolLogger.createdNonPooledObject.get("pool - ", "object-", 4));
+            verify(logger).debug(Messages.PoolLogger.createdNonPooledObject("pool - ", "object-", 4));
             verifyNoMoreInteractions(logger);
         }
 
@@ -130,7 +130,7 @@ class PoolLoggerTest {
             poolLogger.increasedObjectRefCount(4, 2);
 
             verify(logger).isDebugEnabled();
-            verify(logger).debug(Messages.PoolLogger.increasedObjectRefCount.get("pool - ", "object-", 4, 2));
+            verify(logger).debug(Messages.PoolLogger.increasedObjectRefCount("pool - ", "object-", 4, 2));
             verifyNoMoreInteractions(logger);
         }
 
@@ -140,7 +140,7 @@ class PoolLoggerTest {
             poolLogger.decreasedObjectRefCount(4, 2);
 
             verify(logger).isDebugEnabled();
-            verify(logger).debug(Messages.PoolLogger.decreasedObjectRefCount.get("pool - ", "object-", 4, 2));
+            verify(logger).debug(Messages.PoolLogger.decreasedObjectRefCount("pool - ", "object-", 4, 2));
             verifyNoMoreInteractions(logger);
         }
 
@@ -150,7 +150,7 @@ class PoolLoggerTest {
             poolLogger.releasingObjectResources(4);
 
             verify(logger).isDebugEnabled();
-            verify(logger).debug(Messages.PoolLogger.releasingObjectResources.get("pool - ", "object-", 4));
+            verify(logger).debug(Messages.PoolLogger.releasingObjectResources("pool - ", "object-", 4));
             verifyNoMoreInteractions(logger);
         }
 
@@ -160,7 +160,7 @@ class PoolLoggerTest {
             poolLogger.releasedObjectResources(4);
 
             verify(logger).isDebugEnabled();
-            verify(logger).debug(Messages.PoolLogger.releasedObjectResources.get("pool - ", "object-", 4));
+            verify(logger).debug(Messages.PoolLogger.releasedObjectResources("pool - ", "object-", 4));
             verifyNoMoreInteractions(logger);
         }
 
@@ -172,7 +172,7 @@ class PoolLoggerTest {
             poolLogger.releaseObjectResourcesFailed(4, exception);
 
             verify(logger).isDebugEnabled();
-            verify(logger).debug(Messages.PoolLogger.releaseObjectResourcesFailed.get("pool - ", "object-", 4), exception);
+            verify(logger).debug(Messages.PoolLogger.releaseObjectResourcesFailed("pool - ", "object-", 4), exception);
             verifyNoMoreInteractions(logger);
         }
 
@@ -182,7 +182,7 @@ class PoolLoggerTest {
             poolLogger.acquiredObject(4, 2, 10);
 
             verify(logger).isDebugEnabled();
-            verify(logger).debug(Messages.PoolLogger.acquiredObject.get("pool - ", "object-", 4, 2, 10));
+            verify(logger).debug(Messages.PoolLogger.acquiredObject("pool - ", "object-", 4, 2, 10));
             verifyNoMoreInteractions(logger);
         }
 
@@ -192,7 +192,7 @@ class PoolLoggerTest {
             poolLogger.returnedObject(4, 2, 10);
 
             verify(logger).isDebugEnabled();
-            verify(logger).debug(Messages.PoolLogger.returnedObject.get("pool - ", "object-", 4, 2, 10));
+            verify(logger).debug(Messages.PoolLogger.returnedObject("pool - ", "object-", 4, 2, 10));
             verifyNoMoreInteractions(logger);
         }
 
@@ -202,7 +202,7 @@ class PoolLoggerTest {
             poolLogger.objectInvalidated(4, 2, 10);
 
             verify(logger).isDebugEnabled();
-            verify(logger).debug(Messages.PoolLogger.objectInvalidated.get("pool - ", "object-", 4, 2, 10));
+            verify(logger).debug(Messages.PoolLogger.objectInvalidated("pool - ", "object-", 4, 2, 10));
             verifyNoMoreInteractions(logger);
         }
 
@@ -212,7 +212,7 @@ class PoolLoggerTest {
             poolLogger.objectIdleTooLong(4, 2, 10);
 
             verify(logger).isDebugEnabled();
-            verify(logger).debug(Messages.PoolLogger.objectIdleTooLong.get("pool - ", "object-", 4, 2, 10));
+            verify(logger).debug(Messages.PoolLogger.objectIdleTooLong("pool - ", "object-", 4, 2, 10));
             verifyNoMoreInteractions(logger);
         }
 
@@ -222,7 +222,7 @@ class PoolLoggerTest {
             poolLogger.objectEvent(4, "custom event");
 
             verify(logger).isDebugEnabled();
-            verify(logger).debug(Messages.PoolLogger.objectEvent.get("pool - ", "object-", 4, "custom event"));
+            verify(logger).debug(Messages.PoolLogger.objectEvent("pool - ", "object-", 4, "custom event"));
             verifyNoMoreInteractions(logger);
         }
 
@@ -232,7 +232,7 @@ class PoolLoggerTest {
             poolLogger.objectEvent(4, () -> "custom event");
 
             verify(logger).isDebugEnabled();
-            verify(logger).debug(Messages.PoolLogger.objectEvent.get("pool - ", "object-", 4, "custom event"));
+            verify(logger).debug(Messages.PoolLogger.objectEvent("pool - ", "object-", 4, "custom event"));
             verifyNoMoreInteractions(logger);
         }
     }

@@ -45,7 +45,7 @@ import java.util.function.Supplier;
 public final class Pool<T extends PoolableObject<X>, X extends Exception> {
 
     private static final Supplier<NoSuchElementException> DEFAULT_ERROR_SUPPLIER = () -> new NoSuchElementException(
-            Messages.Pool.maxWaitTimeExpired.get());
+            Messages.Pool.maxWaitTimeExpired());
 
     private final PoolConfig config;
     private final PoolableObjectFactory<T, X> factory;
@@ -567,7 +567,7 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
 
     private void checkActive() {
         if (!isActive()) {
-            throw new IllegalStateException(Messages.Pool.notActive.get());
+            throw new IllegalStateException(Messages.Pool.notActive());
         }
     }
 

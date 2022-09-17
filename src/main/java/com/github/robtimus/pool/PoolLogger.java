@@ -74,7 +74,7 @@ public class PoolLogger {
      */
     public void creatingPool(PoolConfig config) {
         if (logger.isDebugEnabled()) {
-            logger.debug(Messages.PoolLogger.creatingPool.get(messagePrefix, config));
+            logger.debug(Messages.PoolLogger.creatingPool(messagePrefix, config));
         }
     }
 
@@ -85,7 +85,7 @@ public class PoolLogger {
      */
     public void createdPool(PoolConfig config) {
         if (logger.isDebugEnabled()) {
-            logger.debug(Messages.PoolLogger.createdPool.get(messagePrefix, config));
+            logger.debug(Messages.PoolLogger.createdPool(messagePrefix, config));
         }
     }
 
@@ -96,7 +96,7 @@ public class PoolLogger {
      */
     public void failedToCreatePool(Exception exception) {
         if (logger.isDebugEnabled()) {
-            logger.debug(Messages.PoolLogger.failedToCreatePool.get(messagePrefix), exception);
+            logger.debug(Messages.PoolLogger.failedToCreatePool(messagePrefix), exception);
         }
     }
 
@@ -107,7 +107,7 @@ public class PoolLogger {
      */
     public void drainedPool(int poolSize) {
         if (logger.isDebugEnabled()) {
-            logger.debug(Messages.PoolLogger.drainedPool.get(messagePrefix, poolSize));
+            logger.debug(Messages.PoolLogger.drainedPool(messagePrefix, poolSize));
         }
     }
 
@@ -116,7 +116,7 @@ public class PoolLogger {
      */
     public void shutDownPool() {
         if (logger.isDebugEnabled()) {
-            logger.debug(Messages.PoolLogger.shutDownPool.get(messagePrefix));
+            logger.debug(Messages.PoolLogger.shutDownPool(messagePrefix));
         }
     }
 
@@ -129,7 +129,7 @@ public class PoolLogger {
      */
     public void createdObject(long objectId) {
         if (logger.isDebugEnabled()) {
-            logger.debug(Messages.PoolLogger.createdObject.get(messagePrefix, objectPrefix, objectId));
+            logger.debug(Messages.PoolLogger.createdObject(messagePrefix, objectPrefix, objectId));
         }
     }
 
@@ -141,7 +141,7 @@ public class PoolLogger {
      */
     public void createdNonPooledObject(long objectId) {
         if (logger.isDebugEnabled()) {
-            logger.debug(Messages.PoolLogger.createdNonPooledObject.get(messagePrefix, objectPrefix, objectId));
+            logger.debug(Messages.PoolLogger.createdNonPooledObject(messagePrefix, objectPrefix, objectId));
         }
     }
 
@@ -154,7 +154,7 @@ public class PoolLogger {
      */
     public void increasedObjectRefCount(long objectId, int refCount) {
         if (logger.isDebugEnabled()) {
-            logger.debug(Messages.PoolLogger.increasedObjectRefCount.get(messagePrefix, objectPrefix, objectId, refCount));
+            logger.debug(Messages.PoolLogger.increasedObjectRefCount(messagePrefix, objectPrefix, objectId, refCount));
         }
     }
 
@@ -167,7 +167,7 @@ public class PoolLogger {
      */
     public void decreasedObjectRefCount(long objectId, int refCount) {
         if (logger.isDebugEnabled()) {
-            logger.debug(Messages.PoolLogger.decreasedObjectRefCount.get(messagePrefix, objectPrefix, objectId, refCount));
+            logger.debug(Messages.PoolLogger.decreasedObjectRefCount(messagePrefix, objectPrefix, objectId, refCount));
         }
     }
 
@@ -180,7 +180,7 @@ public class PoolLogger {
      */
     public void releasingObjectResources(long objectId) {
         if (logger.isDebugEnabled()) {
-            logger.debug(Messages.PoolLogger.releasingObjectResources.get(messagePrefix, objectPrefix, objectId));
+            logger.debug(Messages.PoolLogger.releasingObjectResources(messagePrefix, objectPrefix, objectId));
         }
     }
 
@@ -193,7 +193,7 @@ public class PoolLogger {
      */
     public void releasedObjectResources(long objectId) {
         if (logger.isDebugEnabled()) {
-            logger.debug(Messages.PoolLogger.releasedObjectResources.get(messagePrefix, objectPrefix, objectId));
+            logger.debug(Messages.PoolLogger.releasedObjectResources(messagePrefix, objectPrefix, objectId));
         }
     }
 
@@ -206,7 +206,7 @@ public class PoolLogger {
      */
     public void releaseObjectResourcesFailed(long objectId, Exception exception) {
         if (logger.isDebugEnabled()) {
-            logger.debug(Messages.PoolLogger.releaseObjectResourcesFailed.get(messagePrefix, objectPrefix, objectId), exception);
+            logger.debug(Messages.PoolLogger.releaseObjectResourcesFailed(messagePrefix, objectPrefix, objectId), exception);
         }
     }
 
@@ -219,7 +219,7 @@ public class PoolLogger {
      */
     public void acquiredObject(long objectId, int idleCount, int poolSize) {
         if (logger.isDebugEnabled()) {
-            logger.debug(Messages.PoolLogger.acquiredObject.get(messagePrefix, objectPrefix, objectId, idleCount, poolSize));
+            logger.debug(Messages.PoolLogger.acquiredObject(messagePrefix, objectPrefix, objectId, idleCount, poolSize));
         }
     }
 
@@ -232,7 +232,7 @@ public class PoolLogger {
      */
     public void returnedObject(long objectId, int idleCount, int poolSize) {
         if (logger.isDebugEnabled()) {
-            logger.debug(Messages.PoolLogger.returnedObject.get(messagePrefix, objectPrefix, objectId, idleCount, poolSize));
+            logger.debug(Messages.PoolLogger.returnedObject(messagePrefix, objectPrefix, objectId, idleCount, poolSize));
         }
     }
 
@@ -246,7 +246,7 @@ public class PoolLogger {
      */
     public void objectInvalidated(long objectId, int idleCount, int poolSize) {
         if (logger.isDebugEnabled()) {
-            logger.debug(Messages.PoolLogger.objectInvalidated.get(messagePrefix, objectPrefix, objectId, idleCount, poolSize));
+            logger.debug(Messages.PoolLogger.objectInvalidated(messagePrefix, objectPrefix, objectId, idleCount, poolSize));
         }
     }
 
@@ -259,7 +259,7 @@ public class PoolLogger {
      */
     public void objectIdleTooLong(long objectId, int idleCount, int poolSize) {
         if (logger.isDebugEnabled()) {
-            logger.debug(Messages.PoolLogger.objectIdleTooLong.get(messagePrefix, objectPrefix, objectId, idleCount, poolSize));
+            logger.debug(Messages.PoolLogger.objectIdleTooLong(messagePrefix, objectPrefix, objectId, idleCount, poolSize));
         }
     }
 
@@ -271,7 +271,7 @@ public class PoolLogger {
      */
     public void objectEvent(long objectId, String message) {
         if (logger.isDebugEnabled()) {
-            logger.debug(Messages.PoolLogger.objectEvent.get(messagePrefix, objectPrefix, objectId, message));
+            logger.debug(Messages.PoolLogger.objectEvent(messagePrefix, objectPrefix, objectId, message));
         }
     }
 
@@ -283,7 +283,7 @@ public class PoolLogger {
      */
     public void objectEvent(long objectId, Supplier<String> messageSupplier) {
         if (logger.isDebugEnabled()) {
-            logger.debug(Messages.PoolLogger.objectEvent.get(messagePrefix, objectPrefix, objectId, messageSupplier.get()));
+            logger.debug(Messages.PoolLogger.objectEvent(messagePrefix, objectPrefix, objectId, messageSupplier.get()));
         }
     }
 

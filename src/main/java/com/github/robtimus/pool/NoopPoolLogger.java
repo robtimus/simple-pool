@@ -107,12 +107,17 @@ final class NoopPoolLogger extends PoolLogger {
     }
 
     @Override
-    public void objectEvent(long objectId, String message) {
+    public void objectEvent(LogLevel level, long objectId, String message) {
         // does nothing
     }
 
     @Override
-    public void objectEvent(long objectId, Supplier<String> messageSupplier) {
+    public void objectEvent(LogLevel level, long objectId, Supplier<String> messageSupplier) {
         // does nothing
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName();
     }
 }

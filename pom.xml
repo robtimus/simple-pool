@@ -126,6 +126,7 @@
           <artifactId>maven-javadoc-plugin</artifactId>
           <configuration>
             <links>
+              <link>https://www.slf4j.org/apidocs/</link>
             </links>
           </configuration>
         </plugin>

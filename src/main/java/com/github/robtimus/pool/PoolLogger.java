@@ -264,27 +264,39 @@ public class PoolLogger {
     }
 
     /**
-     * Called when {@link PoolableObject#logEvent(String)} is called.
+     * Called when {@link PoolableObject#logEvent(LogLevel, String)} is called.
      *
+     * @param level The log level to use.
      * @param objectId The id of the {@link PoolableObject}.
      * @param message The event message.
      */
-    public void objectEvent(long objectId, String message) {
-        if (logger.isDebugEnabled()) {
-            logger.debug(Messages.PoolLogger.objectEvent(messagePrefix, objectPrefix, objectId, message));
+    public void objectEvent(LogLevel level, long objectId, String message) {
+        if (level.isEnabled(logger)) {
+            level.log(logger, Messages.PoolLogger.objectEvent(messagePrefix, objectPrefix, objectId, message));
         }
     }
 
     /**
-     * Called when {@link PoolableObject#logEvent(String)} is called.
+     * Called when {@link PoolableObject#logEvent(LogLevel, Supplier)} is called.
      *
+     * @param level The log level to use.
      * @param objectId The id of the {@link PoolableObject}.
      * @param messageSupplier A supplier for the event message.
      */
-    public void objectEvent(long objectId, Supplier<String> messageSupplier) {
-        if (logger.isDebugEnabled()) {
-            logger.debug(Messages.PoolLogger.objectEvent(messagePrefix, objectPrefix, objectId, messageSupplier.get()));
+    public void objectEvent(LogLevel level, long objectId, Supplier<String> messageSupplier) {
+        if (level.isEnabled(logger)) {
+            level.log(logger, Messages.PoolLogger.objectEvent(messagePrefix, objectPrefix, objectId, messageSupplier.get()));
         }
+    }
+
+    @Override
+    @SuppressWarnings("nls")
+    public String toString() {
+        return getClass().getSimpleName()
+                + "[logger=" + logger.getName()
+                + ",messagePrefix=" + messagePrefix
+                + ",objectPrefix=" + objectPrefix
+                + "]";
     }
 
     /**

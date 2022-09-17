@@ -1638,11 +1638,11 @@ class PoolTest {
             verify(logger).acquiredObject(object1.objectId(), 2, 3);
             // forAllIdleObjects
             verify(logger).drainedPool(3);
-            verify(logger).objectEvent(object2.objectId(), "custom event");
-            verify(logger).objectEvent(object2.objectId(), messageSupplier);
+            verify(logger).objectEvent(LogLevel.DEBUG, object2.objectId(), "custom event");
+            verify(logger).objectEvent(LogLevel.DEBUG, object2.objectId(), messageSupplier);
             verify(logger).returnedObject(object2.objectId(), 1, 3);
-            verify(logger).objectEvent(object3.objectId(), "custom event");
-            verify(logger).objectEvent(object3.objectId(), messageSupplier);
+            verify(logger).objectEvent(LogLevel.DEBUG, object3.objectId(), "custom event");
+            verify(logger).objectEvent(LogLevel.DEBUG, object3.objectId(), messageSupplier);
             verify(logger).returnedObject(object3.objectId(), 2, 3);
             // acquire object2
             verify(logger).increasedObjectRefCount(object2.objectId(), 1);

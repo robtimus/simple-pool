@@ -19,6 +19,7 @@ package com.github.robtimus.pool;
 
 import static com.github.robtimus.junit.support.util.DisplayNameUtils.getMethodDisplayName;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.DynamicTest.dynamicTest;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -28,6 +29,7 @@ import java.util.function.Supplier;
 import java.util.stream.Stream;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.DynamicTest;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestFactory;
 
 @SuppressWarnings("nls")
@@ -82,6 +84,17 @@ class NoopPoolLoggerTest {
         if (type == Supplier.class) {
             return (Supplier<String>) () -> "custom message";
         }
+        if (type == LogLevel.class) {
+            return LogLevel.DEBUG;
+        }
         return UUID.randomUUID().toString();
+    }
+
+    @Test
+    @DisplayName("toString")
+    void testtoString() {
+        PoolLogger logger = PoolLogger.noopLogger();
+
+        assertEquals("NoopPoolLogger", logger.toString());
     }
 }

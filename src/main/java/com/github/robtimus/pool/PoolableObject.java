@@ -216,21 +216,53 @@ public abstract class PoolableObject<X extends Exception> {
     }
 
     /**
-     * Logs a custom event for this object.
+     * Logs a custom event for this object at debug level.
      * The message should preferably be a compile-time constant; for calculated messages, use {@link #logEvent(Supplier)} instead.
      *
      * @param message The event message.
      */
     protected final void logEvent(String message) {
-        logger.objectEvent(objectId, message);
+        logEvent(LogLevel.DEBUG, message);
+    }
+
+    /**
+     * Logs a custom event for this object.
+     * The message should preferably be a compile-time constant; for calculated messages, use {@link #logEvent(LogLevel, Supplier)} instead.
+     *
+     * @param level The log level to use.
+     * @param message The event message.
+     */
+    protected final void logEvent(LogLevel level, String message) {
+        logger.objectEvent(level, objectId, message);
+    }
+
+    /**
+     * Logs a custom event for this object at debug level.
+     *
+     * @param messageSupplier A supplier for the event message.
+     */
+    protected final void logEvent(Supplier<String> messageSupplier) {
+        logEvent(LogLevel.DEBUG, messageSupplier);
     }
 
     /**
      * Logs a custom event for this object.
      *
+     * @param level The log level to use.
      * @param messageSupplier A supplier for the event message.
      */
-    protected final void logEvent(Supplier<String> messageSupplier) {
-        logger.objectEvent(objectId, messageSupplier);
+    protected final void logEvent(LogLevel level, Supplier<String> messageSupplier) {
+        logger.objectEvent(level, objectId, messageSupplier);
+    }
+
+    /**
+     * Returns whether or not logging at a specific level is enabled.
+     * This can be used to perform conditional configuration, like adding logging listeners conditionally.
+     *
+     * @param level The level to check.
+     * @return {@code true} if logging at the given level is enabled, or {@code false} otherwise.
+     */
+    protected final boolean isEnabled(LogLevel level) {
+        return level.isEnabled(logger.logger());
     }
 }

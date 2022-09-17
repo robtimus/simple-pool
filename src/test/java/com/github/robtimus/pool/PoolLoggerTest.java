@@ -216,24 +216,142 @@ class PoolLoggerTest {
             verifyNoMoreInteractions(logger);
         }
 
-        @Test
+        @Nested
         @DisplayName("objectEvent(String)")
-        void testObjectEventWithMessage() {
-            poolLogger.objectEvent(4, "custom event");
+        class ObjectEventWithMessage {
 
-            verify(logger).isDebugEnabled();
-            verify(logger).debug(Messages.PoolLogger.objectEvent("pool - ", "object-", 4, "custom event"));
-            verifyNoMoreInteractions(logger);
+            @Test
+            @DisplayName("ERROR")
+            void testErrorLevel() {
+                when(logger.isDebugEnabled()).thenReturn(false);
+                when(logger.isErrorEnabled()).thenReturn(true);
+
+                poolLogger.objectEvent(LogLevel.ERROR, 4, "custom event");
+
+                verify(logger).isErrorEnabled();
+                verify(logger).error(Messages.PoolLogger.objectEvent("pool - ", "object-", 4, "custom event"));
+                verifyNoMoreInteractions(logger);
+            }
+
+            @Test
+            @DisplayName("WARN")
+            void testWarnLevel() {
+                when(logger.isDebugEnabled()).thenReturn(false);
+                when(logger.isWarnEnabled()).thenReturn(true);
+
+                poolLogger.objectEvent(LogLevel.WARN, 4, "custom event");
+
+                verify(logger).isWarnEnabled();
+                verify(logger).warn(Messages.PoolLogger.objectEvent("pool - ", "object-", 4, "custom event"));
+                verifyNoMoreInteractions(logger);
+            }
+
+            @Test
+            @DisplayName("INFO")
+            void testInfoLevel() {
+                when(logger.isDebugEnabled()).thenReturn(false);
+                when(logger.isInfoEnabled()).thenReturn(true);
+
+                poolLogger.objectEvent(LogLevel.INFO, 4, "custom event");
+
+                verify(logger).isInfoEnabled();
+                verify(logger).info(Messages.PoolLogger.objectEvent("pool - ", "object-", 4, "custom event"));
+                verifyNoMoreInteractions(logger);
+            }
+
+            @Test
+            @DisplayName("DEBUG")
+            void testDebugLevel() {
+                // isDebugEnabled is already mocked
+
+                poolLogger.objectEvent(LogLevel.DEBUG, 4, "custom event");
+
+                verify(logger).isDebugEnabled();
+                verify(logger).debug(Messages.PoolLogger.objectEvent("pool - ", "object-", 4, "custom event"));
+                verifyNoMoreInteractions(logger);
+            }
+
+            @Test
+            @DisplayName("TRACE")
+            void testTraceLevel() {
+                when(logger.isDebugEnabled()).thenReturn(false);
+                when(logger.isTraceEnabled()).thenReturn(true);
+
+                poolLogger.objectEvent(LogLevel.TRACE, 4, "custom event");
+
+                verify(logger).isTraceEnabled();
+                verify(logger).trace(Messages.PoolLogger.objectEvent("pool - ", "object-", 4, "custom event"));
+                verifyNoMoreInteractions(logger);
+            }
         }
 
-        @Test
+        @Nested
         @DisplayName("objectEvent(Supplier)")
-        void testObjectEventWithMessageSupplier() {
-            poolLogger.objectEvent(4, () -> "custom event");
+        class ObjectEventWithMessageSupplier {
 
-            verify(logger).isDebugEnabled();
-            verify(logger).debug(Messages.PoolLogger.objectEvent("pool - ", "object-", 4, "custom event"));
-            verifyNoMoreInteractions(logger);
+            @Test
+            @DisplayName("ERROR")
+            void testErrorLevel() {
+                when(logger.isDebugEnabled()).thenReturn(false);
+                when(logger.isErrorEnabled()).thenReturn(true);
+
+                poolLogger.objectEvent(LogLevel.ERROR, 4, () -> "custom event");
+
+                verify(logger).isErrorEnabled();
+                verify(logger).error(Messages.PoolLogger.objectEvent("pool - ", "object-", 4, "custom event"));
+                verifyNoMoreInteractions(logger);
+            }
+
+            @Test
+            @DisplayName("WARN")
+            void testWarnLevel() {
+                when(logger.isDebugEnabled()).thenReturn(false);
+                when(logger.isWarnEnabled()).thenReturn(true);
+
+                poolLogger.objectEvent(LogLevel.WARN, 4, () -> "custom event");
+
+                verify(logger).isWarnEnabled();
+                verify(logger).warn(Messages.PoolLogger.objectEvent("pool - ", "object-", 4, "custom event"));
+                verifyNoMoreInteractions(logger);
+            }
+
+            @Test
+            @DisplayName("INFO")
+            void testInfoLevel() {
+                when(logger.isDebugEnabled()).thenReturn(false);
+                when(logger.isInfoEnabled()).thenReturn(true);
+
+                poolLogger.objectEvent(LogLevel.INFO, 4, () -> "custom event");
+
+                verify(logger).isInfoEnabled();
+                verify(logger).info(Messages.PoolLogger.objectEvent("pool - ", "object-", 4, "custom event"));
+                verifyNoMoreInteractions(logger);
+            }
+
+            @Test
+            @DisplayName("DEBUG")
+            void testDebugLevel() {
+                // isDebugEnabled is already mocked
+
+                poolLogger.objectEvent(LogLevel.DEBUG, 4, "custom event");
+
+                verify(logger).isDebugEnabled();
+                verify(logger).debug(Messages.PoolLogger.objectEvent("pool - ", "object-", 4, "custom event"));
+                verifyNoMoreInteractions(logger);
+            }
+
+            @Test
+            @DisplayName("TRACE")
+            void testTraceLevel() {
+                when(logger.isDebugEnabled()).thenReturn(false);
+                when(logger.isTraceEnabled()).thenReturn(true);
+
+                poolLogger.objectEvent(LogLevel.TRACE, 4, () -> "custom event");
+
+                verify(logger).isTraceEnabled();
+                verify(logger).trace(Messages.PoolLogger.objectEvent("pool - ", "object-", 4, "custom event"));
+                verifyNoMoreInteractions(logger);
+            }
         }
     }
 
@@ -404,22 +522,104 @@ class PoolLoggerTest {
             verifyNoMoreInteractions(logger);
         }
 
-        @Test
+        @Nested
         @DisplayName("objectEvent(String)")
-        void testObjectEventWithMessage() {
-            poolLogger.objectEvent(4, "custom event");
+        class ObjectEventWithMessage {
 
-            verify(logger).isDebugEnabled();
-            verifyNoMoreInteractions(logger);
+            @Test
+            @DisplayName("ERROR")
+            void testErrorLevel() {
+                poolLogger.objectEvent(LogLevel.ERROR, 4, "custom event");
+
+                verify(logger).isErrorEnabled();
+                verifyNoMoreInteractions(logger);
+            }
+
+            @Test
+            @DisplayName("WARN")
+            void testWarnLevel() {
+                poolLogger.objectEvent(LogLevel.WARN, 4, "custom event");
+
+                verify(logger).isWarnEnabled();
+                verifyNoMoreInteractions(logger);
+            }
+
+            @Test
+            @DisplayName("INFO")
+            void testInfoLevel() {
+                poolLogger.objectEvent(LogLevel.INFO, 4, "custom event");
+
+                verify(logger).isInfoEnabled();
+                verifyNoMoreInteractions(logger);
+            }
+
+            @Test
+            @DisplayName("DEBUG")
+            void testDebugLevel() {
+                poolLogger.objectEvent(LogLevel.DEBUG, 4, "custom event");
+
+                verify(logger).isDebugEnabled();
+                verifyNoMoreInteractions(logger);
+            }
+
+            @Test
+            @DisplayName("TRACE")
+            void testTraceLevel() {
+                poolLogger.objectEvent(LogLevel.TRACE, 4, "custom event");
+
+                verify(logger).isTraceEnabled();
+                verifyNoMoreInteractions(logger);
+            }
         }
 
-        @Test
+        @Nested
         @DisplayName("objectEvent(Supplier)")
-        void testObjectEventWithMessageSupplier() {
-            poolLogger.objectEvent(4, () -> "custom event");
+        class ObjectEventWithMessageSupplier {
 
-            verify(logger).isDebugEnabled();
-            verifyNoMoreInteractions(logger);
+            @Test
+            @DisplayName("ERROR")
+            void testErrorLevel() {
+                poolLogger.objectEvent(LogLevel.ERROR, 4, () -> "custom event");
+
+                verify(logger).isErrorEnabled();
+                verifyNoMoreInteractions(logger);
+            }
+
+            @Test
+            @DisplayName("WARN")
+            void testWarnLevel() {
+                poolLogger.objectEvent(LogLevel.WARN, 4, () -> "custom event");
+
+                verify(logger).isWarnEnabled();
+                verifyNoMoreInteractions(logger);
+            }
+
+            @Test
+            @DisplayName("INFO")
+            void testInfoLevel() {
+                poolLogger.objectEvent(LogLevel.INFO, 4, () -> "custom event");
+
+                verify(logger).isInfoEnabled();
+                verifyNoMoreInteractions(logger);
+            }
+
+            @Test
+            @DisplayName("DEBUG")
+            void testDebugLevel() {
+                poolLogger.objectEvent(LogLevel.DEBUG, 4, "custom event");
+
+                verify(logger).isDebugEnabled();
+                verifyNoMoreInteractions(logger);
+            }
+
+            @Test
+            @DisplayName("TRACE")
+            void testTraceLevel() {
+                poolLogger.objectEvent(LogLevel.TRACE, 4, () -> "custom event");
+
+                verify(logger).isTraceEnabled();
+                verifyNoMoreInteractions(logger);
+            }
         }
     }
 
@@ -631,5 +831,17 @@ class PoolLoggerTest {
                 assertEquals("test", logger.objectPrefix());
             }
         }
+    }
+
+    @Test
+    @DisplayName("toString")
+    void testtoString() {
+        PoolLogger logger = PoolLogger.custom()
+                .withLoggerName("custom-logger")
+                .withMessagePrefix("prefix - ")
+                .withObjectPrefix("obj-")
+                .build();
+
+        assertEquals("PoolLogger[logger=custom-logger,messagePrefix=prefix - ,objectPrefix=obj-]", logger.toString());
     }
 }

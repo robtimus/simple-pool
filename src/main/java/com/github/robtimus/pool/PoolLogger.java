@@ -363,7 +363,7 @@ public class PoolLogger {
          * @return This builder.
          * @throws NullPointerException If the given message prefix is {@code null}.
          */
-        public Builder withPrefix(String messagePrefix) {
+        public Builder withMessagePrefix(String messagePrefix) {
             this.messagePrefix = Objects.requireNonNull(messagePrefix);
             return this;
         }

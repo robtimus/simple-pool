@@ -538,7 +538,7 @@ class PoolLoggerTest {
             void testNullValue() {
                 Builder builder = PoolLogger.custom();
 
-                assertThrows(NullPointerException.class, () -> builder.withPrefix(null));
+                assertThrows(NullPointerException.class, () -> builder.withMessagePrefix(null));
 
                 PoolLogger logger = builder.build();
 
@@ -549,7 +549,7 @@ class PoolLoggerTest {
             @DisplayName("empty value")
             void testEmptyValue() {
                 PoolLogger logger = PoolLogger.custom()
-                        .withPrefix("")
+                        .withMessagePrefix("")
                         .build();
 
                 assertEquals("", logger.messagePrefix());
@@ -559,7 +559,7 @@ class PoolLoggerTest {
             @DisplayName("blank value")
             void testBlankValue() {
                 PoolLogger logger = PoolLogger.custom()
-                        .withPrefix(" ")
+                        .withMessagePrefix(" ")
                         .build();
 
                 assertEquals(" ", logger.messagePrefix());
@@ -569,7 +569,7 @@ class PoolLoggerTest {
             @DisplayName("non-blank value")
             void testPositiveValue() {
                 PoolLogger logger = PoolLogger.custom()
-                        .withPrefix("test")
+                        .withMessagePrefix("test")
                         .build();
 
                 assertEquals("test", logger.messagePrefix());

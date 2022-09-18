@@ -52,68 +52,73 @@ final class NoopPoolLogger extends PoolLogger {
     }
 
     @Override
-    public void createdObject(long objectId) {
+    public void createdObject(PoolableObject<?> object) {
         // does nothing
     }
 
     @Override
-    public void createdNonPooledObject(long objectId) {
+    public void createdNonPooledObject(PoolableObject<?> object) {
         // does nothing
     }
 
     @Override
-    public void increasedObjectRefCount(long objectId, int refCount) {
+    public void increasedObjectRefCount(PoolableObject<?> object, int refCount) {
         // does nothing
     }
 
     @Override
-    public void decreasedObjectRefCount(long objectId, int refCount) {
+    public void decreasedObjectRefCount(PoolableObject<?> object, int refCount) {
         // does nothing
     }
 
     @Override
-    public void releasingObjectResources(long objectId) {
+    public void releasingObjectResources(PoolableObject<?> object) {
         // does nothing
     }
 
     @Override
-    public void releasedObjectResources(long objectId) {
+    public void releasedObjectResources(PoolableObject<?> object) {
         // does nothing
     }
 
     @Override
-    public void releaseObjectResourcesFailed(long objectId, Exception exception) {
+    public void releaseObjectResourcesFailed(PoolableObject<?> object, Exception exception) {
         // does nothing
     }
 
     @Override
-    public void acquiredObject(long objectId, int idleCount, int poolSize) {
+    public void acquiredObject(PoolableObject<?> object, int idleCount, int poolSize) {
         // does nothing
     }
 
     @Override
-    public void returnedObject(long objectId, int idleCount, int poolSize) {
+    public void returnedObject(PoolableObject<?> object, int idleCount, int poolSize) {
         // does nothing
     }
 
     @Override
-    public void objectInvalidated(long objectId, int idleCount, int poolSize) {
+    public void objectInvalidated(PoolableObject<?> object, int idleCount, int poolSize) {
         // does nothing
     }
 
     @Override
-    public void objectIdleTooLong(long objectId, int idleCount, int poolSize) {
+    public void objectIdleTooLong(PoolableObject<?> object, int idleCount, int poolSize) {
         // does nothing
     }
 
     @Override
-    public void objectEvent(LogLevel level, long objectId, String message) {
+    public void objectEvent(LogLevel level, PoolableObject<?> object, String message) {
         // does nothing
     }
 
     @Override
-    public void objectEvent(LogLevel level, long objectId, Supplier<String> messageSupplier) {
+    public void objectEvent(LogLevel level, PoolableObject<?> object, Supplier<String> messageSupplier) {
         // does nothing
+    }
+
+    @Override
+    public boolean isEnabled(LogLevel level) {
+        return false;
     }
 
     @Override

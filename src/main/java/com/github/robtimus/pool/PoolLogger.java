@@ -125,11 +125,11 @@ public class PoolLogger {
     /**
      * Called when a new {@link PoolableObject} has been created.
      *
-     * @param objectId The id of the {@link PoolableObject}.
+     * @param object The {@link PoolableObject}.
      */
-    public void createdObject(long objectId) {
+    public void createdObject(PoolableObject<?> object) {
         if (logger.isDebugEnabled()) {
-            logger.debug(Messages.PoolLogger.createdObject(messagePrefix, objectPrefix, objectId));
+            logger.debug(Messages.PoolLogger.createdObject(messagePrefix, objectPrefix, object.objectId()));
         }
     }
 
@@ -137,129 +137,129 @@ public class PoolLogger {
      * Called when a new {@link PoolableObject} has been created that will not be returned to the pool it was
      * {@linkplain Pool#acquireOrCreate() acquired} from.
      *
-     * @param objectId The id of the {@link PoolableObject}.
+     * @param object The {@link PoolableObject}.
      */
-    public void createdNonPooledObject(long objectId) {
+    public void createdNonPooledObject(PoolableObject<?> object) {
         if (logger.isDebugEnabled()) {
-            logger.debug(Messages.PoolLogger.createdNonPooledObject(messagePrefix, objectPrefix, objectId));
+            logger.debug(Messages.PoolLogger.createdNonPooledObject(messagePrefix, objectPrefix, object.objectId()));
         }
     }
 
     /**
      * Called when an additional reference was added to a {@link PoolableObject}.
      *
-     * @param objectId The id of the {@link Pool}.
+     * @param object The {@link PoolableObject}.
      * @param refCount The new number of references, including the {@link PoolableObject} itself.
      * @see PoolableObject#addReference(Object)
      */
-    public void increasedObjectRefCount(long objectId, int refCount) {
+    public void increasedObjectRefCount(PoolableObject<?> object, int refCount) {
         if (logger.isDebugEnabled()) {
-            logger.debug(Messages.PoolLogger.increasedObjectRefCount(messagePrefix, objectPrefix, objectId, refCount));
+            logger.debug(Messages.PoolLogger.increasedObjectRefCount(messagePrefix, objectPrefix, object.objectId(), refCount));
         }
     }
 
     /**
      * Called when a reference was removed from a {@link PoolableObject}.
      *
-     * @param objectId The id of the {@link PoolableObject}.
+     * @param object The {@link PoolableObject}.
      * @param refCount The new number of references, including the {@link PoolableObject} itself.
      * @see PoolableObject#removeReference(Object)
      */
-    public void decreasedObjectRefCount(long objectId, int refCount) {
+    public void decreasedObjectRefCount(PoolableObject<?> object, int refCount) {
         if (logger.isDebugEnabled()) {
-            logger.debug(Messages.PoolLogger.decreasedObjectRefCount(messagePrefix, objectPrefix, objectId, refCount));
+            logger.debug(Messages.PoolLogger.decreasedObjectRefCount(messagePrefix, objectPrefix, object.objectId(), refCount));
         }
     }
 
     /**
      * Called before the resources of a {@link PoolableObject} will be released.
      *
-     * @param objectId The id of the {@link PoolableObject}.
+     * @param object The {@link PoolableObject}.
      * @see PoolableObject#releaseResources()
      * @see PoolableObject#releaseResourcesQuietly()
      */
-    public void releasingObjectResources(long objectId) {
+    public void releasingObjectResources(PoolableObject<?> object) {
         if (logger.isDebugEnabled()) {
-            logger.debug(Messages.PoolLogger.releasingObjectResources(messagePrefix, objectPrefix, objectId));
+            logger.debug(Messages.PoolLogger.releasingObjectResources(messagePrefix, objectPrefix, object.objectId()));
         }
     }
 
     /**
      * Called when the resources of a {@link PoolableObject} have been released.
      *
-     * @param objectId The id of the {@link PoolableObject}.
+     * @param object The {@link PoolableObject}.
      * @see PoolableObject#releaseResources()
      * @see PoolableObject#releaseResourcesQuietly()
      */
-    public void releasedObjectResources(long objectId) {
+    public void releasedObjectResources(PoolableObject<?> object) {
         if (logger.isDebugEnabled()) {
-            logger.debug(Messages.PoolLogger.releasedObjectResources(messagePrefix, objectPrefix, objectId));
+            logger.debug(Messages.PoolLogger.releasedObjectResources(messagePrefix, objectPrefix, object.objectId()));
         }
     }
 
     /**
      * Called when an error occurs when quietly releasing the resources of a {@link PoolableObject}.
      *
-     * @param objectId The id of the {@link PoolableObject}.
+     * @param object The {@link PoolableObject}.
      * @param exception The exception that was thrown while quietly releasing the resources of the {@link PoolableObject}.
      * @see PoolableObject#releaseResourcesQuietly()
      */
-    public void releaseObjectResourcesFailed(long objectId, Exception exception) {
+    public void releaseObjectResourcesFailed(PoolableObject<?> object, Exception exception) {
         if (logger.isDebugEnabled()) {
-            logger.debug(Messages.PoolLogger.releaseObjectResourcesFailed(messagePrefix, objectPrefix, objectId), exception);
+            logger.debug(Messages.PoolLogger.releaseObjectResourcesFailed(messagePrefix, objectPrefix, object.objectId()), exception);
         }
     }
 
     /**
      * Called when a {@link PoolableObject} is acquired from a {@link Pool}.
      *
-     * @param objectId The id of the {@link PoolableObject}.
+     * @param object The {@link PoolableObject}.
      * @param idleCount The number of idle {@link PoolableObject}s after acquiring the {@link PoolableObject}.
      * @param poolSize The total pool size - the number of acquired and idle {@link PoolableObject}s combined.
      */
-    public void acquiredObject(long objectId, int idleCount, int poolSize) {
+    public void acquiredObject(PoolableObject<?> object, int idleCount, int poolSize) {
         if (logger.isDebugEnabled()) {
-            logger.debug(Messages.PoolLogger.acquiredObject(messagePrefix, objectPrefix, objectId, idleCount, poolSize));
+            logger.debug(Messages.PoolLogger.acquiredObject(messagePrefix, objectPrefix, object.objectId(), idleCount, poolSize));
         }
     }
 
     /**
      * Called when a {@link PoolableObject} is returned to a {@link Pool}.
      *
-     * @param objectId The id of the {@link PoolableObject}.
+     * @param object The {@link PoolableObject}.
      * @param idleCount The number of idle {@link PoolableObject}s after returning the {@link PoolableObject}.
      * @param poolSize The total pool size - the number of acquired and idle {@link PoolableObject}s combined.
      */
-    public void returnedObject(long objectId, int idleCount, int poolSize) {
+    public void returnedObject(PoolableObject<?> object, int idleCount, int poolSize) {
         if (logger.isDebugEnabled()) {
-            logger.debug(Messages.PoolLogger.returnedObject(messagePrefix, objectPrefix, objectId, idleCount, poolSize));
+            logger.debug(Messages.PoolLogger.returnedObject(messagePrefix, objectPrefix, object.objectId(), idleCount, poolSize));
         }
     }
 
     /**
      * Called when a {@link PoolableObject} is no longer valid and has been removed from its {@link Pool}.
      *
-     * @param objectId The id of the {@link PoolableObject}.
+     * @param object The {@link PoolableObject}.
      * @param idleCount The number of idle {@link PoolableObject}s after invalidating the {@link PoolableObject}.
      * @param poolSize The total pool size - the number of acquired and idle {@link PoolableObject}s combined.
      * @see PoolableObject#isValid()
      */
-    public void objectInvalidated(long objectId, int idleCount, int poolSize) {
+    public void objectInvalidated(PoolableObject<?> object, int idleCount, int poolSize) {
         if (logger.isDebugEnabled()) {
-            logger.debug(Messages.PoolLogger.objectInvalidated(messagePrefix, objectPrefix, objectId, idleCount, poolSize));
+            logger.debug(Messages.PoolLogger.objectInvalidated(messagePrefix, objectPrefix, object.objectId(), idleCount, poolSize));
         }
     }
 
     /**
      * Called when a {@link PoolableObject} has been idle for too long.
      *
-     * @param objectId The id of the {@link PoolableObject}.
+     * @param object The {@link PoolableObject}.
      * @param idleCount The number of idle {@link PoolableObject}s after invalidating the {@link PoolableObject}.
      * @param poolSize The total pool size - the number of acquired and idle {@link PoolableObject}s combined.
      */
-    public void objectIdleTooLong(long objectId, int idleCount, int poolSize) {
+    public void objectIdleTooLong(PoolableObject<?> object, int idleCount, int poolSize) {
         if (logger.isDebugEnabled()) {
-            logger.debug(Messages.PoolLogger.objectIdleTooLong(messagePrefix, objectPrefix, objectId, idleCount, poolSize));
+            logger.debug(Messages.PoolLogger.objectIdleTooLong(messagePrefix, objectPrefix, object.objectId(), idleCount, poolSize));
         }
     }
 
@@ -267,12 +267,12 @@ public class PoolLogger {
      * Called when {@link PoolableObject#logEvent(LogLevel, String)} is called.
      *
      * @param level The log level to use.
-     * @param objectId The id of the {@link PoolableObject}.
+     * @param object The {@link PoolableObject}.
      * @param message The event message.
      */
-    public void objectEvent(LogLevel level, long objectId, String message) {
+    public void objectEvent(LogLevel level, PoolableObject<?> object, String message) {
         if (level.isEnabled(logger)) {
-            level.log(logger, Messages.PoolLogger.objectEvent(messagePrefix, objectPrefix, objectId, message));
+            level.log(logger, Messages.PoolLogger.objectEvent(messagePrefix, objectPrefix, object.objectId(), message));
         }
     }
 
@@ -280,13 +280,24 @@ public class PoolLogger {
      * Called when {@link PoolableObject#logEvent(LogLevel, Supplier)} is called.
      *
      * @param level The log level to use.
-     * @param objectId The id of the {@link PoolableObject}.
+     * @param object The {@link PoolableObject}.
      * @param messageSupplier A supplier for the event message.
      */
-    public void objectEvent(LogLevel level, long objectId, Supplier<String> messageSupplier) {
+    public void objectEvent(LogLevel level, PoolableObject<?> object, Supplier<String> messageSupplier) {
         if (level.isEnabled(logger)) {
-            level.log(logger, Messages.PoolLogger.objectEvent(messagePrefix, objectPrefix, objectId, messageSupplier.get()));
+            level.log(logger, Messages.PoolLogger.objectEvent(messagePrefix, objectPrefix, object.objectId(), messageSupplier.get()));
         }
+    }
+
+    /**
+     * Returns whether or not logging at a specific level is enabled.
+     * This can be used to perform conditional configuration, like adding logging listeners conditionally.
+     *
+     * @param level The level to check.
+     * @return {@code true} if logging at the given level is enabled, or {@code false} otherwise.
+     */
+    public boolean isEnabled(LogLevel level) {
+        return level.isEnabled(logger);
     }
 
     @Override

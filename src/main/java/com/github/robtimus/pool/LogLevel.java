@@ -33,7 +33,7 @@ public enum LogLevel {
     ERROR() {
         @Override
         boolean isEnabled(Logger logger) {
-            return logger != null && logger.isErrorEnabled();
+            return logger.isErrorEnabled();
         }
 
         @Override
@@ -46,7 +46,7 @@ public enum LogLevel {
     WARN() {
         @Override
         boolean isEnabled(Logger logger) {
-            return logger != null && logger.isWarnEnabled();
+            return logger.isWarnEnabled();
         }
 
         @Override
@@ -59,7 +59,7 @@ public enum LogLevel {
     INFO() {
         @Override
         boolean isEnabled(Logger logger) {
-            return logger != null && logger.isInfoEnabled();
+            return logger.isInfoEnabled();
         }
 
         @Override
@@ -72,7 +72,7 @@ public enum LogLevel {
     DEBUG() {
         @Override
         boolean isEnabled(Logger logger) {
-            return logger != null && logger.isDebugEnabled();
+            return logger.isDebugEnabled();
         }
 
         @Override
@@ -85,7 +85,7 @@ public enum LogLevel {
     TRACE() {
         @Override
         boolean isEnabled(Logger logger) {
-            return logger != null && logger.isTraceEnabled();
+            return logger.isTraceEnabled();
         }
 
         @Override

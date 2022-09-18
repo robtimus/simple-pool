@@ -102,7 +102,7 @@ public abstract class PoolableObject<X extends Exception> {
     protected final void addReference(Object reference) {
         Objects.requireNonNull(reference);
         if (references.add(reference)) {
-            logger.increasedObjectRefCount(objectId, references.size());
+            logger.increasedObjectRefCount(this, references.size());
         }
     }
 
@@ -119,7 +119,7 @@ public abstract class PoolableObject<X extends Exception> {
     protected final void removeReference(Object reference) throws X {
         Objects.requireNonNull(reference);
         if (references.remove(reference)) {
-            logger.decreasedObjectRefCount(objectId, references.size());
+            logger.decreasedObjectRefCount(this, references.size());
 
             if (references.isEmpty()) {
                 if (pool != null) {
@@ -145,12 +145,12 @@ public abstract class PoolableObject<X extends Exception> {
      * @throws X If the resources could not be released.
      */
     protected final void releaseResources() throws X {
-        logger.releasingObjectResources(objectId);
+        logger.releasingObjectResources(this);
         try {
             doReleaseResources();
-            logger.releasedObjectResources(objectId);
+            logger.releasedObjectResources(this);
         } catch (Exception e) {
-            logger.releaseObjectResourcesFailed(objectId, e);
+            logger.releaseObjectResourcesFailed(this, e);
             throw cast(e);
         }
     }
@@ -165,9 +165,9 @@ public abstract class PoolableObject<X extends Exception> {
      * Releases any resources associated with this object, without throwing exceptions.
      */
     protected final void releaseResourcesQuietly() {
-        logger.releasingObjectResources(objectId);
+        logger.releasingObjectResources(this);
         doReleaseResourcesQuietly();
-        logger.releasedObjectResources(objectId);
+        logger.releasedObjectResources(this);
     }
 
     /**
@@ -198,7 +198,7 @@ public abstract class PoolableObject<X extends Exception> {
      * @param exception The exception that was thrown while quietly releasing the resources associated to this object.
      */
     protected final void releaseResourcesFailed(Exception exception) {
-        logger.releaseObjectResourcesFailed(objectId, exception);
+        logger.releaseObjectResourcesFailed(this, exception);
     }
 
     void acquired() {
@@ -218,6 +218,8 @@ public abstract class PoolableObject<X extends Exception> {
     /**
      * Logs a custom event for this object at debug level.
      * The message should preferably be a compile-time constant; for calculated messages, use {@link #logEvent(Supplier)} instead.
+     * <p>
+     * Note: this method will use the logger of the {@link Pool} that manages this object. If this object is not pooled, this method will do nothing.
      *
      * @param message The event message.
      */
@@ -228,16 +230,20 @@ public abstract class PoolableObject<X extends Exception> {
     /**
      * Logs a custom event for this object.
      * The message should preferably be a compile-time constant; for calculated messages, use {@link #logEvent(LogLevel, Supplier)} instead.
+     * <p>
+     * Note: this method will use the logger of the {@link Pool} that manages this object. If this object is not pooled, this method will do nothing.
      *
      * @param level The log level to use.
      * @param message The event message.
      */
     protected final void logEvent(LogLevel level, String message) {
-        logger.objectEvent(level, objectId, message);
+        logger.objectEvent(level, this, message);
     }
 
     /**
      * Logs a custom event for this object at debug level.
+     * <p>
+     * Note: this method will use the logger of the {@link Pool} that manages this object. If this object is not pooled, this method will do nothing.
      *
      * @param messageSupplier A supplier for the event message.
      */
@@ -247,22 +253,27 @@ public abstract class PoolableObject<X extends Exception> {
 
     /**
      * Logs a custom event for this object.
+     * <p>
+     * Note: this method will use the logger of the {@link Pool} that manages this object. If this object is not pooled, this method will do nothing.
      *
      * @param level The log level to use.
      * @param messageSupplier A supplier for the event message.
      */
     protected final void logEvent(LogLevel level, Supplier<String> messageSupplier) {
-        logger.objectEvent(level, objectId, messageSupplier);
+        logger.objectEvent(level, this, messageSupplier);
     }
 
     /**
      * Returns whether or not logging at a specific level is enabled.
      * This can be used to perform conditional configuration, like adding logging listeners conditionally.
+     * <p>
+     * Note: this method will use the logger of the {@link Pool} that manages this object. If this object is not pooled, this method will return
+     * {@code false}.
      *
      * @param level The level to check.
      * @return {@code true} if logging at the given level is enabled, or {@code false} otherwise.
      */
     protected final boolean isEnabled(LogLevel level) {
-        return level.isEnabled(logger.logger());
+        return logger.isEnabled(level);
     }
 }

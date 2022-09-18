@@ -91,20 +91,20 @@ class PoolTest {
 
             Pool<?, None> pool = assertDoesNotThrow(() -> Pool.throwingNone(config, supplier, logger));
 
-            ArgumentCaptor<Long> objectIdCaptor = ArgumentCaptor.forClass(Long.class);
+            ArgumentCaptor<TestObject> objectCaptor = ArgumentCaptor.forClass(TestObject.class);
 
             verify(supplier).get();
             // logger calls in order
             verify(logger).creatingPool(config);
-            verify(logger).createdObject(objectIdCaptor.capture());
+            verify(logger).createdObject(objectCaptor.capture());
             verify(logger).createdPool(config);
 
             verifyNoMoreInteractions(supplier, logger);
 
             pool.shutdown();
 
-            verify(logger).releasingObjectResources(objectIdCaptor.getValue());
-            verify(logger).releasedObjectResources(objectIdCaptor.getValue());
+            verify(logger).releasingObjectResources(objectCaptor.getValue());
+            verify(logger).releasedObjectResources(objectCaptor.getValue());
             verify(logger).drainedPool(0);
             verify(logger).shutDownPool();
 
@@ -157,15 +157,15 @@ class PoolTest {
             NumberFormatException exception = assertThrows(NumberFormatException.class, () -> Pool.throwingNone(config, supplier, logger));
             assertSame(error, exception);
 
-            ArgumentCaptor<Long> objectIdCaptor = ArgumentCaptor.forClass(Long.class);
+            ArgumentCaptor<TestObject> objectCaptor = ArgumentCaptor.forClass(TestObject.class);
 
             verify(supplier, times(2)).get();
             // logger calls in order
             verify(logger).creatingPool(config);
-            verify(logger).createdObject(objectIdCaptor.capture());
+            verify(logger).createdObject(objectCaptor.capture());
             verify(logger).failedToCreatePool(error);
-            verify(logger).releasingObjectResources(objectIdCaptor.getValue());
-            verify(logger).releasedObjectResources(objectIdCaptor.getValue());
+            verify(logger).releasingObjectResources(objectCaptor.getValue());
+            verify(logger).releasedObjectResources(objectCaptor.getValue());
 
             verifyNoMoreInteractions(supplier, logger);
         }
@@ -204,10 +204,10 @@ class PoolTest {
             verify(supplier, times(2)).get();
             // logger calls in order
             verify(logger).creatingPool(config);
-            verify(logger).createdObject(object.objectId());
+            verify(logger).createdObject(object);
             verify(logger).failedToCreatePool(error);
-            verify(logger).releasingObjectResources(object.objectId());
-            verify(logger).releaseObjectResourcesFailed(object.objectId(), suppressed);
+            verify(logger).releasingObjectResources(object);
+            verify(logger).releaseObjectResourcesFailed(object, suppressed);
 
             verifyNoMoreInteractions(logger);
         }
@@ -257,14 +257,14 @@ class PoolTest {
                 // logger calls in order
                 // create pool
                 verify(logger).creatingPool(config);
-                verify(logger).createdObject(object.objectId());
+                verify(logger).createdObject(object);
                 verify(logger).createdPool(config);
                 // acquire object
-                verify(logger).increasedObjectRefCount(object.objectId(), 1);
-                verify(logger).acquiredObject(object.objectId(), 0, 1);
+                verify(logger).increasedObjectRefCount(object, 1);
+                verify(logger).acquiredObject(object, 0, 1);
                 // release object
-                verify(logger).decreasedObjectRefCount(object.objectId(), 0);
-                verify(logger).returnedObject(object.objectId(), 1, 1);
+                verify(logger).decreasedObjectRefCount(object, 0);
+                verify(logger).returnedObject(object, 1, 1);
 
                 verifyNoMoreInteractions(supplier, logger);
 
@@ -298,21 +298,21 @@ class PoolTest {
                 // logger calls in order
                 // create pool
                 verify(logger).creatingPool(config);
-                verify(logger).createdObject(object1.objectId());
+                verify(logger).createdObject(object1);
                 verify(logger).createdPool(config);
                 // acquire object1
-                verify(logger).increasedObjectRefCount(object1.objectId(), 1);
-                verify(logger).acquiredObject(object1.objectId(), 0, 1);
+                verify(logger).increasedObjectRefCount(object1, 1);
+                verify(logger).acquiredObject(object1, 0, 1);
                 // acquire object2
-                verify(logger).createdObject(object2.objectId());
-                verify(logger).increasedObjectRefCount(object2.objectId(), 1);
-                verify(logger).acquiredObject(object2.objectId(), 0, 2);
+                verify(logger).createdObject(object2);
+                verify(logger).increasedObjectRefCount(object2, 1);
+                verify(logger).acquiredObject(object2, 0, 2);
                 // release object1
-                verify(logger).decreasedObjectRefCount(object1.objectId(), 0);
-                verify(logger).returnedObject(object1.objectId(), 1, 2);
+                verify(logger).decreasedObjectRefCount(object1, 0);
+                verify(logger).returnedObject(object1, 1, 2);
                 // release object2
-                verify(logger).decreasedObjectRefCount(object2.objectId(), 0);
-                verify(logger).returnedObject(object2.objectId(), 2, 2);
+                verify(logger).decreasedObjectRefCount(object2, 0);
+                verify(logger).returnedObject(object2, 2, 2);
 
                 verifyNoMoreInteractions(supplier, logger);
 
@@ -354,21 +354,21 @@ class PoolTest {
                     // logger calls in order
                     // create pool
                     verify(logger).creatingPool(config);
-                    verify(logger).createdObject(object1.objectId());
+                    verify(logger).createdObject(object1);
                     verify(logger).createdPool(config);
                     // acquire object1
-                    verify(logger).increasedObjectRefCount(object1.objectId(), 1);
-                    verify(logger).acquiredObject(object1.objectId(), 0, 1);
+                    verify(logger).increasedObjectRefCount(object1, 1);
+                    verify(logger).acquiredObject(object1, 0, 1);
                     // acquire object2
-                    verify(logger).createdObject(object2.objectId());
-                    verify(logger).increasedObjectRefCount(object2.objectId(), 1);
-                    verify(logger).acquiredObject(object2.objectId(), 0, 2);
+                    verify(logger).createdObject(object2);
+                    verify(logger).increasedObjectRefCount(object2, 1);
+                    verify(logger).acquiredObject(object2, 0, 2);
                     // release object1
-                    verify(logger).decreasedObjectRefCount(object1.objectId(), 0);
-                    verify(logger).returnedObject(object1.objectId(), 1, 2);
+                    verify(logger).decreasedObjectRefCount(object1, 0);
+                    verify(logger).returnedObject(object1, 1, 2);
                     // release object2
-                    verify(logger).decreasedObjectRefCount(object2.objectId(), 0);
-                    verify(logger).returnedObject(object2.objectId(), 2, 2);
+                    verify(logger).decreasedObjectRefCount(object2, 0);
+                    verify(logger).returnedObject(object2, 2, 2);
 
                     verifyNoMoreInteractions(supplier, logger);
 
@@ -407,21 +407,21 @@ class PoolTest {
                     // logger calls in order
                     // create pool
                     verify(logger).creatingPool(config);
-                    verify(logger).createdObject(object1.objectId());
+                    verify(logger).createdObject(object1);
                     verify(logger).createdPool(config);
                     // acquire object1
-                    verify(logger).increasedObjectRefCount(object1.objectId(), 1);
-                    verify(logger).acquiredObject(object1.objectId(), 0, 1);
+                    verify(logger).increasedObjectRefCount(object1, 1);
+                    verify(logger).acquiredObject(object1, 0, 1);
                     // acquire object2
-                    verify(logger).createdObject(object2.objectId());
-                    verify(logger).increasedObjectRefCount(object2.objectId(), 1);
-                    verify(logger).acquiredObject(object2.objectId(), 0, 2);
+                    verify(logger).createdObject(object2);
+                    verify(logger).increasedObjectRefCount(object2, 1);
+                    verify(logger).acquiredObject(object2, 0, 2);
                     // release object1
-                    verify(logger).decreasedObjectRefCount(object1.objectId(), 0);
-                    verify(logger).returnedObject(object1.objectId(), 1, 2);
+                    verify(logger).decreasedObjectRefCount(object1, 0);
+                    verify(logger).returnedObject(object1, 1, 2);
                     // release object2
-                    verify(logger).decreasedObjectRefCount(object2.objectId(), 0);
-                    verify(logger).returnedObject(object2.objectId(), 2, 2);
+                    verify(logger).decreasedObjectRefCount(object2, 0);
+                    verify(logger).returnedObject(object2, 2, 2);
 
                     verifyNoMoreInteractions(supplier, logger);
 
@@ -465,26 +465,26 @@ class PoolTest {
                     // logger calls in order
                     // create pool
                     verify(logger).creatingPool(config);
-                    verify(logger).createdObject(object1.objectId());
+                    verify(logger).createdObject(object1);
                     verify(logger).createdPool(config);
                     // acquire object1
-                    verify(logger).increasedObjectRefCount(object1.objectId(), 1);
-                    verify(logger).acquiredObject(object1.objectId(), 0, 1);
+                    verify(logger).increasedObjectRefCount(object1, 1);
+                    verify(logger).acquiredObject(object1, 0, 1);
                     // acquire object2
-                    verify(logger).createdObject(object2.objectId());
-                    verify(logger).increasedObjectRefCount(object2.objectId(), 1);
-                    verify(logger).acquiredObject(object2.objectId(), 0, 2);
+                    verify(logger).createdObject(object2);
+                    verify(logger).increasedObjectRefCount(object2, 1);
+                    verify(logger).acquiredObject(object2, 0, 2);
                     // shutdown - no idle objects available
                     verify(logger).drainedPool(2);
                     verify(logger).shutDownPool();
                     // release object1 - not returned but resources released
-                    verify(logger).decreasedObjectRefCount(object1.objectId(), 0);
-                    verify(logger).releasingObjectResources(object1.objectId());
-                    verify(logger).releasedObjectResources(object1.objectId());
+                    verify(logger).decreasedObjectRefCount(object1, 0);
+                    verify(logger).releasingObjectResources(object1);
+                    verify(logger).releasedObjectResources(object1);
                     // release object2 - not returned but resources released
-                    verify(logger).decreasedObjectRefCount(object2.objectId(), 0);
-                    verify(logger).releasingObjectResources(object2.objectId());
-                    verify(logger).releasedObjectResources(object2.objectId());
+                    verify(logger).decreasedObjectRefCount(object2, 0);
+                    verify(logger).releasingObjectResources(object2);
+                    verify(logger).releasedObjectResources(object2);
 
                     verifyNoMoreInteractions(supplier, logger);
 
@@ -529,26 +529,26 @@ class PoolTest {
                     // logger calls in order
                     // create pool
                     verify(logger).creatingPool(config);
-                    verify(logger).createdObject(object1.objectId());
+                    verify(logger).createdObject(object1);
                     verify(logger).createdPool(config);
                     // acquire object1
-                    verify(logger).increasedObjectRefCount(object1.objectId(), 1);
-                    verify(logger).acquiredObject(object1.objectId(), 0, 1);
+                    verify(logger).increasedObjectRefCount(object1, 1);
+                    verify(logger).acquiredObject(object1, 0, 1);
                     // acquire object2
-                    verify(logger).createdObject(object2.objectId());
-                    verify(logger).increasedObjectRefCount(object2.objectId(), 1);
-                    verify(logger).acquiredObject(object2.objectId(), 0, 2);
+                    verify(logger).createdObject(object2);
+                    verify(logger).increasedObjectRefCount(object2, 1);
+                    verify(logger).acquiredObject(object2, 0, 2);
                     // shutdown - no idle objects available
                     verify(logger).drainedPool(2);
                     verify(logger).shutDownPool();
                     // release object1 - not returned but resources released
-                    verify(logger).decreasedObjectRefCount(object1.objectId(), 0);
-                    verify(logger).releasingObjectResources(object1.objectId());
-                    verify(logger).releasedObjectResources(object1.objectId());
+                    verify(logger).decreasedObjectRefCount(object1, 0);
+                    verify(logger).releasingObjectResources(object1);
+                    verify(logger).releasedObjectResources(object1);
                     // release object2 - not returned but resources released
-                    verify(logger).decreasedObjectRefCount(object2.objectId(), 0);
-                    verify(logger).releasingObjectResources(object2.objectId());
-                    verify(logger).releasedObjectResources(object2.objectId());
+                    verify(logger).decreasedObjectRefCount(object2, 0);
+                    verify(logger).releasingObjectResources(object2);
+                    verify(logger).releasedObjectResources(object2);
 
                     verifyNoMoreInteractions(supplier, logger);
 
@@ -599,21 +599,21 @@ class PoolTest {
                 // logger calls in order
                 // create pool
                 verify(logger).creatingPool(config);
-                verify(logger).createdObject(object1.objectId());
+                verify(logger).createdObject(object1);
                 verify(logger).createdPool(config);
                 // acquire object1
-                verify(logger).increasedObjectRefCount(object1.objectId(), 1);
-                verify(logger).acquiredObject(object1.objectId(), 0, 1);
+                verify(logger).increasedObjectRefCount(object1, 1);
+                verify(logger).acquiredObject(object1, 0, 1);
                 // acquire object2
-                verify(logger).createdObject(object2.objectId());
-                verify(logger).increasedObjectRefCount(object2.objectId(), 1);
-                verify(logger).acquiredObject(object2.objectId(), 0, 2);
+                verify(logger).createdObject(object2);
+                verify(logger).increasedObjectRefCount(object2, 1);
+                verify(logger).acquiredObject(object2, 0, 2);
                 // release object1
-                verify(logger).decreasedObjectRefCount(object1.objectId(), 0);
-                verify(logger).returnedObject(object1.objectId(), 1, 2);
+                verify(logger).decreasedObjectRefCount(object1, 0);
+                verify(logger).returnedObject(object1, 1, 2);
                 // release object2
-                verify(logger).decreasedObjectRefCount(object2.objectId(), 0);
-                verify(logger).returnedObject(object2.objectId(), 2, 2);
+                verify(logger).decreasedObjectRefCount(object2, 0);
+                verify(logger).returnedObject(object2, 2, 2);
 
                 verifyNoMoreInteractions(supplier, logger);
 
@@ -655,14 +655,14 @@ class PoolTest {
                     // logger calls in order
                     // create pool
                     verify(logger).creatingPool(config);
-                    verify(logger).createdObject(object1.objectId());
+                    verify(logger).createdObject(object1);
                     verify(logger).createdPool(config);
                     // acquire object1 / object2
-                    verify(logger, times(2)).increasedObjectRefCount(object1.objectId(), 1);
-                    verify(logger, times(2)).acquiredObject(object1.objectId(), 0, 1);
+                    verify(logger, times(2)).increasedObjectRefCount(object1, 1);
+                    verify(logger, times(2)).acquiredObject(object1, 0, 1);
                     // release object1
-                    verify(logger).decreasedObjectRefCount(object1.objectId(), 0);
-                    verify(logger).returnedObject(object1.objectId(), 1, 1);
+                    verify(logger).decreasedObjectRefCount(object1, 0);
+                    verify(logger).returnedObject(object1, 1, 1);
 
                     verifyNoMoreInteractions(supplier, logger);
 
@@ -700,14 +700,14 @@ class PoolTest {
                     // logger calls in order
                     // create pool
                     verify(logger).creatingPool(config);
-                    verify(logger).createdObject(object1.objectId());
+                    verify(logger).createdObject(object1);
                     verify(logger).createdPool(config);
                     // acquire object1 / object2
-                    verify(logger, times(2)).increasedObjectRefCount(object1.objectId(), 1);
-                    verify(logger, times(2)).acquiredObject(object1.objectId(), 0, 1);
+                    verify(logger, times(2)).increasedObjectRefCount(object1, 1);
+                    verify(logger, times(2)).acquiredObject(object1, 0, 1);
                     // release object1
-                    verify(logger).decreasedObjectRefCount(object1.objectId(), 0);
-                    verify(logger).returnedObject(object1.objectId(), 1, 1);
+                    verify(logger).decreasedObjectRefCount(object1, 0);
+                    verify(logger).returnedObject(object1, 1, 1);
 
                     verifyNoMoreInteractions(supplier, logger);
 
@@ -748,18 +748,18 @@ class PoolTest {
                 // logger calls in order
                 // create pool
                 verify(logger).creatingPool(config);
-                verify(logger).createdObject(object.objectId());
+                verify(logger).createdObject(object);
                 verify(logger).createdPool(config);
                 // acquire object
-                verify(logger).increasedObjectRefCount(object.objectId(), 1);
-                verify(logger).acquiredObject(object.objectId(), 0, 1);
+                verify(logger).increasedObjectRefCount(object, 1);
+                verify(logger).acquiredObject(object, 0, 1);
                 // shutdown
                 verify(logger).drainedPool(1);
                 verify(logger).shutDownPool();
                 // release object
-                verify(logger).decreasedObjectRefCount(object.objectId(), 0);
-                verify(logger).releasingObjectResources(object.objectId());
-                verify(logger).releasedObjectResources(object.objectId());
+                verify(logger).decreasedObjectRefCount(object, 0);
+                verify(logger).releasingObjectResources(object);
+                verify(logger).releasedObjectResources(object);
 
                 verifyNoMoreInteractions(supplier, logger);
 
@@ -796,14 +796,14 @@ class PoolTest {
                 // logger calls in order
                 // create pool
                 verify(logger).creatingPool(config);
-                verify(logger).createdObject(object.objectId());
+                verify(logger).createdObject(object);
                 verify(logger).createdPool(config);
                 // acquire object
-                verify(logger).increasedObjectRefCount(object.objectId(), 1);
-                verify(logger).acquiredObject(object.objectId(), 0, 1);
+                verify(logger).increasedObjectRefCount(object, 1);
+                verify(logger).acquiredObject(object, 0, 1);
                 // release object
-                verify(logger).decreasedObjectRefCount(object.objectId(), 0);
-                verify(logger).returnedObject(object.objectId(), 1, 1);
+                verify(logger).decreasedObjectRefCount(object, 0);
+                verify(logger).returnedObject(object, 1, 1);
 
                 verifyNoMoreInteractions(supplier, logger);
 
@@ -836,21 +836,21 @@ class PoolTest {
                 // logger calls in order
                 // create pool
                 verify(logger).creatingPool(config);
-                verify(logger).createdObject(object1.objectId());
+                verify(logger).createdObject(object1);
                 verify(logger).createdPool(config);
                 // acquire object1
-                verify(logger).increasedObjectRefCount(object1.objectId(), 1);
-                verify(logger).acquiredObject(object1.objectId(), 0, 1);
+                verify(logger).increasedObjectRefCount(object1, 1);
+                verify(logger).acquiredObject(object1, 0, 1);
                 // acquire object2
-                verify(logger).createdObject(object2.objectId());
-                verify(logger).increasedObjectRefCount(object2.objectId(), 1);
-                verify(logger).acquiredObject(object2.objectId(), 0, 2);
+                verify(logger).createdObject(object2);
+                verify(logger).increasedObjectRefCount(object2, 1);
+                verify(logger).acquiredObject(object2, 0, 2);
                 // release object1
-                verify(logger).decreasedObjectRefCount(object1.objectId(), 0);
-                verify(logger).returnedObject(object1.objectId(), 1, 2);
+                verify(logger).decreasedObjectRefCount(object1, 0);
+                verify(logger).returnedObject(object1, 1, 2);
                 // release object2
-                verify(logger).decreasedObjectRefCount(object2.objectId(), 0);
-                verify(logger).returnedObject(object2.objectId(), 2, 2);
+                verify(logger).decreasedObjectRefCount(object2, 0);
+                verify(logger).returnedObject(object2, 2, 2);
 
                 verifyNoMoreInteractions(supplier, logger);
 
@@ -887,21 +887,21 @@ class PoolTest {
                 // logger calls in order
                 // create pool
                 verify(logger).creatingPool(config);
-                verify(logger).createdObject(object1.objectId());
+                verify(logger).createdObject(object1);
                 verify(logger).createdPool(config);
                 // acquire object1
-                verify(logger).increasedObjectRefCount(object1.objectId(), 1);
-                verify(logger).acquiredObject(object1.objectId(), 0, 1);
+                verify(logger).increasedObjectRefCount(object1, 1);
+                verify(logger).acquiredObject(object1, 0, 1);
                 // acquire object2
-                verify(logger).createdObject(object2.objectId());
-                verify(logger).increasedObjectRefCount(object2.objectId(), 1);
-                verify(logger).acquiredObject(object2.objectId(), 0, 2);
+                verify(logger).createdObject(object2);
+                verify(logger).increasedObjectRefCount(object2, 1);
+                verify(logger).acquiredObject(object2, 0, 2);
                 // release object1
-                verify(logger).decreasedObjectRefCount(object1.objectId(), 0);
-                verify(logger).returnedObject(object1.objectId(), 1, 2);
+                verify(logger).decreasedObjectRefCount(object1, 0);
+                verify(logger).returnedObject(object1, 1, 2);
                 // release object2
-                verify(logger).decreasedObjectRefCount(object2.objectId(), 0);
-                verify(logger).returnedObject(object2.objectId(), 2, 2);
+                verify(logger).decreasedObjectRefCount(object2, 0);
+                verify(logger).returnedObject(object2, 2, 2);
 
                 verifyNoMoreInteractions(supplier, logger);
 
@@ -950,21 +950,21 @@ class PoolTest {
                 // logger calls in order
                 // create pool
                 verify(logger).creatingPool(config);
-                verify(logger).createdObject(object1.objectId());
+                verify(logger).createdObject(object1);
                 verify(logger).createdPool(config);
                 // acquire object1
-                verify(logger).increasedObjectRefCount(object1.objectId(), 1);
-                verify(logger).acquiredObject(object1.objectId(), 0, 1);
+                verify(logger).increasedObjectRefCount(object1, 1);
+                verify(logger).acquiredObject(object1, 0, 1);
                 // acquire object2
-                verify(logger).createdObject(object2.objectId());
-                verify(logger).increasedObjectRefCount(object2.objectId(), 1);
-                verify(logger).acquiredObject(object2.objectId(), 0, 2);
+                verify(logger).createdObject(object2);
+                verify(logger).increasedObjectRefCount(object2, 1);
+                verify(logger).acquiredObject(object2, 0, 2);
                 // release object1
-                verify(logger).decreasedObjectRefCount(object1.objectId(), 0);
-                verify(logger).returnedObject(object1.objectId(), 1, 2);
+                verify(logger).decreasedObjectRefCount(object1, 0);
+                verify(logger).returnedObject(object1, 1, 2);
                 // release object2
-                verify(logger).decreasedObjectRefCount(object2.objectId(), 0);
-                verify(logger).returnedObject(object2.objectId(), 2, 2);
+                verify(logger).decreasedObjectRefCount(object2, 0);
+                verify(logger).returnedObject(object2, 2, 2);
 
                 verifyNoMoreInteractions(supplier, logger);
 
@@ -1003,14 +1003,14 @@ class PoolTest {
                 // logger calls in order
                 // create pool
                 verify(logger).creatingPool(config);
-                verify(logger).createdObject(object.objectId());
+                verify(logger).createdObject(object);
                 verify(logger).createdPool(config);
                 // acquire object
-                verify(logger).increasedObjectRefCount(object.objectId(), 1);
-                verify(logger).acquiredObject(object.objectId(), 0, 1);
+                verify(logger).increasedObjectRefCount(object, 1);
+                verify(logger).acquiredObject(object, 0, 1);
                 // release object
-                verify(logger).decreasedObjectRefCount(object.objectId(), 0);
-                verify(logger).returnedObject(object.objectId(), 1, 1);
+                verify(logger).decreasedObjectRefCount(object, 0);
+                verify(logger).returnedObject(object, 1, 1);
 
                 verifyNoMoreInteractions(supplier, logger);
 
@@ -1046,21 +1046,21 @@ class PoolTest {
                 // logger calls in order
                 // create pool
                 verify(logger).creatingPool(config);
-                verify(logger).createdObject(object1.objectId());
+                verify(logger).createdObject(object1);
                 verify(logger).createdPool(config);
                 // acquire object1
-                verify(logger).increasedObjectRefCount(object1.objectId(), 1);
-                verify(logger).acquiredObject(object1.objectId(), 0, 1);
+                verify(logger).increasedObjectRefCount(object1, 1);
+                verify(logger).acquiredObject(object1, 0, 1);
                 // acquire object2
-                verify(logger).createdObject(object2.objectId());
-                verify(logger).increasedObjectRefCount(object2.objectId(), 1);
-                verify(logger).acquiredObject(object2.objectId(), 0, 2);
+                verify(logger).createdObject(object2);
+                verify(logger).increasedObjectRefCount(object2, 1);
+                verify(logger).acquiredObject(object2, 0, 2);
                 // release object1
-                verify(logger).decreasedObjectRefCount(object1.objectId(), 0);
-                verify(logger).returnedObject(object1.objectId(), 1, 2);
+                verify(logger).decreasedObjectRefCount(object1, 0);
+                verify(logger).returnedObject(object1, 1, 2);
                 // release object2
-                verify(logger).decreasedObjectRefCount(object2.objectId(), 0);
-                verify(logger).returnedObject(object2.objectId(), 2, 2);
+                verify(logger).decreasedObjectRefCount(object2, 0);
+                verify(logger).returnedObject(object2, 2, 2);
 
                 verifyNoMoreInteractions(supplier, logger);
 
@@ -1102,23 +1102,23 @@ class PoolTest {
                 // logger calls in order
                 // create pool
                 verify(logger).creatingPool(config);
-                verify(logger).createdObject(object1.objectId());
+                verify(logger).createdObject(object1);
                 verify(logger).createdPool(config);
                 // acquire object1; the pool size was 1
-                verify(logger).increasedObjectRefCount(object1.objectId(), 1);
-                verify(logger).acquiredObject(object1.objectId(), 0, 1);
+                verify(logger).increasedObjectRefCount(object1, 1);
+                verify(logger).acquiredObject(object1, 0, 1);
                 // acquire object2
-                verify(logger).createdObject(object2.objectId());
-                verify(logger).increasedObjectRefCount(object2.objectId(), 1);
-                verify(logger).acquiredObject(object2.objectId(), 0, 2);
+                verify(logger).createdObject(object2);
+                verify(logger).increasedObjectRefCount(object2, 1);
+                verify(logger).acquiredObject(object2, 0, 2);
                 // acquire object3
-                verify(logger).createdNonPooledObject(object3.objectId());
+                verify(logger).createdNonPooledObject(object3);
                 // release object1
-                verify(logger).decreasedObjectRefCount(object1.objectId(), 0);
-                verify(logger).returnedObject(object1.objectId(), 1, 2);
+                verify(logger).decreasedObjectRefCount(object1, 0);
+                verify(logger).returnedObject(object1, 1, 2);
                 // release object2
-                verify(logger).decreasedObjectRefCount(object2.objectId(), 0);
-                verify(logger).returnedObject(object2.objectId(), 2, 2);
+                verify(logger).decreasedObjectRefCount(object2, 0);
+                verify(logger).returnedObject(object2, 2, 2);
 
                 verifyNoMoreInteractions(supplier, logger);
 
@@ -1170,21 +1170,21 @@ class PoolTest {
                 // logger calls in order
                 // create pool
                 verify(logger).creatingPool(config);
-                verify(logger).createdObject(object1.objectId());
+                verify(logger).createdObject(object1);
                 verify(logger).createdPool(config);
                 // acquire object1
-                verify(logger).increasedObjectRefCount(object1.objectId(), 1);
-                verify(logger).acquiredObject(object1.objectId(), 0, 1);
+                verify(logger).increasedObjectRefCount(object1, 1);
+                verify(logger).acquiredObject(object1, 0, 1);
                 // acquire object2
-                verify(logger).createdObject(object2.objectId());
-                verify(logger).increasedObjectRefCount(object2.objectId(), 1);
-                verify(logger).acquiredObject(object2.objectId(), 0, 2);
+                verify(logger).createdObject(object2);
+                verify(logger).increasedObjectRefCount(object2, 1);
+                verify(logger).acquiredObject(object2, 0, 2);
                 // release object1
-                verify(logger).decreasedObjectRefCount(object1.objectId(), 0);
-                verify(logger).returnedObject(object1.objectId(), 1, 2);
+                verify(logger).decreasedObjectRefCount(object1, 0);
+                verify(logger).returnedObject(object1, 1, 2);
                 // release object2
-                verify(logger).decreasedObjectRefCount(object2.objectId(), 0);
-                verify(logger).returnedObject(object2.objectId(), 2, 2);
+                verify(logger).decreasedObjectRefCount(object2, 0);
+                verify(logger).returnedObject(object2, 2, 2);
 
                 verifyNoMoreInteractions(supplier, logger);
 
@@ -1221,36 +1221,36 @@ class PoolTest {
 
             object2.release();
 
-            ArgumentCaptor<Long> objectIdCaptor = ArgumentCaptor.forClass(Long.class);
+            ArgumentCaptor<TestObject> objectCaptor = ArgumentCaptor.forClass(TestObject.class);
 
             verify(supplier, times(3)).get();
             // logger calls in order
             // create pool
             verify(logger).creatingPool(config);
-            verify(logger, times(3)).createdObject(objectIdCaptor.capture());
-            List<Long> objectIds = objectIdCaptor.getAllValues();
-            verify(logger).createdObject(objectIds.get(0));
+            verify(logger, times(3)).createdObject(objectCaptor.capture());
+            List<TestObject> objects = objectCaptor.getAllValues();
+            verify(logger).createdObject(objects.get(0));
             verify(logger).createdPool(config);
             // acquire object1
-            verify(logger).objectInvalidated(objectIds.get(0), 0, 0);
-            verify(logger).createdObject(object1.objectId());
-            verify(logger).increasedObjectRefCount(object1.objectId(), 1);
-            verify(logger).acquiredObject(object1.objectId(), 0, 1);
+            verify(logger).objectInvalidated(objects.get(0), 0, 0);
+            verify(logger).createdObject(object1);
+            verify(logger).increasedObjectRefCount(object1, 1);
+            verify(logger).acquiredObject(object1, 0, 1);
             // release object1
-            verify(logger).decreasedObjectRefCount(object1.objectId(), 0);
-            verify(logger).objectInvalidated(object1.objectId(), 0, 0);
+            verify(logger).decreasedObjectRefCount(object1, 0);
+            verify(logger).objectInvalidated(object1, 0, 0);
             // acquire object2
-            verify(logger).createdObject(object2.objectId());
-            verify(logger).increasedObjectRefCount(object2.objectId(), 1);
-            verify(logger).acquiredObject(object2.objectId(), 0, 1);
+            verify(logger).createdObject(object2);
+            verify(logger).increasedObjectRefCount(object2, 1);
+            verify(logger).acquiredObject(object2, 0, 1);
             // release object2
-            verify(logger).decreasedObjectRefCount(object2.objectId(), 0);
-            verify(logger).objectInvalidated(object2.objectId(), 0, 0);
+            verify(logger).decreasedObjectRefCount(object2, 0);
+            verify(logger).objectInvalidated(object2, 0, 0);
 
             verifyNoMoreInteractions(supplier, logger);
 
-            assertEquals(object1.objectId(), objectIds.get(1));
-            assertEquals(object2.objectId(), objectIds.get(2));
+            assertSame(object1, objects.get(1));
+            assertSame(object2, objects.get(2));
 
             verify(object1, never()).releaseResources();
             verify(object1, never()).releaseResourcesQuietly();
@@ -1290,25 +1290,25 @@ class PoolTest {
             // logger calls in order
             // create pool
             verify(logger).creatingPool(config);
-            verify(logger).createdObject(object1.objectId());
+            verify(logger).createdObject(object1);
             verify(logger).createdPool(config);
             // acquire object1
-            verify(logger).increasedObjectRefCount(object1.objectId(), 1);
-            verify(logger).acquiredObject(object1.objectId(), 0, 1);
+            verify(logger).increasedObjectRefCount(object1, 1);
+            verify(logger).acquiredObject(object1, 0, 1);
             // release object1
-            verify(logger).decreasedObjectRefCount(object1.objectId(), 0);
-            verify(logger).returnedObject(object1.objectId(), 1, 1);
+            verify(logger).decreasedObjectRefCount(object1, 0);
+            verify(logger).returnedObject(object1, 1, 1);
             // acquire object2; the size is decreased to 0 which allows a new object to be created
-            verify(logger).objectIdleTooLong(object1.objectId(), 0, 0);
-            verify(logger).releasingObjectResources(object1.objectId());
-            verify(logger).releaseObjectResourcesFailed(object1.objectId(), releaseError);
-            verify(logger).releasedObjectResources(object1.objectId());
-            verify(logger).createdObject(object2.objectId());
-            verify(logger).increasedObjectRefCount(object2.objectId(), 1);
-            verify(logger).acquiredObject(object2.objectId(), 0, 1);
+            verify(logger).objectIdleTooLong(object1, 0, 0);
+            verify(logger).releasingObjectResources(object1);
+            verify(logger).releaseObjectResourcesFailed(object1, releaseError);
+            verify(logger).releasedObjectResources(object1);
+            verify(logger).createdObject(object2);
+            verify(logger).increasedObjectRefCount(object2, 1);
+            verify(logger).acquiredObject(object2, 0, 1);
             // release object2
-            verify(logger).decreasedObjectRefCount(object2.objectId(), 0);
-            verify(logger).returnedObject(object2.objectId(), 1, 1);
+            verify(logger).decreasedObjectRefCount(object2, 0);
+            verify(logger).returnedObject(object2, 1, 1);
 
             verifyNoMoreInteractions(logger);
 
@@ -1363,18 +1363,18 @@ class PoolTest {
             // logger calls in order
             // create pool
             verify(logger).creatingPool(config);
-            verify(logger).createdObject(object1.objectId());
+            verify(logger).createdObject(object1);
             verify(logger).createdPool(config);
             // acquire object1 / object2
-            verify(logger, times(2)).increasedObjectRefCount(object1.objectId(), 1);
-            verify(logger, times(2)).acquiredObject(object1.objectId(), 0, 1);
+            verify(logger, times(2)).increasedObjectRefCount(object1, 1);
+            verify(logger, times(2)).acquiredObject(object1, 0, 1);
             // add reference
-            verify(logger).increasedObjectRefCount(object1.objectId(), 2);
+            verify(logger).increasedObjectRefCount(object1, 2);
             // release object1
-            verify(logger).decreasedObjectRefCount(object1.objectId(), 1);
+            verify(logger).decreasedObjectRefCount(object1, 1);
             // remove reference / release object2
-            verify(logger, times(2)).decreasedObjectRefCount(object1.objectId(), 0);
-            verify(logger, times(2)).returnedObject(object1.objectId(), 1, 1);
+            verify(logger, times(2)).decreasedObjectRefCount(object1, 0);
+            verify(logger, times(2)).returnedObject(object1, 1, 1);
 
             verifyNoMoreInteractions(supplier, logger);
 
@@ -1410,18 +1410,18 @@ class PoolTest {
                 assertEquals("0", exception.getMessage());
                 assertEquals(0, exception.getSuppressed().length);
 
-                ArgumentCaptor<Long> objectIdCaptor = ArgumentCaptor.forClass(Long.class);
+                ArgumentCaptor<TestObject> objectCaptor = ArgumentCaptor.forClass(TestObject.class);
 
                 verify(supplier).get();
                 // logger calls in order
                 // create pool
                 verify(logger).creatingPool(config);
-                verify(logger).createdObject(objectIdCaptor.capture());
+                verify(logger).createdObject(objectCaptor.capture());
                 verify(logger).createdPool(config);
                 // shutdown
                 verify(logger).drainedPool(0);
-                verify(logger).releasingObjectResources(objectIdCaptor.getValue());
-                verify(logger).releaseObjectResourcesFailed(objectIdCaptor.getValue(), exception);
+                verify(logger).releasingObjectResources(objectCaptor.getValue());
+                verify(logger).releaseObjectResourcesFailed(objectCaptor.getValue(), exception);
                 verify(logger).shutDownPool();
 
                 verifyNoMoreInteractions(supplier, logger);
@@ -1457,23 +1457,23 @@ class PoolTest {
                 assertInstanceOf(NumberFormatException.class, suppressed[1]);
                 assertEquals("2", suppressed[1].getMessage());
 
-                ArgumentCaptor<Long> objectIdCaptor = ArgumentCaptor.forClass(Long.class);
+                ArgumentCaptor<TestObject> objectCaptor = ArgumentCaptor.forClass(TestObject.class);
 
                 verify(supplier, times(3)).get();
                 // logger calls in order
                 // create pool
                 verify(logger).creatingPool(config);
-                verify(logger, times(3)).createdObject(objectIdCaptor.capture());
-                List<Long> objectIds = objectIdCaptor.getAllValues();
+                verify(logger, times(3)).createdObject(objectCaptor.capture());
+                List<TestObject> objects = objectCaptor.getAllValues();
                 verify(logger).createdPool(config);
                 // shutdown
                 verify(logger).drainedPool(0);
-                verify(logger).releasingObjectResources(objectIds.get(0));
-                verify(logger).releaseObjectResourcesFailed(objectIds.get(0), exception);
-                verify(logger).releasingObjectResources(objectIds.get(1));
-                verify(logger).releaseObjectResourcesFailed(objectIds.get(1), (Exception) suppressed[0]);
-                verify(logger).releasingObjectResources(objectIds.get(2));
-                verify(logger).releaseObjectResourcesFailed(objectIds.get(2), (Exception) suppressed[1]);
+                verify(logger).releasingObjectResources(objects.get(0));
+                verify(logger).releaseObjectResourcesFailed(objects.get(0), exception);
+                verify(logger).releasingObjectResources(objects.get(1));
+                verify(logger).releaseObjectResourcesFailed(objects.get(1), (Exception) suppressed[0]);
+                verify(logger).releasingObjectResources(objects.get(2));
+                verify(logger).releaseObjectResourcesFailed(objects.get(2), (Exception) suppressed[1]);
                 verify(logger).shutDownPool();
 
                 verifyNoMoreInteractions(supplier, logger);
@@ -1500,19 +1500,19 @@ class PoolTest {
             pool.shutdown();
             pool.shutdown();
 
-            ArgumentCaptor<Long> objectIdCaptor = ArgumentCaptor.forClass(Long.class);
+            ArgumentCaptor<TestObject> objectCaptor = ArgumentCaptor.forClass(TestObject.class);
 
             verify(supplier, times(2)).get();
             // logger calls in order
             // create pool
             verify(logger).creatingPool(config);
-            verify(logger, times(2)).createdObject(objectIdCaptor.capture());
+            verify(logger, times(2)).createdObject(objectCaptor.capture());
             verify(logger).createdPool(config);
             // shutdown 1
             verify(logger).drainedPool(0);
-            for (long objectId : objectIdCaptor.getAllValues()) {
-                verify(logger).releasingObjectResources(objectId);
-                verify(logger).releasedObjectResources(objectId);
+            for (TestObject object : objectCaptor.getAllValues()) {
+                verify(logger).releasingObjectResources(object);
+                verify(logger).releasedObjectResources(object);
             }
             verify(logger).shutDownPool();
             // no events for shutdown 2+
@@ -1562,19 +1562,19 @@ class PoolTest {
             // forAllIdleObjects
             verify(logger).drainedPool(0);
             // acquire object1
-            verify(logger).createdObject(object1.objectId());
-            verify(logger).increasedObjectRefCount(object1.objectId(), 1);
-            verify(logger).acquiredObject(object1.objectId(), 0, 1);
+            verify(logger).createdObject(object1);
+            verify(logger).increasedObjectRefCount(object1, 1);
+            verify(logger).acquiredObject(object1, 0, 1);
             // acquire object2
-            verify(logger).createdObject(object2.objectId());
-            verify(logger).increasedObjectRefCount(object2.objectId(), 1);
-            verify(logger).acquiredObject(object2.objectId(), 0, 2);
+            verify(logger).createdObject(object2);
+            verify(logger).increasedObjectRefCount(object2, 1);
+            verify(logger).acquiredObject(object2, 0, 2);
             // release object1
-            verify(logger).decreasedObjectRefCount(object1.objectId(), 0);
-            verify(logger).returnedObject(object1.objectId(), 1, 2);
+            verify(logger).decreasedObjectRefCount(object1, 0);
+            verify(logger).returnedObject(object1, 1, 2);
             // release object2
-            verify(logger).decreasedObjectRefCount(object2.objectId(), 0);
-            verify(logger).returnedObject(object2.objectId(), 2, 2);
+            verify(logger).decreasedObjectRefCount(object2, 0);
+            verify(logger).returnedObject(object2, 2, 2);
 
             verifyNoMoreInteractions(supplier, logger, action);
 
@@ -1629,36 +1629,36 @@ class PoolTest {
             // logger calls in order
             // create pool
             verify(logger).creatingPool(config);
-            verify(logger).createdObject(object1.objectId());
-            verify(logger).createdObject(object2.objectId());
-            verify(logger).createdObject(object3.objectId());
+            verify(logger).createdObject(object1);
+            verify(logger).createdObject(object2);
+            verify(logger).createdObject(object3);
             verify(logger).createdPool(config);
             // acquire object1
-            verify(logger).increasedObjectRefCount(object1.objectId(), 1);
-            verify(logger).acquiredObject(object1.objectId(), 2, 3);
+            verify(logger).increasedObjectRefCount(object1, 1);
+            verify(logger).acquiredObject(object1, 2, 3);
             // forAllIdleObjects
             verify(logger).drainedPool(3);
-            verify(logger).objectEvent(LogLevel.DEBUG, object2.objectId(), "custom event");
-            verify(logger).objectEvent(LogLevel.DEBUG, object2.objectId(), messageSupplier);
-            verify(logger).returnedObject(object2.objectId(), 1, 3);
-            verify(logger).objectEvent(LogLevel.DEBUG, object3.objectId(), "custom event");
-            verify(logger).objectEvent(LogLevel.DEBUG, object3.objectId(), messageSupplier);
-            verify(logger).returnedObject(object3.objectId(), 2, 3);
+            verify(logger).objectEvent(LogLevel.DEBUG, object2, "custom event");
+            verify(logger).objectEvent(LogLevel.DEBUG, object2, messageSupplier);
+            verify(logger).returnedObject(object2, 1, 3);
+            verify(logger).objectEvent(LogLevel.DEBUG, object3, "custom event");
+            verify(logger).objectEvent(LogLevel.DEBUG, object3, messageSupplier);
+            verify(logger).returnedObject(object3, 2, 3);
             // acquire object2
-            verify(logger).increasedObjectRefCount(object2.objectId(), 1);
-            verify(logger).acquiredObject(object2.objectId(), 1, 3);
+            verify(logger).increasedObjectRefCount(object2, 1);
+            verify(logger).acquiredObject(object2, 1, 3);
             // acquire object3
-            verify(logger).increasedObjectRefCount(object3.objectId(), 1);
-            verify(logger).acquiredObject(object3.objectId(), 0, 3);
+            verify(logger).increasedObjectRefCount(object3, 1);
+            verify(logger).acquiredObject(object3, 0, 3);
             // release object1
-            verify(logger).decreasedObjectRefCount(object1.objectId(), 0);
-            verify(logger).returnedObject(object1.objectId(), 1, 3);
+            verify(logger).decreasedObjectRefCount(object1, 0);
+            verify(logger).returnedObject(object1, 1, 3);
             // release object2
-            verify(logger).decreasedObjectRefCount(object2.objectId(), 0);
-            verify(logger).returnedObject(object2.objectId(), 2, 3);
+            verify(logger).decreasedObjectRefCount(object2, 0);
+            verify(logger).returnedObject(object2, 2, 3);
             // release object3
-            verify(logger).decreasedObjectRefCount(object3.objectId(), 0);
-            verify(logger).returnedObject(object3.objectId(), 3, 3);
+            verify(logger).decreasedObjectRefCount(object3, 0);
+            verify(logger).returnedObject(object3, 3, 3);
 
             verifyNoMoreInteractions(supplier, logger, action);
 
@@ -1717,32 +1717,32 @@ class PoolTest {
             // logger calls in order
             // create pool
             verify(logger).creatingPool(config);
-            verify(logger).createdObject(object1.objectId());
-            verify(logger).createdObject(object2.objectId());
-            verify(logger).createdObject(object3.objectId());
+            verify(logger).createdObject(object1);
+            verify(logger).createdObject(object2);
+            verify(logger).createdObject(object3);
             verify(logger).createdPool(config);
             // acquire object1
-            verify(logger).increasedObjectRefCount(object1.objectId(), 1);
-            verify(logger).acquiredObject(object1.objectId(), 2, 3);
+            verify(logger).increasedObjectRefCount(object1, 1);
+            verify(logger).acquiredObject(object1, 2, 3);
             // forAllIdleObjects
             verify(logger).drainedPool(3);
-            verify(logger).returnedObject(object2.objectId(), 1, 3);
-            verify(logger).returnedObject(object3.objectId(), 2, 3);
+            verify(logger).returnedObject(object2, 1, 3);
+            verify(logger).returnedObject(object3, 2, 3);
             // acquire object2
-            verify(logger).increasedObjectRefCount(object2.objectId(), 1);
-            verify(logger).acquiredObject(object2.objectId(), 1, 3);
+            verify(logger).increasedObjectRefCount(object2, 1);
+            verify(logger).acquiredObject(object2, 1, 3);
             // acquire object3
-            verify(logger).increasedObjectRefCount(object3.objectId(), 1);
-            verify(logger).acquiredObject(object3.objectId(), 0, 3);
+            verify(logger).increasedObjectRefCount(object3, 1);
+            verify(logger).acquiredObject(object3, 0, 3);
             // release object1
-            verify(logger).decreasedObjectRefCount(object1.objectId(), 0);
-            verify(logger).returnedObject(object1.objectId(), 1, 3);
+            verify(logger).decreasedObjectRefCount(object1, 0);
+            verify(logger).returnedObject(object1, 1, 3);
             // release object2
-            verify(logger).decreasedObjectRefCount(object2.objectId(), 0);
-            verify(logger).returnedObject(object2.objectId(), 2, 3);
+            verify(logger).decreasedObjectRefCount(object2, 0);
+            verify(logger).returnedObject(object2, 2, 3);
             // release object3
-            verify(logger).decreasedObjectRefCount(object3.objectId(), 0);
-            verify(logger).returnedObject(object3.objectId(), 3, 3);
+            verify(logger).decreasedObjectRefCount(object3, 0);
+            verify(logger).returnedObject(object3, 3, 3);
 
             verifyNoMoreInteractions(supplier, logger, action);
 
@@ -1752,37 +1752,6 @@ class PoolTest {
             verify(object2, never()).releaseResourcesQuietly();
             verify(object3, never()).releaseResources();
             verify(object3, never()).releaseResourcesQuietly();
-        }
-    }
-
-    private static class TestObject extends PoolableObject<None> {
-
-        private final boolean valid;
-        private final Supplier<RuntimeException> releaseExceptionSupplier;
-
-        private TestObject() {
-            this(true);
-        }
-
-        TestObject(boolean valid) {
-            this(valid, null);
-        }
-
-        TestObject(boolean valid, Supplier<RuntimeException> releaseExceptionSupplier) {
-            this.valid = valid;
-            this.releaseExceptionSupplier = releaseExceptionSupplier;
-        }
-
-        @Override
-        protected boolean isValid() {
-            return valid;
-        }
-
-        @Override
-        protected void doReleaseResources() throws None {
-            if (releaseExceptionSupplier != null) {
-                throw releaseExceptionSupplier.get();
-            }
         }
     }
 }

@@ -51,38 +51,7 @@ class ObjectWrapperTest {
 
         pool.shutdown();
 
-        ArgumentCaptor<Long> objectIdCaptor = ArgumentCaptor.forClass(Long.class);
-
-        // logger calls in order, apart from createdObject
-        // create pool
-        verify(logger).creatingPool(config);
-        verify(logger, times(2)).createdObject(objectIdCaptor.capture());
-        List<Long> objectIds = objectIdCaptor.getAllValues();
-        verify(logger).createdObject(objectIds.get(0));
-        verify(logger).createdPool(config);
-        // acquire wrapper / wrapper1
-        verify(logger, times(2)).increasedObjectRefCount(objectIds.get(0), 1);
-        verify(logger, times(2)).acquiredObject(objectIds.get(0), 0, 1);
-        // release wrapper / wrapper1; the second return is with wrapper2 added to the pool
-        verify(logger, times(2)).decreasedObjectRefCount(objectIds.get(0), 0);
-        verify(logger).returnedObject(objectIds.get(0), 1, 1);
-        verify(logger).returnedObject(objectIds.get(0), 2, 2);
-        // acquire wrapper2
-        verify(logger).createdObject(objectIds.get(1));
-        verify(logger).increasedObjectRefCount(objectIds.get(1), 1);
-        verify(logger).acquiredObject(objectIds.get(1), 0, 2);
-        // release wrapper2
-        verify(logger).decreasedObjectRefCount(objectIds.get(1), 0);
-        verify(logger).returnedObject(objectIds.get(1), 1, 2);
-        // shutdown
-        verify(logger).drainedPool(0);
-        verify(logger).releasingObjectResources(objectIds.get(0));
-        verify(logger).releasedObjectResources(objectIds.get(0));
-        verify(logger).releasingObjectResources(objectIds.get(1));
-        verify(logger).releasedObjectResources(objectIds.get(1));
-        verify(logger).shutDownPool();
-
-        verifyNoMoreInteractions(logger);
+        verifyPoolEvents(config, logger);
     }
 
     private void testPool(Pool<ObjectWrapper<Integer>, None> pool) {
@@ -102,5 +71,42 @@ class ObjectWrapperTest {
                 assertIsEmpty(pool.acquireNow());
             }
         }
+    }
+
+    @SuppressWarnings("resource")
+    private void verifyPoolEvents(PoolConfig config, PoolLogger logger) {
+        @SuppressWarnings("unchecked")
+        ArgumentCaptor<ObjectWrapper<Integer>> objectCaptor = ArgumentCaptor.forClass(ObjectWrapper.class);
+
+        // logger calls in order, apart from createdObject
+        // create pool
+        verify(logger).creatingPool(config);
+        verify(logger, times(2)).createdObject(objectCaptor.capture());
+        List<ObjectWrapper<Integer>> objects = objectCaptor.getAllValues();
+        verify(logger).createdObject(objects.get(0));
+        verify(logger).createdPool(config);
+        // acquire wrapper / wrapper1
+        verify(logger, times(2)).increasedObjectRefCount(objects.get(0), 1);
+        verify(logger, times(2)).acquiredObject(objects.get(0), 0, 1);
+        // release wrapper / wrapper1; the second return is with wrapper2 added to the pool
+        verify(logger, times(2)).decreasedObjectRefCount(objects.get(0), 0);
+        verify(logger).returnedObject(objects.get(0), 1, 1);
+        verify(logger).returnedObject(objects.get(0), 2, 2);
+        // acquire wrapper2
+        verify(logger).createdObject(objects.get(1));
+        verify(logger).increasedObjectRefCount(objects.get(1), 1);
+        verify(logger).acquiredObject(objects.get(1), 0, 2);
+        // release wrapper2
+        verify(logger).decreasedObjectRefCount(objects.get(1), 0);
+        verify(logger).returnedObject(objects.get(1), 1, 2);
+        // shutdown
+        verify(logger).drainedPool(0);
+        verify(logger).releasingObjectResources(objects.get(0));
+        verify(logger).releasedObjectResources(objects.get(0));
+        verify(logger).releasingObjectResources(objects.get(1));
+        verify(logger).releasedObjectResources(objects.get(1));
+        verify(logger).shutDownPool();
+
+        verifyNoMoreInteractions(logger);
     }
 }

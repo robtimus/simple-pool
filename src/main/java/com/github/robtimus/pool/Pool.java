@@ -307,7 +307,7 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
         T object = acquireNow().orElse(null);
         if (object == null) {
             object = factory.newObject();
-            logger.createdNonPooledObject(object.objectId());
+            logger.createdNonPooledObject(object);
             object.acquired();
             // The call to object.acquired() allows it to release resources once it has been released
             // Don't log acquired; the object is not part of the pool
@@ -323,7 +323,7 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
             int poolSize = size;
             return () -> {
                 object.acquired();
-                logger.acquiredObject(object.objectId(), idleCount, poolSize);
+                logger.acquiredObject(object, idleCount, poolSize);
                 return object;
             };
         }
@@ -337,7 +337,7 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
                 try {
                     T newObject = createObject();
                     newObject.acquired();
-                    logger.acquiredObject(newObject.objectId(), idleCount, poolSize);
+                    logger.acquiredObject(newObject, idleCount, poolSize);
                     return newObject;
 
                 } catch (Exception e) {
@@ -356,11 +356,11 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
             if (!object.isValid()) {
                 size--;
                 object.clearPool();
-                logger.objectInvalidated(object.objectId(), idleObjects.size(), size);
+                logger.objectInvalidated(object, idleObjects.size(), size);
                 removedObjects = true;
             } else if (config.maxIdleTimeExceeded(object)) {
                 size--;
-                logger.objectIdleTooLong(object.objectId(), idleObjects.size(), size);
+                logger.objectIdleTooLong(object, idleObjects.size(), size);
                 object.releaseResourcesQuietly();
                 object.clearPool();
                 removedObjects = true;
@@ -382,7 +382,7 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
     private T createObject() throws X {
         T object = factory.newObject();
         object.setPool((Pool<PoolableObject<X>, X>) this);
-        logger.createdObject(object.objectId());
+        logger.createdObject(object);
         return object;
     }
 
@@ -431,11 +431,11 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
                 if (object.isValid()) {
                     object.resetIdleSince();
                     idleObjects.add(object);
-                    logger.returnedObject(object.objectId(), idleObjects.size(), size);
+                    logger.returnedObject(object, idleObjects.size(), size);
                 } else {
                     object.clearPool();
                     size--;
-                    logger.objectInvalidated(object.objectId(), idleObjects.size(), size);
+                    logger.objectInvalidated(object, idleObjects.size(), size);
                 }
             } else {
                 size--;

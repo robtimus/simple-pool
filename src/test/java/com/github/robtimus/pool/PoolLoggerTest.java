@@ -107,112 +107,133 @@ class PoolLoggerTest {
         @Test
         @DisplayName("createdObject")
         void testCreatedObject() {
-            poolLogger.createdObject(4);
+            PoolableObject<?> object = new TestObject();
+
+            poolLogger.createdObject(object);
 
             verify(logger).isDebugEnabled();
-            verify(logger).debug(Messages.PoolLogger.createdObject("pool - ", "object-", 4));
+            verify(logger).debug(Messages.PoolLogger.createdObject("pool - ", "object-", object.objectId()));
             verifyNoMoreInteractions(logger);
         }
 
         @Test
         @DisplayName("createdNonPooledObject")
         void testCreatedNonPooledObject() {
-            poolLogger.createdNonPooledObject(4);
+            PoolableObject<?> object = new TestObject();
+
+            poolLogger.createdNonPooledObject(object);
 
             verify(logger).isDebugEnabled();
-            verify(logger).debug(Messages.PoolLogger.createdNonPooledObject("pool - ", "object-", 4));
+            verify(logger).debug(Messages.PoolLogger.createdNonPooledObject("pool - ", "object-", object.objectId()));
             verifyNoMoreInteractions(logger);
         }
 
         @Test
         @DisplayName("increasedObjectRefCount")
         void testIncreasedObjectRefCount() {
-            poolLogger.increasedObjectRefCount(4, 2);
+            PoolableObject<?> object = new TestObject();
+
+            poolLogger.increasedObjectRefCount(object, 2);
 
             verify(logger).isDebugEnabled();
-            verify(logger).debug(Messages.PoolLogger.increasedObjectRefCount("pool - ", "object-", 4, 2));
+            verify(logger).debug(Messages.PoolLogger.increasedObjectRefCount("pool - ", "object-", object.objectId(), 2));
             verifyNoMoreInteractions(logger);
         }
 
         @Test
         @DisplayName("decreasedObjectRefCount")
         void testDecreasedObjectRefCount() {
-            poolLogger.decreasedObjectRefCount(4, 2);
+            PoolableObject<?> object = new TestObject();
+
+            poolLogger.decreasedObjectRefCount(object, 2);
 
             verify(logger).isDebugEnabled();
-            verify(logger).debug(Messages.PoolLogger.decreasedObjectRefCount("pool - ", "object-", 4, 2));
+            verify(logger).debug(Messages.PoolLogger.decreasedObjectRefCount("pool - ", "object-", object.objectId(), 2));
             verifyNoMoreInteractions(logger);
         }
 
         @Test
         @DisplayName("releasingObjectResources")
         void testReleasingObjectResources() {
-            poolLogger.releasingObjectResources(4);
+            PoolableObject<?> object = new TestObject();
+
+            poolLogger.releasingObjectResources(object);
 
             verify(logger).isDebugEnabled();
-            verify(logger).debug(Messages.PoolLogger.releasingObjectResources("pool - ", "object-", 4));
+            verify(logger).debug(Messages.PoolLogger.releasingObjectResources("pool - ", "object-", object.objectId()));
             verifyNoMoreInteractions(logger);
         }
 
         @Test
         @DisplayName("releasedObjectResources")
         void testReleasedObjectResources() {
-            poolLogger.releasedObjectResources(4);
+            PoolableObject<?> object = new TestObject();
+
+            poolLogger.releasedObjectResources(object);
 
             verify(logger).isDebugEnabled();
-            verify(logger).debug(Messages.PoolLogger.releasedObjectResources("pool - ", "object-", 4));
+            verify(logger).debug(Messages.PoolLogger.releasedObjectResources("pool - ", "object-", object.objectId()));
             verifyNoMoreInteractions(logger);
         }
 
         @Test
         @DisplayName("releaseObjectResourcesFailed")
         void testReleaseObjectResourcesFailed() {
+            PoolableObject<?> object = new TestObject();
             Exception exception = new NullPointerException();
 
-            poolLogger.releaseObjectResourcesFailed(4, exception);
+            poolLogger.releaseObjectResourcesFailed(object, exception);
 
             verify(logger).isDebugEnabled();
-            verify(logger).debug(Messages.PoolLogger.releaseObjectResourcesFailed("pool - ", "object-", 4), exception);
+            verify(logger).debug(Messages.PoolLogger.releaseObjectResourcesFailed("pool - ", "object-", object.objectId()), exception);
             verifyNoMoreInteractions(logger);
         }
 
         @Test
         @DisplayName("acquiredObject")
         void testAcquiredObject() {
-            poolLogger.acquiredObject(4, 2, 10);
+            PoolableObject<?> object = new TestObject();
+
+            poolLogger.acquiredObject(object, 2, 10);
 
             verify(logger).isDebugEnabled();
-            verify(logger).debug(Messages.PoolLogger.acquiredObject("pool - ", "object-", 4, 2, 10));
+            verify(logger).debug(Messages.PoolLogger.acquiredObject("pool - ", "object-", object.objectId(), 2, 10));
             verifyNoMoreInteractions(logger);
         }
 
         @Test
         @DisplayName("returnedObject")
         void testReturnedObject() {
-            poolLogger.returnedObject(4, 2, 10);
+            PoolableObject<?> object = new TestObject();
+
+            poolLogger.returnedObject(object, 2, 10);
 
             verify(logger).isDebugEnabled();
-            verify(logger).debug(Messages.PoolLogger.returnedObject("pool - ", "object-", 4, 2, 10));
+            verify(logger).debug(Messages.PoolLogger.returnedObject("pool - ", "object-", object.objectId(), 2, 10));
             verifyNoMoreInteractions(logger);
         }
 
         @Test
         @DisplayName("objectInvalidated")
         void testObjectInvalidated() {
-            poolLogger.objectInvalidated(4, 2, 10);
+            PoolableObject<?> object = new TestObject();
+
+            poolLogger.objectInvalidated(object, 2, 10);
 
             verify(logger).isDebugEnabled();
-            verify(logger).debug(Messages.PoolLogger.objectInvalidated("pool - ", "object-", 4, 2, 10));
+            verify(logger).debug(Messages.PoolLogger.objectInvalidated("pool - ", "object-", object.objectId(), 2, 10));
             verifyNoMoreInteractions(logger);
         }
 
         @Test
         @DisplayName("objectIdleTooLong")
         void testObjectIdleTooLong() {
-            poolLogger.objectIdleTooLong(4, 2, 10);
+            PoolableObject<?> object = new TestObject();
+
+            poolLogger.objectIdleTooLong(object, 2, 10);
 
             verify(logger).isDebugEnabled();
-            verify(logger).debug(Messages.PoolLogger.objectIdleTooLong("pool - ", "object-", 4, 2, 10));
+            verify(logger).debug(Messages.PoolLogger.objectIdleTooLong("pool - ", "object-", object.objectId(), 2, 10));
             verifyNoMoreInteractions(logger);
         }
 
@@ -223,64 +244,74 @@ class PoolLoggerTest {
             @Test
             @DisplayName("ERROR")
             void testErrorLevel() {
+                PoolableObject<?> object = new TestObject();
+
                 when(logger.isDebugEnabled()).thenReturn(false);
                 when(logger.isErrorEnabled()).thenReturn(true);
 
-                poolLogger.objectEvent(LogLevel.ERROR, 4, "custom event");
+                poolLogger.objectEvent(LogLevel.ERROR, object, "custom event");
 
                 verify(logger).isErrorEnabled();
-                verify(logger).error(Messages.PoolLogger.objectEvent("pool - ", "object-", 4, "custom event"));
+                verify(logger).error(Messages.PoolLogger.objectEvent("pool - ", "object-", object.objectId(), "custom event"));
                 verifyNoMoreInteractions(logger);
             }
 
             @Test
             @DisplayName("WARN")
             void testWarnLevel() {
+                PoolableObject<?> object = new TestObject();
+
                 when(logger.isDebugEnabled()).thenReturn(false);
                 when(logger.isWarnEnabled()).thenReturn(true);
 
-                poolLogger.objectEvent(LogLevel.WARN, 4, "custom event");
+                poolLogger.objectEvent(LogLevel.WARN, object, "custom event");
 
                 verify(logger).isWarnEnabled();
-                verify(logger).warn(Messages.PoolLogger.objectEvent("pool - ", "object-", 4, "custom event"));
+                verify(logger).warn(Messages.PoolLogger.objectEvent("pool - ", "object-", object.objectId(), "custom event"));
                 verifyNoMoreInteractions(logger);
             }
 
             @Test
             @DisplayName("INFO")
             void testInfoLevel() {
+                PoolableObject<?> object = new TestObject();
+
                 when(logger.isDebugEnabled()).thenReturn(false);
                 when(logger.isInfoEnabled()).thenReturn(true);
 
-                poolLogger.objectEvent(LogLevel.INFO, 4, "custom event");
+                poolLogger.objectEvent(LogLevel.INFO, object, "custom event");
 
                 verify(logger).isInfoEnabled();
-                verify(logger).info(Messages.PoolLogger.objectEvent("pool - ", "object-", 4, "custom event"));
+                verify(logger).info(Messages.PoolLogger.objectEvent("pool - ", "object-", object.objectId(), "custom event"));
                 verifyNoMoreInteractions(logger);
             }
 
             @Test
             @DisplayName("DEBUG")
             void testDebugLevel() {
+                PoolableObject<?> object = new TestObject();
+
                 // isDebugEnabled is already mocked
 
-                poolLogger.objectEvent(LogLevel.DEBUG, 4, "custom event");
+                poolLogger.objectEvent(LogLevel.DEBUG, object, "custom event");
 
                 verify(logger).isDebugEnabled();
-                verify(logger).debug(Messages.PoolLogger.objectEvent("pool - ", "object-", 4, "custom event"));
+                verify(logger).debug(Messages.PoolLogger.objectEvent("pool - ", "object-", object.objectId(), "custom event"));
                 verifyNoMoreInteractions(logger);
             }
 
             @Test
             @DisplayName("TRACE")
             void testTraceLevel() {
+                PoolableObject<?> object = new TestObject();
+
                 when(logger.isDebugEnabled()).thenReturn(false);
                 when(logger.isTraceEnabled()).thenReturn(true);
 
-                poolLogger.objectEvent(LogLevel.TRACE, 4, "custom event");
+                poolLogger.objectEvent(LogLevel.TRACE, object, "custom event");
 
                 verify(logger).isTraceEnabled();
-                verify(logger).trace(Messages.PoolLogger.objectEvent("pool - ", "object-", 4, "custom event"));
+                verify(logger).trace(Messages.PoolLogger.objectEvent("pool - ", "object-", object.objectId(), "custom event"));
                 verifyNoMoreInteractions(logger);
             }
         }
@@ -292,64 +323,74 @@ class PoolLoggerTest {
             @Test
             @DisplayName("ERROR")
             void testErrorLevel() {
+                PoolableObject<?> object = new TestObject();
+
                 when(logger.isDebugEnabled()).thenReturn(false);
                 when(logger.isErrorEnabled()).thenReturn(true);
 
-                poolLogger.objectEvent(LogLevel.ERROR, 4, () -> "custom event");
+                poolLogger.objectEvent(LogLevel.ERROR, object, () -> "custom event");
 
                 verify(logger).isErrorEnabled();
-                verify(logger).error(Messages.PoolLogger.objectEvent("pool - ", "object-", 4, "custom event"));
+                verify(logger).error(Messages.PoolLogger.objectEvent("pool - ", "object-", object.objectId(), "custom event"));
                 verifyNoMoreInteractions(logger);
             }
 
             @Test
             @DisplayName("WARN")
             void testWarnLevel() {
+                PoolableObject<?> object = new TestObject();
+
                 when(logger.isDebugEnabled()).thenReturn(false);
                 when(logger.isWarnEnabled()).thenReturn(true);
 
-                poolLogger.objectEvent(LogLevel.WARN, 4, () -> "custom event");
+                poolLogger.objectEvent(LogLevel.WARN, object, () -> "custom event");
 
                 verify(logger).isWarnEnabled();
-                verify(logger).warn(Messages.PoolLogger.objectEvent("pool - ", "object-", 4, "custom event"));
+                verify(logger).warn(Messages.PoolLogger.objectEvent("pool - ", "object-", object.objectId(), "custom event"));
                 verifyNoMoreInteractions(logger);
             }
 
             @Test
             @DisplayName("INFO")
             void testInfoLevel() {
+                PoolableObject<?> object = new TestObject();
+
                 when(logger.isDebugEnabled()).thenReturn(false);
                 when(logger.isInfoEnabled()).thenReturn(true);
 
-                poolLogger.objectEvent(LogLevel.INFO, 4, () -> "custom event");
+                poolLogger.objectEvent(LogLevel.INFO, object, () -> "custom event");
 
                 verify(logger).isInfoEnabled();
-                verify(logger).info(Messages.PoolLogger.objectEvent("pool - ", "object-", 4, "custom event"));
+                verify(logger).info(Messages.PoolLogger.objectEvent("pool - ", "object-", object.objectId(), "custom event"));
                 verifyNoMoreInteractions(logger);
             }
 
             @Test
             @DisplayName("DEBUG")
             void testDebugLevel() {
+                PoolableObject<?> object = new TestObject();
+
                 // isDebugEnabled is already mocked
 
-                poolLogger.objectEvent(LogLevel.DEBUG, 4, "custom event");
+                poolLogger.objectEvent(LogLevel.DEBUG, object, "custom event");
 
                 verify(logger).isDebugEnabled();
-                verify(logger).debug(Messages.PoolLogger.objectEvent("pool - ", "object-", 4, "custom event"));
+                verify(logger).debug(Messages.PoolLogger.objectEvent("pool - ", "object-", object.objectId(), "custom event"));
                 verifyNoMoreInteractions(logger);
             }
 
             @Test
             @DisplayName("TRACE")
             void testTraceLevel() {
+                PoolableObject<?> object = new TestObject();
+
                 when(logger.isDebugEnabled()).thenReturn(false);
                 when(logger.isTraceEnabled()).thenReturn(true);
 
-                poolLogger.objectEvent(LogLevel.TRACE, 4, () -> "custom event");
+                poolLogger.objectEvent(LogLevel.TRACE, object, () -> "custom event");
 
                 verify(logger).isTraceEnabled();
-                verify(logger).trace(Messages.PoolLogger.objectEvent("pool - ", "object-", 4, "custom event"));
+                verify(logger).trace(Messages.PoolLogger.objectEvent("pool - ", "object-", object.objectId(), "custom event"));
                 verifyNoMoreInteractions(logger);
             }
         }
@@ -424,7 +465,9 @@ class PoolLoggerTest {
         @Test
         @DisplayName("createdObject")
         void testCreatedObject() {
-            poolLogger.createdObject(4);
+            PoolableObject<?> object = new TestObject();
+
+            poolLogger.createdObject(object);
 
             verify(logger).isDebugEnabled();
             verifyNoMoreInteractions(logger);
@@ -433,7 +476,9 @@ class PoolLoggerTest {
         @Test
         @DisplayName("createdNonPooledObject")
         void testCreatedNonPooledObject() {
-            poolLogger.createdNonPooledObject(4);
+            PoolableObject<?> object = new TestObject();
+
+            poolLogger.createdNonPooledObject(object);
 
             verify(logger).isDebugEnabled();
             verifyNoMoreInteractions(logger);
@@ -442,7 +487,9 @@ class PoolLoggerTest {
         @Test
         @DisplayName("increasedObjectRefCount")
         void testIncreasedObjectRefCount() {
-            poolLogger.increasedObjectRefCount(4, 2);
+            PoolableObject<?> object = new TestObject();
+
+            poolLogger.increasedObjectRefCount(object, 2);
 
             verify(logger).isDebugEnabled();
             verifyNoMoreInteractions(logger);
@@ -451,7 +498,9 @@ class PoolLoggerTest {
         @Test
         @DisplayName("decreasedObjectRefCount")
         void testDecreasedObjectRefCount() {
-            poolLogger.decreasedObjectRefCount(4, 2);
+            PoolableObject<?> object = new TestObject();
+
+            poolLogger.decreasedObjectRefCount(object, 2);
 
             verify(logger).isDebugEnabled();
             verifyNoMoreInteractions(logger);
@@ -460,7 +509,9 @@ class PoolLoggerTest {
         @Test
         @DisplayName("releasingObjectResources")
         void testReleasingObjectResources() {
-            poolLogger.releasingObjectResources(4);
+            PoolableObject<?> object = new TestObject();
+
+            poolLogger.releasingObjectResources(object);
 
             verify(logger).isDebugEnabled();
             verifyNoMoreInteractions(logger);
@@ -469,7 +520,9 @@ class PoolLoggerTest {
         @Test
         @DisplayName("releasedObjectResources")
         void testReleasedObjectResources() {
-            poolLogger.releasedObjectResources(4);
+            PoolableObject<?> object = new TestObject();
+
+            poolLogger.releasedObjectResources(object);
 
             verify(logger).isDebugEnabled();
             verifyNoMoreInteractions(logger);
@@ -478,9 +531,10 @@ class PoolLoggerTest {
         @Test
         @DisplayName("releaseObjectResourcesFailed")
         void testReleaseObjectResourcesFailed() {
+            PoolableObject<?> object = new TestObject();
             Exception exception = new NullPointerException();
 
-            poolLogger.releaseObjectResourcesFailed(4, exception);
+            poolLogger.releaseObjectResourcesFailed(object, exception);
 
             verify(logger).isDebugEnabled();
             verifyNoMoreInteractions(logger);
@@ -489,7 +543,9 @@ class PoolLoggerTest {
         @Test
         @DisplayName("acquiredObject")
         void testAcquiredObject() {
-            poolLogger.acquiredObject(4, 2, 10);
+            PoolableObject<?> object = new TestObject();
+
+            poolLogger.acquiredObject(object, 2, 10);
 
             verify(logger).isDebugEnabled();
             verifyNoMoreInteractions(logger);
@@ -498,7 +554,9 @@ class PoolLoggerTest {
         @Test
         @DisplayName("returnedObject")
         void testReturnedObject() {
-            poolLogger.returnedObject(4, 2, 10);
+            PoolableObject<?> object = new TestObject();
+
+            poolLogger.returnedObject(object, 2, 10);
 
             verify(logger).isDebugEnabled();
             verifyNoMoreInteractions(logger);
@@ -507,7 +565,9 @@ class PoolLoggerTest {
         @Test
         @DisplayName("objectInvalidated")
         void testObjectInvalidated() {
-            poolLogger.objectInvalidated(4, 2, 10);
+            PoolableObject<?> object = new TestObject();
+
+            poolLogger.objectInvalidated(object, 2, 10);
 
             verify(logger).isDebugEnabled();
             verifyNoMoreInteractions(logger);
@@ -516,7 +576,9 @@ class PoolLoggerTest {
         @Test
         @DisplayName("objectIdleTooLong")
         void testObjectIdleTooLong() {
-            poolLogger.objectIdleTooLong(4, 2, 10);
+            PoolableObject<?> object = new TestObject();
+
+            poolLogger.objectIdleTooLong(object, 2, 10);
 
             verify(logger).isDebugEnabled();
             verifyNoMoreInteractions(logger);
@@ -529,7 +591,9 @@ class PoolLoggerTest {
             @Test
             @DisplayName("ERROR")
             void testErrorLevel() {
-                poolLogger.objectEvent(LogLevel.ERROR, 4, "custom event");
+                PoolableObject<?> object = new TestObject();
+
+                poolLogger.objectEvent(LogLevel.ERROR, object, "custom event");
 
                 verify(logger).isErrorEnabled();
                 verifyNoMoreInteractions(logger);
@@ -538,7 +602,9 @@ class PoolLoggerTest {
             @Test
             @DisplayName("WARN")
             void testWarnLevel() {
-                poolLogger.objectEvent(LogLevel.WARN, 4, "custom event");
+                PoolableObject<?> object = new TestObject();
+
+                poolLogger.objectEvent(LogLevel.WARN, object, "custom event");
 
                 verify(logger).isWarnEnabled();
                 verifyNoMoreInteractions(logger);
@@ -547,7 +613,9 @@ class PoolLoggerTest {
             @Test
             @DisplayName("INFO")
             void testInfoLevel() {
-                poolLogger.objectEvent(LogLevel.INFO, 4, "custom event");
+                PoolableObject<?> object = new TestObject();
+
+                poolLogger.objectEvent(LogLevel.INFO, object, "custom event");
 
                 verify(logger).isInfoEnabled();
                 verifyNoMoreInteractions(logger);
@@ -556,7 +624,9 @@ class PoolLoggerTest {
             @Test
             @DisplayName("DEBUG")
             void testDebugLevel() {
-                poolLogger.objectEvent(LogLevel.DEBUG, 4, "custom event");
+                PoolableObject<?> object = new TestObject();
+
+                poolLogger.objectEvent(LogLevel.DEBUG, object, "custom event");
 
                 verify(logger).isDebugEnabled();
                 verifyNoMoreInteractions(logger);
@@ -565,7 +635,9 @@ class PoolLoggerTest {
             @Test
             @DisplayName("TRACE")
             void testTraceLevel() {
-                poolLogger.objectEvent(LogLevel.TRACE, 4, "custom event");
+                PoolableObject<?> object = new TestObject();
+
+                poolLogger.objectEvent(LogLevel.TRACE, object, "custom event");
 
                 verify(logger).isTraceEnabled();
                 verifyNoMoreInteractions(logger);
@@ -579,7 +651,9 @@ class PoolLoggerTest {
             @Test
             @DisplayName("ERROR")
             void testErrorLevel() {
-                poolLogger.objectEvent(LogLevel.ERROR, 4, () -> "custom event");
+                PoolableObject<?> object = new TestObject();
+
+                poolLogger.objectEvent(LogLevel.ERROR, object, () -> "custom event");
 
                 verify(logger).isErrorEnabled();
                 verifyNoMoreInteractions(logger);
@@ -588,7 +662,9 @@ class PoolLoggerTest {
             @Test
             @DisplayName("WARN")
             void testWarnLevel() {
-                poolLogger.objectEvent(LogLevel.WARN, 4, () -> "custom event");
+                PoolableObject<?> object = new TestObject();
+
+                poolLogger.objectEvent(LogLevel.WARN, object, () -> "custom event");
 
                 verify(logger).isWarnEnabled();
                 verifyNoMoreInteractions(logger);
@@ -597,7 +673,9 @@ class PoolLoggerTest {
             @Test
             @DisplayName("INFO")
             void testInfoLevel() {
-                poolLogger.objectEvent(LogLevel.INFO, 4, () -> "custom event");
+                PoolableObject<?> object = new TestObject();
+
+                poolLogger.objectEvent(LogLevel.INFO, object, () -> "custom event");
 
                 verify(logger).isInfoEnabled();
                 verifyNoMoreInteractions(logger);
@@ -606,7 +684,9 @@ class PoolLoggerTest {
             @Test
             @DisplayName("DEBUG")
             void testDebugLevel() {
-                poolLogger.objectEvent(LogLevel.DEBUG, 4, "custom event");
+                PoolableObject<?> object = new TestObject();
+
+                poolLogger.objectEvent(LogLevel.DEBUG, object, "custom event");
 
                 verify(logger).isDebugEnabled();
                 verifyNoMoreInteractions(logger);
@@ -615,7 +695,9 @@ class PoolLoggerTest {
             @Test
             @DisplayName("TRACE")
             void testTraceLevel() {
-                poolLogger.objectEvent(LogLevel.TRACE, 4, () -> "custom event");
+                PoolableObject<?> object = new TestObject();
+
+                poolLogger.objectEvent(LogLevel.TRACE, object, () -> "custom event");
 
                 verify(logger).isTraceEnabled();
                 verifyNoMoreInteractions(logger);

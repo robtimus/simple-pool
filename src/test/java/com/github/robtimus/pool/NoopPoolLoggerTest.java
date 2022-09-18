@@ -69,11 +69,11 @@ class NoopPoolLoggerTest {
     }
 
     private Object getValue(Class<?> type) {
-        if (type == long.class) {
-            return Long.MAX_VALUE;
-        }
         if (type == int.class) {
             return Integer.MAX_VALUE;
+        }
+        if (type == PoolableObject.class) {
+            return new TestObject();
         }
         if (type == PoolConfig.class) {
             return PoolConfig.defaultConfig();

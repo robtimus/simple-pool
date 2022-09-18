@@ -1238,14 +1238,15 @@ class PoolTest {
             verify(logger).acquiredObject(object1, 0, 1);
             // release object1
             verify(logger).decreasedObjectRefCount(object1, 0);
-            verify(logger).objectInvalidated(object1, 0, 0);
+            verify(logger).returnedObject(object1, 1, 1);
             // acquire object2
+            verify(logger).objectInvalidated(object1, 0, 0);
             verify(logger).createdObject(object2);
             verify(logger).increasedObjectRefCount(object2, 1);
             verify(logger).acquiredObject(object2, 0, 1);
             // release object2
             verify(logger).decreasedObjectRefCount(object2, 0);
-            verify(logger).objectInvalidated(object2, 0, 0);
+            verify(logger).returnedObject(object2, 1, 1);
 
             verifyNoMoreInteractions(supplier, logger);
 

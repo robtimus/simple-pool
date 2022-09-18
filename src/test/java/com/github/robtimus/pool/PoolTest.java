@@ -1672,6 +1672,83 @@ class PoolTest {
         }
 
         @Test
+        @DisplayName("with inactive idle objects")
+        void testWithInactiveIdleObjects() {
+            PoolConfig config = PoolConfig.custom()
+                    .withInitialSize(2)
+                    .withMaxSize(2)
+                    .build();
+            @SuppressWarnings("unchecked")
+            Supplier<TestObject> supplier = mock(Supplier.class);
+            PoolLogger logger = mock(PoolLogger.class);
+            @SuppressWarnings("unchecked")
+            PoolableObjectConsumer<TestObject, None> action = mock(PoolableObjectConsumer.class);
+            @SuppressWarnings("unchecked")
+            Supplier<String> messageSupplier = mock(Supplier.class);
+
+            when(supplier.get()).thenAnswer(i -> spy(new TestObject(false)));
+            doAnswer(i -> {
+                TestObject object = i.getArgument(0, TestObject.class);
+                object.logEvent("custom event");
+                object.logEvent(messageSupplier);
+                return null;
+            }).when(action).accept(any());
+            when(messageSupplier.get()).thenReturn("custom supplied event");
+
+            Pool<TestObject, None> pool = Pool.throwingNone(config, supplier, logger);
+
+            pool.forAllIdleObjects(action);
+
+            // check that the pool is still usable
+            TestObject object1 = assertIsPresent(pool.acquireNow());
+            TestObject object2 = assertIsPresent(pool.acquireNow());
+            assertIsEmpty(pool.acquireNow());
+
+            object1.release();
+            object2.release();
+
+            ArgumentCaptor<TestObject> objectCaptor = ArgumentCaptor.forClass(TestObject.class);
+
+            verify(supplier, times(4)).get();
+            // logger calls in order
+            // create pool
+            verify(logger).creatingPool(config);
+            verify(logger, times(4)).createdObject(objectCaptor.capture());
+            List<TestObject> objects = objectCaptor.getAllValues();
+            verify(logger).createdObject(objects.get(0));
+            verify(logger).createdObject(objects.get(1));
+            verify(logger).createdPool(config);
+            // forAllIdleObjects
+            verify(logger).objectInvalidated(objects.get(0), 1, 1);
+            verify(logger).objectInvalidated(objects.get(1), 0, 0);
+            verify(logger).drainedPool(0);
+            // acquire object1
+            verify(logger).createdObject(object1);
+            verify(logger).increasedObjectRefCount(object1, 1);
+            verify(logger).acquiredObject(object1, 0, 1);
+            // acquire object2
+            verify(logger).createdObject(object2);
+            verify(logger).increasedObjectRefCount(object2, 1);
+            verify(logger).acquiredObject(object2, 0, 2);
+            // release object1
+            verify(logger).decreasedObjectRefCount(object1, 0);
+            verify(logger).returnedObject(object1, 1, 2);
+            // release object2
+            verify(logger).decreasedObjectRefCount(object2, 0);
+            verify(logger).returnedObject(object2, 2, 2);
+
+            verifyNoMoreInteractions(supplier, logger, action);
+
+            assertSame(object1, objects.get(2));
+            assertSame(object2, objects.get(3));
+
+            verify(object1, never()).releaseResources();
+            verify(object1, never()).releaseResourcesQuietly();
+            verify(object2, never()).releaseResources();
+            verify(object2, never()).releaseResourcesQuietly();
+        }
+
+        @Test
         @DisplayName("with throwing action")
         void testWithThrowingAction() {
             PoolConfig config = PoolConfig.custom()

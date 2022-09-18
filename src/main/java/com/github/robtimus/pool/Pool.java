@@ -55,7 +55,7 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
     private int size;
 
     private final Lock lock;
-    private final Condition notEmpty;
+    private final Condition notEmptyOrInactive;
 
     private final AtomicBoolean active;
     private final CountDownLatch shutdownLatch;
@@ -78,7 +78,7 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
         size = 0;
 
         lock = new ReentrantLock();
-        notEmpty = lock.newCondition();
+        notEmptyOrInactive = lock.newCondition();
 
         fillPool();
 
@@ -257,7 +257,7 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
 
         awaitPoolNotEmpty(maxWaitTimeInNanos);
 
-        // either !idleObjects.isEmpty(), or size < maxSize, or this pool is no longer active, or the max wait time expired
+        // Either !idleObjects.isEmpty(), or size < maxSize, or this pool is no longer active, or the max wait time expired
 
         checkActive();
 
@@ -316,7 +316,7 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
     }
 
     private ObjectSupplier<T, X> findAvailableObject() {
-        T object = findValidObject();
+        T object = findValidObject(true);
         if (object != null) {
             // object is valid
             int idleCount = idleObjects.size();
@@ -349,7 +349,7 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
         return null;
     }
 
-    private T findValidObject() {
+    private T findValidObject(boolean signalIfNotEmpty) {
         T object;
         boolean removedObjects = false;
         while ((object = idleObjects.poll()) != null) {
@@ -368,11 +368,11 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
                 return object;
             }
         }
-        // no valid objects in the pool
+        // No valid objects in the pool
 
-        if (removedObjects) {
-            // new objects can possibly be created
-            notEmpty.signalAll();
+        if (signalIfNotEmpty && removedObjects) {
+            // New objects can possibly be created
+            notEmptyOrInactive.signalAll();
         }
 
         return null;
@@ -396,7 +396,7 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
 
     private void awaitPoolNotEmptyWithoutTimeout() throws InterruptedException {
         while (idleObjects.isEmpty() && size >= config.maxSize() && isActive()) {
-            notEmpty.await();
+            notEmptyOrInactive.await();
         }
     }
 
@@ -404,10 +404,10 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
         long nanos = maxWaitTimeInNanos;
         while (idleObjects.isEmpty() && size >= config.maxSize() && isActive()) {
             if (nanos <= 0) {
-                // let the caller check again for pool.isEmpty() and poolSize < maxPoolSize
+                // Let the caller check again for pool.isEmpty() and poolSize < maxPoolSize
                 return;
             }
-            nanos = notEmpty.awaitNanos(nanos);
+            nanos = notEmptyOrInactive.awaitNanos(nanos);
         }
     }
 
@@ -415,7 +415,7 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
         lock.lock();
         try {
             size--;
-            notEmpty.signalAll();
+            notEmptyOrInactive.signalAll();
 
         } finally {
             lock.unlock();
@@ -437,7 +437,7 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
                 object.clearPool();
             }
             // Either idleObjects has had an object added or size has been decreased.
-            notEmpty.signalAll();
+            notEmptyOrInactive.signalAll();
 
         } finally {
             lock.unlock();
@@ -447,6 +447,9 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
     /**
      * Runs an operation on all idle objects. These will be acquired in bulk, after which the operation is run on them sequentially. Afterwards, each
      * object will be returned to the pool.
+     * <p>
+     * Any object that is no longer {@linkplain PoolableObject#validate() valid} or has been idle too long will be removed from the pool before
+     * running the operation on idle objects. As a result, all arguments to the operation will be valid.
      *
      * @param action The operation to run.
      * @throws X If an error occurs while running the operation on any of the idle objects.
@@ -455,7 +458,7 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
     public void forAllIdleObjects(PoolableObjectConsumer<T, X> action) throws X {
         Objects.requireNonNull(action);
 
-        List<T> objects = drainPool(false);
+        List<T> objects = drainIdleObjects();
 
         Exception exception = null;
         for (T object : objects) {
@@ -469,6 +472,32 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
         }
         if (exception != null) {
             throw cast(exception);
+        }
+    }
+
+    private List<T> drainIdleObjects() {
+        lock.lock();
+        try {
+            List<T> objects = new ArrayList<>(idleObjects.size());
+
+            int oldSize = size;
+
+            T object;
+            while ((object = findValidObject(false)) != null) {
+                objects.add(object);
+            }
+
+            if (size < oldSize) {
+                // A.k.a. removedObjects in findValidObject; new objects can possibly be created
+                notEmptyOrInactive.signalAll();
+            }
+
+            logger.drainedPool(size);
+
+            return objects;
+
+        } finally {
+            lock.unlock();
         }
     }
 
@@ -491,14 +520,14 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
         if (active.compareAndSet(true, false)) {
             try {
                 releaseIdleResources();
-
+            } finally {
                 lock.lock();
                 try {
-                    notEmpty.signalAll();
+                    notEmptyOrInactive.signalAll();
                 } finally {
                     lock.unlock();
                 }
-            } finally {
+
                 logger.shutDownPool();
                 shutdownLatch.countDown();
             }
@@ -506,7 +535,7 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
     }
 
     private void releaseIdleResources() throws X {
-        List<T> objects = drainPool(true);
+        List<T> objects = drainIdleObjectsForRelease();
 
         Exception exception = null;
         for (T object : objects) {
@@ -522,6 +551,29 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
         }
     }
 
+    private List<T> drainIdleObjectsForRelease() {
+        lock.lock();
+        try {
+            List<T> objects = new ArrayList<>(idleObjects.size());
+
+            T object;
+            while ((object = idleObjects.poll()) != null) {
+                // No need to validate, the object will not go back to the pool
+                objects.add(object);
+                size--;
+            }
+
+            // No need to signal notEmptyOrInactive; this method is part of the shutdown call which will perform the signal
+
+            logger.drainedPool(size);
+
+            return objects;
+
+        } finally {
+            lock.unlock();
+        }
+    }
+
     boolean awaitShutdown(long maxWaitTime, TimeUnit timeUnit) throws InterruptedException {
         return shutdownLatch.await(maxWaitTime, timeUnit);
     }
@@ -530,25 +582,6 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
     private X cast(Exception exception) {
         // Exception will either be compatible with X, or an unchecked exception. That means this unsafe cast is allowed.
         return (X) exception;
-    }
-
-    private List<T> drainPool(boolean updateSize) {
-        lock.lock();
-        try {
-            List<T> objects = new ArrayList<>(idleObjects);
-
-            idleObjects.clear();
-            if (updateSize && !objects.isEmpty()) {
-                size -= objects.size();
-                notEmpty.signalAll();
-            }
-            logger.drainedPool(size);
-
-            return objects;
-
-        } finally {
-            lock.unlock();
-        }
     }
 
     private Exception add(Exception existing, Exception e) {

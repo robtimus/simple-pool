@@ -353,7 +353,7 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
         T object;
         boolean removedObjects = false;
         while ((object = idleObjects.poll()) != null) {
-            if (!object.isValid()) {
+            if (!object.validate()) {
                 size--;
                 object.clearPool();
                 logger.objectInvalidated(object, idleObjects.size(), size);
@@ -428,7 +428,7 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
         lock.lock();
         try {
             if (isActive()) {
-                if (object.isValid()) {
+                if (object.validate()) {
                     object.resetIdleSince();
                     idleObjects.add(object);
                     logger.returnedObject(object, idleObjects.size(), size);

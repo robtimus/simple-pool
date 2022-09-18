@@ -21,7 +21,7 @@ import java.util.Objects;
 import java.util.function.Supplier;
 
 /**
- * A poolable object that wraps a single value. Instances will always be considered {@linkplain #isValid() valid} and have no resources to
+ * A poolable object that wraps a single value. Instances will always be considered {@linkplain #validate() valid} and have no resources to
  * {@linkplain #doReleaseResources() release}. This class implements {@link AutoCloseable}, which allows instances to be used in try-with-resources
  * blocks; when an instance is closed it is returned to the pool.
  *
@@ -51,7 +51,7 @@ public final class ObjectWrapper<T> extends PoolableObject<None> implements Auto
     }
 
     @Override
-    protected boolean isValid() {
+    protected boolean validate() {
         return true;
     }
 

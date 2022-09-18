@@ -38,7 +38,7 @@ class TestObject extends PoolableObject<None> {
     }
 
     @Override
-    protected boolean isValid() {
+    protected boolean validate() {
         return valid;
     }
 

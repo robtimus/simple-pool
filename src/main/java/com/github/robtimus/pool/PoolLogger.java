@@ -242,7 +242,7 @@ public class PoolLogger {
      * @param object The {@link PoolableObject}.
      * @param idleCount The number of idle {@link PoolableObject}s after invalidating the {@link PoolableObject}.
      * @param poolSize The total pool size - the number of acquired and idle {@link PoolableObject}s combined.
-     * @see PoolableObject#isValid()
+     * @see PoolableObject#validate()
      */
     public void objectInvalidated(PoolableObject<?> object, int idleCount, int poolSize) {
         if (logger.isDebugEnabled()) {

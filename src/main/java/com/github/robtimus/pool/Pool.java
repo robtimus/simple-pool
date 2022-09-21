@@ -104,7 +104,7 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
             logger.failedToCreatePool(e);
             for (T object : objects) {
                 try {
-                    object.releaseResources();
+                    discard(object);
                 } catch (Exception e2) {
                     e.addSuppressed(e2);
                 }
@@ -361,8 +361,7 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
             } else if (config.maxIdleTimeExceeded(object)) {
                 size--;
                 logger.objectIdleTooLong(object, idleObjects.size(), size);
-                object.releaseResourcesQuietly();
-                object.clearPool();
+                discardQuietly(object);
                 removedObjects = true;
             } else {
                 return object;
@@ -433,14 +432,34 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
                 logger.returnedObject(object, idleObjects.size(), size);
             } else {
                 size--;
-                object.releaseResourcesQuietly();
-                object.clearPool();
+                discardQuietly(object);
             }
             // Either idleObjects has had an object added or size has been decreased.
             notEmptyOrInactive.signalAll();
 
         } finally {
             lock.unlock();
+        }
+    }
+
+    private void discard(T object) throws X {
+        logger.releasingObjectResources(object);
+        try {
+            object.releaseResources();
+            logger.releasedObjectResources(object);
+        } catch (Exception e) {
+            logger.releaseObjectResourcesFailed(object, e);
+            throw cast(e);
+        } finally {
+            object.clearPool();
+        }
+    }
+
+    private void discardQuietly(T object) {
+        try {
+            discard(object);
+        } catch (@SuppressWarnings("unused") Exception e) {
+            // the exception has already been reported
         }
     }
 
@@ -540,11 +559,10 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
         Exception exception = null;
         for (T object : objects) {
             try {
-                object.releaseResources();
+                discard(object);
             } catch (Exception e) {
                 exception = add(exception, e);
             }
-            object.clearPool();
         }
         if (exception != null) {
             throw cast(exception);

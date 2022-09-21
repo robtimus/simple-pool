@@ -176,7 +176,6 @@ public class PoolLogger {
      *
      * @param object The {@link PoolableObject}.
      * @see PoolableObject#releaseResources()
-     * @see PoolableObject#releaseResourcesQuietly()
      */
     public void releasingObjectResources(PoolableObject<?> object) {
         if (logger.isDebugEnabled()) {
@@ -189,7 +188,6 @@ public class PoolLogger {
      *
      * @param object The {@link PoolableObject}.
      * @see PoolableObject#releaseResources()
-     * @see PoolableObject#releaseResourcesQuietly()
      */
     public void releasedObjectResources(PoolableObject<?> object) {
         if (logger.isDebugEnabled()) {
@@ -202,7 +200,7 @@ public class PoolLogger {
      *
      * @param object The {@link PoolableObject}.
      * @param exception The exception that was thrown while quietly releasing the resources of the {@link PoolableObject}.
-     * @see PoolableObject#releaseResourcesQuietly()
+     * @see PoolableObject#releaseResources()
      */
     public void releaseObjectResourcesFailed(PoolableObject<?> object, Exception exception) {
         if (logger.isDebugEnabled()) {

@@ -22,7 +22,7 @@ import java.util.function.Supplier;
 
 /**
  * A poolable object that wraps a single value. Instances will always be considered {@linkplain #validate() valid} and have no resources to
- * {@linkplain #doReleaseResources() release}. This class implements {@link AutoCloseable}, which allows instances to be used in try-with-resources
+ * {@linkplain #releaseResources() release}. This class implements {@link AutoCloseable}, which allows instances to be used in try-with-resources
  * blocks; when an instance is closed it is returned to the pool.
  *
  * @author Rob Spoor
@@ -56,7 +56,7 @@ public final class ObjectWrapper<T> extends PoolableObject<None> implements Auto
     }
 
     @Override
-    protected void doReleaseResources() throws None {
+    protected void releaseResources() {
         // does nothing
     }
 

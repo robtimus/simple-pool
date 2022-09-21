@@ -185,7 +185,7 @@ class PoolTest {
 
             TestObject object = new TestObject() {
                 @Override
-                protected void doReleaseResources() throws None {
+                protected void releaseResources() {
                     throw suppressed;
                 }
             };
@@ -269,7 +269,6 @@ class PoolTest {
                 verifyNoMoreInteractions(supplier, logger);
 
                 verify(object, never()).releaseResources();
-                verify(object, never()).releaseResourcesQuietly();
             }
 
             @Test
@@ -317,9 +316,7 @@ class PoolTest {
                 verifyNoMoreInteractions(supplier, logger);
 
                 verify(object1, never()).releaseResources();
-                verify(object1, never()).releaseResourcesQuietly();
                 verify(object2, never()).releaseResources();
-                verify(object2, never()).releaseResourcesQuietly();
             }
 
             @Nested
@@ -373,9 +370,7 @@ class PoolTest {
                     verifyNoMoreInteractions(supplier, logger);
 
                     verify(object1, never()).releaseResources();
-                    verify(object1, never()).releaseResourcesQuietly();
                     verify(object2, never()).releaseResources();
-                    verify(object2, never()).releaseResourcesQuietly();
                 }
 
                 @Test
@@ -426,9 +421,7 @@ class PoolTest {
                     verifyNoMoreInteractions(supplier, logger);
 
                     verify(object1, never()).releaseResources();
-                    verify(object1, never()).releaseResourcesQuietly();
                     verify(object2, never()).releaseResources();
-                    verify(object2, never()).releaseResourcesQuietly();
                 }
 
                 @Test
@@ -488,11 +481,9 @@ class PoolTest {
 
                     verifyNoMoreInteractions(supplier, logger);
 
-                    // releaseResourcesQuietly is called because the pool is no longer active when the objects are returned
-                    verify(object1, never()).releaseResources();
-                    verify(object1).releaseResourcesQuietly();
-                    verify(object2, never()).releaseResources();
-                    verify(object2).releaseResourcesQuietly();
+                    // releaseResources is called because the pool is no longer active when the objects are returned
+                    verify(object1).releaseResources();
+                    verify(object2).releaseResources();
                 }
 
                 @Test
@@ -552,11 +543,9 @@ class PoolTest {
 
                     verifyNoMoreInteractions(supplier, logger);
 
-                    // releaseResourcesQuietly is called because the pool is no longer active when the objects are returned
-                    verify(object1, never()).releaseResources();
-                    verify(object1).releaseResourcesQuietly();
-                    verify(object2, never()).releaseResources();
-                    verify(object2).releaseResourcesQuietly();
+                    // releaseResources is called because the pool is no longer active when the objects are returned
+                    verify(object1).releaseResources();
+                    verify(object2).releaseResources();
                 }
             }
 
@@ -618,9 +607,7 @@ class PoolTest {
                 verifyNoMoreInteractions(supplier, logger);
 
                 verify(object1, never()).releaseResources();
-                verify(object1, never()).releaseResourcesQuietly();
                 verify(object2, never()).releaseResources();
-                verify(object2, never()).releaseResourcesQuietly();
             }
 
             @Nested
@@ -667,9 +654,7 @@ class PoolTest {
                     verifyNoMoreInteractions(supplier, logger);
 
                     verify(object1, never()).releaseResources();
-                    verify(object1, never()).releaseResourcesQuietly();
                     verify(object2, never()).releaseResources();
-                    verify(object2, never()).releaseResourcesQuietly();
                 }
 
                 @Test
@@ -712,9 +697,7 @@ class PoolTest {
                     verifyNoMoreInteractions(supplier, logger);
 
                     verify(object1, never()).releaseResources();
-                    verify(object1, never()).releaseResourcesQuietly();
                     verify(object2, never()).releaseResources();
-                    verify(object2, never()).releaseResourcesQuietly();
                 }
             }
 
@@ -763,9 +746,8 @@ class PoolTest {
 
                 verifyNoMoreInteractions(supplier, logger);
 
-                // releaseResourcesQuietly is called because the pool is no longer active when the object is returned
-                verify(object, never()).releaseResources();
-                verify(object).releaseResourcesQuietly();
+                // releaseResources is called because the pool is no longer active when the object is returned
+                verify(object).releaseResources();
             }
         }
 
@@ -808,7 +790,6 @@ class PoolTest {
                 verifyNoMoreInteractions(supplier, logger);
 
                 verify(object, never()).releaseResources();
-                verify(object, never()).releaseResourcesQuietly();
             }
 
             @Test
@@ -855,9 +836,7 @@ class PoolTest {
                 verifyNoMoreInteractions(supplier, logger);
 
                 verify(object1, never()).releaseResources();
-                verify(object1, never()).releaseResourcesQuietly();
                 verify(object2, never()).releaseResources();
-                verify(object2, never()).releaseResourcesQuietly();
             }
 
             @Test
@@ -906,9 +885,7 @@ class PoolTest {
                 verifyNoMoreInteractions(supplier, logger);
 
                 verify(object1, never()).releaseResources();
-                verify(object1, never()).releaseResourcesQuietly();
                 verify(object2, never()).releaseResources();
-                verify(object2, never()).releaseResourcesQuietly();
             }
 
             @Test
@@ -969,9 +946,7 @@ class PoolTest {
                 verifyNoMoreInteractions(supplier, logger);
 
                 verify(object1, never()).releaseResources();
-                verify(object1, never()).releaseResourcesQuietly();
                 verify(object2, never()).releaseResources();
-                verify(object2, never()).releaseResourcesQuietly();
             }
         }
 
@@ -1015,7 +990,6 @@ class PoolTest {
                 verifyNoMoreInteractions(supplier, logger);
 
                 verify(object, never()).releaseResources();
-                verify(object, never()).releaseResourcesQuietly();
             }
 
             @Test
@@ -1065,9 +1039,7 @@ class PoolTest {
                 verifyNoMoreInteractions(supplier, logger);
 
                 verify(object1, never()).releaseResources();
-                verify(object1, never()).releaseResourcesQuietly();
                 verify(object2, never()).releaseResources();
-                verify(object2, never()).releaseResourcesQuietly();
             }
 
             @Test
@@ -1124,11 +1096,8 @@ class PoolTest {
 
                 // object3 is not pooled, so when it is released its resources are released
                 verify(object1, never()).releaseResources();
-                verify(object1, never()).releaseResourcesQuietly();
                 verify(object2, never()).releaseResources();
-                verify(object2, never()).releaseResourcesQuietly();
                 verify(object3).releaseResources();
-                verify(object3, never()).releaseResourcesQuietly();
             }
 
             @Test
@@ -1189,9 +1158,7 @@ class PoolTest {
                 verifyNoMoreInteractions(supplier, logger);
 
                 verify(object1, never()).releaseResources();
-                verify(object1, never()).releaseResourcesQuietly();
                 verify(object2, never()).releaseResources();
-                verify(object2, never()).releaseResourcesQuietly();
             }
         }
 
@@ -1254,9 +1221,7 @@ class PoolTest {
             assertSame(object2, objects.get(2));
 
             verify(object1, never()).releaseResources();
-            verify(object1, never()).releaseResourcesQuietly();
             verify(object2, never()).releaseResources();
-            verify(object2, never()).releaseResourcesQuietly();
         }
 
         @Test
@@ -1303,7 +1268,6 @@ class PoolTest {
             verify(logger).objectIdleTooLong(object1, 0, 0);
             verify(logger).releasingObjectResources(object1);
             verify(logger).releaseObjectResourcesFailed(object1, releaseError);
-            verify(logger).releasedObjectResources(object1);
             verify(logger).createdObject(object2);
             verify(logger).increasedObjectRefCount(object2, 1);
             verify(logger).acquiredObject(object2, 0, 1);
@@ -1313,12 +1277,10 @@ class PoolTest {
 
             verifyNoMoreInteractions(logger);
 
-            // releaseResourcesQuietly is called for object1 when acquiring object2, because the object has been idle for too long
+            // releaseResources is called for object1 when acquiring object2, because the object has been idle for too long
             // object2 is freshly created
-            verify(object1, never()).releaseResources();
-            verify(object1).releaseResourcesQuietly();
+            verify(object1).releaseResources();
             verify(object2, never()).releaseResources();
-            verify(object2, never()).releaseResourcesQuietly();
         }
 
         @Test
@@ -1380,9 +1342,7 @@ class PoolTest {
             verifyNoMoreInteractions(supplier, logger);
 
             verify(object1, never()).releaseResources();
-            verify(object1, never()).releaseResourcesQuietly();
             verify(object2, never()).releaseResources();
-            verify(object2, never()).releaseResourcesQuietly();
         }
 
         @Nested
@@ -1580,9 +1540,7 @@ class PoolTest {
             verifyNoMoreInteractions(supplier, logger, action);
 
             verify(object1, never()).releaseResources();
-            verify(object1, never()).releaseResourcesQuietly();
             verify(object2, never()).releaseResources();
-            verify(object2, never()).releaseResourcesQuietly();
         }
 
         @Test
@@ -1664,11 +1622,8 @@ class PoolTest {
             verifyNoMoreInteractions(supplier, logger, action);
 
             verify(object1, never()).releaseResources();
-            verify(object1, never()).releaseResourcesQuietly();
             verify(object2, never()).releaseResources();
-            verify(object2, never()).releaseResourcesQuietly();
             verify(object3, never()).releaseResources();
-            verify(object3, never()).releaseResourcesQuietly();
         }
 
         @Test
@@ -1743,9 +1698,7 @@ class PoolTest {
             assertSame(object2, objects.get(3));
 
             verify(object1, never()).releaseResources();
-            verify(object1, never()).releaseResourcesQuietly();
             verify(object2, never()).releaseResources();
-            verify(object2, never()).releaseResourcesQuietly();
         }
 
         @Test
@@ -1825,11 +1778,8 @@ class PoolTest {
             verifyNoMoreInteractions(supplier, logger, action);
 
             verify(object1, never()).releaseResources();
-            verify(object1, never()).releaseResourcesQuietly();
             verify(object2, never()).releaseResources();
-            verify(object2, never()).releaseResourcesQuietly();
             verify(object3, never()).releaseResources();
-            verify(object3, never()).releaseResourcesQuietly();
         }
     }
 }

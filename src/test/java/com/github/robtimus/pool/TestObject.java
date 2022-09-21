@@ -43,7 +43,7 @@ class TestObject extends PoolableObject<None> {
     }
 
     @Override
-    protected void doReleaseResources() throws None {
+    protected void releaseResources() {
         if (releaseExceptionSupplier != null) {
             throw releaseExceptionSupplier.get();
         }

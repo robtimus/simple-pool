@@ -144,62 +144,7 @@ public abstract class PoolableObject<X extends Exception> {
      *
      * @throws X If the resources could not be released.
      */
-    protected final void releaseResources() throws X {
-        logger.releasingObjectResources(this);
-        try {
-            doReleaseResources();
-            logger.releasedObjectResources(this);
-        } catch (Exception e) {
-            logger.releaseObjectResourcesFailed(this, e);
-            throw cast(e);
-        }
-    }
-
-    @SuppressWarnings("unchecked")
-    private X cast(Exception exception) {
-        // Exception will either be compatible with X, or an unchecked exception. That means this unsafe cast is allowed.
-        return (X) exception;
-    }
-
-    /**
-     * Releases any resources associated with this object, without throwing exceptions.
-     */
-    protected final void releaseResourcesQuietly() {
-        logger.releasingObjectResources(this);
-        doReleaseResourcesQuietly();
-        logger.releasedObjectResources(this);
-    }
-
-    /**
-     * Releases any resources associated with this object.
-     *
-     * @throws X If the resources could not be released.
-     */
-    protected abstract void doReleaseResources() throws X;
-
-    /**
-     * Releases any resources associated with this object, without throwing any exceptions.
-     * <p>
-     * This implementation calls {@link #doReleaseResources()}, catching and ignoring any exceptions. Sub classes should override this method if
-     * {@link #doReleaseResources()} contains any try-catch-throw logic, to prevent unnecessarily creating a new exception.
-     */
-    protected void doReleaseResourcesQuietly() {
-        try {
-            doReleaseResources();
-        } catch (Exception e) {
-            releaseResourcesFailed(e);
-        }
-    }
-
-    /**
-     * Logs an event that releasing resources associated with this object failed.
-     * This method should be called from {@link #doReleaseResourcesQuietly()} if an exception occurs.
-     *
-     * @param exception The exception that was thrown while quietly releasing the resources associated to this object.
-     */
-    protected final void releaseResourcesFailed(Exception exception) {
-        logger.releaseObjectResourcesFailed(this, exception);
-    }
+    protected abstract void releaseResources() throws X;
 
     void acquired() {
         addReference(this);

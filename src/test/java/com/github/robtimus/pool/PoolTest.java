@@ -1199,6 +1199,8 @@ class PoolTest {
             verify(logger).createdObject(objects.get(0));
             verify(logger).createdPool(config);
             // acquire object1
+            verify(logger).releasingObjectResources(objects.get(0));
+            verify(logger).releasedObjectResources(objects.get(0));
             verify(logger).objectInvalidated(objects.get(0), 0, 0);
             verify(logger).createdObject(object1);
             verify(logger).increasedObjectRefCount(object1, 1);
@@ -1207,6 +1209,8 @@ class PoolTest {
             verify(logger).decreasedObjectRefCount(object1, 0);
             verify(logger).returnedObject(object1, 1, 1);
             // acquire object2
+            verify(logger).releasingObjectResources(object1);
+            verify(logger).releasedObjectResources(object1);
             verify(logger).objectInvalidated(object1, 0, 0);
             verify(logger).createdObject(object2);
             verify(logger).increasedObjectRefCount(object2, 1);
@@ -1220,7 +1224,8 @@ class PoolTest {
             assertSame(object1, objects.get(1));
             assertSame(object2, objects.get(2));
 
-            verify(object1, never()).releaseResources();
+            // releaseResources is called for object1 when acquiring object2, because the object is not valid
+            verify(object1).releaseResources();
             verify(object2, never()).releaseResources();
         }
 
@@ -1674,7 +1679,11 @@ class PoolTest {
             verify(logger).createdObject(objects.get(1));
             verify(logger).createdPool(config);
             // forAllIdleObjects
+            verify(logger).releasingObjectResources(objects.get(0));
+            verify(logger).releasedObjectResources(objects.get(0));
             verify(logger).objectInvalidated(objects.get(0), 1, 1);
+            verify(logger).releasingObjectResources(objects.get(1));
+            verify(logger).releasedObjectResources(objects.get(1));
             verify(logger).objectInvalidated(objects.get(1), 0, 0);
             verify(logger).drainedPool(0);
             // acquire object1

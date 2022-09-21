@@ -355,7 +355,7 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
         while ((object = idleObjects.poll()) != null) {
             if (!object.validate()) {
                 size--;
-                object.clearPool();
+                discardQuietly(object);
                 logger.objectInvalidated(object, idleObjects.size(), size);
                 removedObjects = true;
             } else if (config.maxIdleTimeExceeded(object)) {

@@ -134,6 +134,7 @@ public abstract class PoolableObject<X extends Exception> {
     /**
      * Checks whether or not this object is still valid.
      * Invalid object will be removed from the pool instead of being returned from {@link Pool#acquire()} or {@link Pool#acquireNow()}.
+     * They will also have their {@linkplain #releaseResources() resources released}.
      *
      * @return {@code true} if this object is still valid, or {@code false} otherwise.
      */

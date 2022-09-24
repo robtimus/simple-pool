@@ -1163,6 +1163,51 @@ class PoolTest {
         }
 
         @Test
+        @DisplayName("acquire returns idle objects if available")
+        void testAcquireIdleObjectsFirst() {
+            PoolConfig config = PoolConfig.custom()
+                    .withInitialSize(2)
+                    .withMaxSize(100)
+                    .build();
+            @SuppressWarnings("unchecked")
+            Supplier<TestObject> supplier = mock(Supplier.class);
+            PoolLogger logger = mock(PoolLogger.class);
+
+            when(supplier.get()).thenAnswer(i -> spy(new TestObject()));
+
+            Pool<TestObject, None> pool = Pool.throwingNone(config, supplier, logger);
+
+            for (int i = 0; i < 10; i++) {
+                TestObject object = assertDoesNotThrow(() -> pool.acquire());
+                object.release();
+            }
+
+            ArgumentCaptor<TestObject> objectCaptor = ArgumentCaptor.forClass(TestObject.class);
+
+            verify(supplier, times(2)).get();
+            // logger calls in order
+            // create pool
+            verify(logger).creatingPool(config);
+            verify(logger, times(2)).createdObject(objectCaptor.capture());
+            List<TestObject> objects = objectCaptor.getAllValues();
+            verify(logger).createdObject(objects.get(0));
+            verify(logger).createdObject(objects.get(1));
+            verify(logger).createdPool(config);
+            // acquire object
+            verify(logger, times(5)).increasedObjectRefCount(objects.get(0), 1);
+            verify(logger, times(5)).acquiredObject(objects.get(0), 1, 2);
+            verify(logger, times(5)).increasedObjectRefCount(objects.get(1), 1);
+            verify(logger, times(5)).acquiredObject(objects.get(1), 1, 2);
+            // release object
+            verify(logger, times(5)).decreasedObjectRefCount(objects.get(0), 0);
+            verify(logger, times(5)).returnedObject(objects.get(0), 2, 2);
+            verify(logger, times(5)).decreasedObjectRefCount(objects.get(1), 0);
+            verify(logger, times(5)).returnedObject(objects.get(1), 2, 2);
+
+            verifyNoMoreInteractions(supplier, logger);
+        }
+
+        @Test
         @DisplayName("inactive objects are removed")
         void testInactiveObjectsAreRemoved() {
             PoolConfig config = PoolConfig.custom()

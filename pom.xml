@@ -22,7 +22,7 @@
   <parent>
     <groupId>com.github.robtimus</groupId>
     <artifactId>robtimus-parent</artifactId>
-    <version>1.5</version>
+    <version>1.6</version>
     <relativePath />
   </parent>
 
@@ -63,12 +63,14 @@
 
   <properties>
     <version.junit-support>2.0</version.junit-support>
+    <version.slf4j>1.7.36</version.slf4j>
   </properties>
 
   <dependencies>
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
+      <version>${version.slf4j}</version>
       <optional>true</optional>
     </dependency>
 
@@ -93,6 +95,7 @@
     <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-reload4j</artifactId>
+      <version>${version.slf4j}</version>
       <scope>test</scope>
     </dependency>
 

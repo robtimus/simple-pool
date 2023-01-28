@@ -1,4 +1,9 @@
 # simple-pool
+[![Maven Central](https://img.shields.io/maven-central/v/com.github.robtimus/simple-pool)](https://search.maven.org/artifact/com.github.robtimus/simple-pool)
+[![Build Status](https://github.com/robtimus/simple-pool/actions/workflows/build.yml/badge.svg)](https://github.com/robtimus/simple-pool/actions/workflows/build.yml)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=com.github.robtimus%3Asimple-pool&metric=alert_status)](https://sonarcloud.io/summary/overall?id=com.github.robtimus%3Asimple-pool)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=com.github.robtimus%3Asimple-pool&metric=coverage)](https://sonarcloud.io/summary/overall?id=com.github.robtimus%3Asimple-pool)
+[![Known Vulnerabilities](https://snyk.io/test/github/robtimus/simple-pool/badge.svg)](https://snyk.io/test/github/robtimus/simple-pool)
 
 A simple object pool implementation. It is designed to be small and lightweight.
 

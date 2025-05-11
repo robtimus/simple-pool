@@ -19,7 +19,7 @@ A pool needs 3 to 4 things:
 
  Class [Pool](https://robtimus.github.io/simple-pool/apidocs/com/github/robtimus/pool/Pool.html) provides two factory methods that accept a `Supplier` instead of the factory, and use `None` as the exception type. For instance, where `MyObject` extends `PoolableObject<None>`:
 
-```
+```java
 Pool<MyObject, None> pool = Pool.throwingNone(config, MyObject::new, logger);
 ```
 
@@ -29,7 +29,7 @@ Pool<MyObject, None> pool = Pool.throwingNone(config, MyObject::new, logger);
 
 A `PoolableObject` can have other references added. Instances are only returned to the pool if all references have been removed. This can be used if the object can expose other objects like `InputStream` or `OutputStream`. By adding such objects as references to the object and removing the references when these objects are no longer necessary (e.g. when they are closed), it's possible to delay returning objects to the pool. This allows sub classes to be released without having to worry about these references themselves. For instance:
 
-```
+```java
 class MyConnection extends PoolableObject<IOException> {
 
     ...
@@ -82,7 +82,7 @@ An acquired object should eventually be released. It is up to the `PoolableObjec
 
 For instance, assuming `MyObject` extends `PoolableObject<IOException>`, implements `AutoCloseable`, and calls `release` from its `close` method:
 
-```
+```java
 Pool<MyObject, IOException> pool = new Pool<>(config, MyObject::new, logger);
 try (MyObject object = pool.acquire()) { // note: may throw InterruptedException
     // use object as needed
@@ -94,7 +94,7 @@ try (MyObject object = pool.acquire()) { // note: may throw InterruptedException
 
 To make it easy to create pools of objects that are always valid and don't need any resource cleanup, class [ObjectWrapper](https://robtimus.github.io/simple-pool/apidocs/com/github/robtimus/pool/ObjectWrapper.html) is a `PoolableObject` sub class that simply wraps a value. It implements `AutoCloseable`, so it can be used in try-with-resources blocks:
 
-```
+```java
 Pool<ObjectWrapper<MyObject>, None> pool = ObjectWrapper.newPool(config, MyObject::new, logger);
 try (ObjectWrapper<MyObject> wrapper = pool.acquire()) { // note: may throw InterruptedException
     MyObject object = wrapper.value();

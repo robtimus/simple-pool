@@ -15,6 +15,9 @@
  * limitations under the License.
  */
 
+/**
+ * A simple object pool implementation.
+ */
 module com.github.robtimus.pool {
     requires static org.slf4j;
 

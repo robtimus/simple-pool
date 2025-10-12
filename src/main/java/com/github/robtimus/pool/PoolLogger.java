@@ -390,7 +390,7 @@ public class PoolLogger {
         }
 
         /**
-         * Sets the object prefix to use. This is prepended to object ids in each logged message. The default is no prefix.
+         * Sets the object prefix to use. This is prepended to object ids in each logged message. The default is {@code object-}.
          *
          * @param objectPrefix The object prefix to use.
          * @return This builder.

@@ -530,7 +530,7 @@ public final class Pool<T extends PoolableObject<X>, X extends Exception> {
     }
 
     /**
-     * Shuts down this pool. For all idle object the resources are {@linkplain PoolableObject#releaseResources()} released, and it will no longer be
+     * Shuts down this pool. For all idle object the resources are {@linkplain PoolableObject#releaseResources() released}, and it will no longer be
      * possible to acquire new objects. Any already acquired objects will remain valid until they are returned to the pool.
      *
      * @throws X If an error occurs while releasing resources for any of the idle objects.

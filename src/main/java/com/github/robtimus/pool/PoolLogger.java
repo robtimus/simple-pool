@@ -150,7 +150,7 @@ public class PoolLogger {
      *
      * @param object The {@link PoolableObject}.
      * @param refCount The new number of references, including the {@link PoolableObject} itself.
-     * @see PoolableObject#addReference(Object)
+     * @see PoolableObject#addReference()
      */
     public void increasedObjectRefCount(PoolableObject<?> object, int refCount) {
         if (logger.isDebugEnabled()) {
@@ -163,7 +163,7 @@ public class PoolLogger {
      *
      * @param object The {@link PoolableObject}.
      * @param refCount The new number of references, including the {@link PoolableObject} itself.
-     * @see PoolableObject#removeReference(Object)
+     * @see PoolableObject.Reference#remove()
      */
     public void decreasedObjectRefCount(PoolableObject<?> object, int refCount) {
         if (logger.isDebugEnabled()) {

@@ -31,8 +31,8 @@ import java.util.function.Supplier;
  * An object that can be pooled. Note that the functionality to return the object back to the pool it was acquired from is not part of its
  * <em>public</em> API. This allows implementations to call {@link #release()} from other methods, e.g. a {@link Closeable}'s {@code close} method.
  * <p>
- * Instances of this class are not expected to be thread-safe. Once acquired from a pool, they should usually be used in only one thread until they
- * are released and returned back to the pool.
+ * Instances of this class or sub classes are not expected to be thread-safe. Once acquired from a pool, they should usually be used in only one
+ * thread until they are released and returned back to the pool.
  *
  * @author Rob Spoor
  * @param <X> The type of exception that operations on the object can throw.
@@ -93,30 +93,30 @@ public abstract class PoolableObject<X extends Exception> {
 
     /**
      * Adds a reference to this object. An object will only be returned to the pool it was acquired from if all references to the object are removed.
-     * This allows objects to return other (closeable) objects like {@link InputStream} or {@link OutputStream}. These should be added as reference,
-     * and {@linkplain #removeReference(Object) removed} when they are no longer needed (e.g. when they are closed).
+     * This allows objects to return other (closeable) objects like {@link InputStream} or {@link OutputStream}. For such objects, a reference should
+     * be added using this method, and the returned value should be {@linkplain Reference#remove() removed} or closed when the objects are no longer
+     * needed (e.g. when they are closed).
      *
-     * @param reference The non-{@code null} reference to add.
-     * @throws NullPointerException If the given reference is {@code null}.
+     * @return An object representing the added reference.
+     * @since 2.0
      */
-    protected final void addReference(Object reference) {
-        Objects.requireNonNull(reference);
+    protected final Reference<X> addReference() {
+        Object reference = new Object();
+
+        addReference(reference);
+
+        return () -> removeReference(reference);
+    }
+
+    private void addReference(Object reference) {
+        // In practice adding the reference will always return true, since it will either be called with a new unique Object or with "this",
+        // which will only be done directly after acquiring the object
         if (references.add(reference)) {
             logger.increasedObjectRefCount(this, references.size());
         }
     }
 
-    /**
-     * Removes a reference to this object.
-     * If no more references remain, this object will be returned to the pool it was acquired from. If this object is not associated with a pool,
-     * {@link #releaseResources()} will be called instead.
-     *
-     * @param reference The non-{@code null} reference to remove.
-     * @throws NullPointerException If the given reference is {@code null}.
-     * @throws X If an exception is thrown when calling {@link #releaseResources()}.
-     * @see #addReference(Object)
-     */
-    protected final void removeReference(Object reference) throws X {
+    private void removeReference(Object reference) throws X {
         Objects.requireNonNull(reference);
         if (references.remove(reference)) {
             logger.decreasedObjectRefCount(this, references.size());
@@ -221,5 +221,38 @@ public abstract class PoolableObject<X extends Exception> {
      */
     protected final boolean isEnabled(LogLevel level) {
         return logger.isEnabled(level);
+    }
+
+    /**
+     * A reference to a {@link PoolableObject}.
+     * If a reference is {@linkplain #remove() removed} or closed and no more references to the {@link PoolableObject} from which it was created
+     * remain, the {@link PoolableObject} will be returned to the pool it was acquired from. If it is not associated with a pool, its resources will
+     * be {@link PoolableObject#releaseResources() released} instead.
+     *
+     * @author Rob Spoor
+     * @param <X> The type of exception that can be thrown when resources are released.
+     * @since 2.0
+     */
+    public interface Reference<X extends Exception> extends AutoCloseable {
+
+        /**
+         * Removes the reference to the {@link PoolableObject} from which this reference was created.
+         * If no more references remain, the {@link PoolableObject} will be returned to the pool it was acquired from. If it is not associated with a
+         * pool, its resources will be {@link PoolableObject#releaseResources() released} called instead.
+         *
+         * @throws X If the resources could not be released.
+         */
+        void remove() throws X;
+
+        /**
+         * Removes the reference to the {@link PoolableObject} from which this reference was created.
+         * This method is an alias for {@link #remove()} that allows instances to be used in try-with-resources blocks.
+         *
+         * @throws X If the resources could not be released.
+         */
+        @Override
+        default void close() throws X {
+            remove();
+        }
     }
 }

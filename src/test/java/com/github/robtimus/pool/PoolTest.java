@@ -912,7 +912,7 @@ class PoolTest {
 
                 TestObject object1 = assertIsPresent(pool.acquireNow());
 
-                assertThrows(NumberFormatException.class, () -> pool.acquireNow());
+                assertThrows(NumberFormatException.class, pool::acquireNow);
 
                 TestObject object2 = assertIsPresent(pool.acquireNow());
 
@@ -1124,7 +1124,7 @@ class PoolTest {
 
                 TestObject object1 = assertIsPresent(pool.acquireNow());
 
-                assertThrows(NumberFormatException.class, () -> pool.acquireNow());
+                assertThrows(NumberFormatException.class, pool::acquireNow);
 
                 TestObject object2 = assertIsPresent(pool.acquireNow());
 
@@ -1350,21 +1350,15 @@ class PoolTest {
             Pool<TestObject, None> pool = Pool.throwingNone(config, supplier, logger);
 
             TestObject object1 = assertDoesNotThrow(() -> pool.acquire(1, TimeUnit.SECONDS));
-            object1.addReference(pool);
-            // second reference to the same object does not count
-            object1.addReference(pool);
 
-            object1.release();
+            try (PoolableObject.Reference<None> reference = object1.addReference()) {
+                object1.release();
 
-            // object1 hasn't been returned yet
-            assertThrows(NoSuchElementException.class, () -> pool.acquire(10, TimeUnit.MILLISECONDS));
+                // object1 hasn't been returned yet
+                assertThrows(NoSuchElementException.class, () -> pool.acquire(10, TimeUnit.MILLISECONDS));
 
-            object1.removeReference("foo");
-
-            // object1 hasn't been returned yet, an invalid reference was removed
-            assertThrows(NoSuchElementException.class, () -> pool.acquire(10, TimeUnit.MILLISECONDS));
-
-            object1.removeReference(pool);
+                reference.remove();
+            }
 
             TestObject object2 = assertDoesNotThrow(() -> pool.acquire(1, TimeUnit.SECONDS));
 

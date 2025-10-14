@@ -249,7 +249,7 @@ class PoolTest {
 
                 Pool<TestObject, None> pool = Pool.throwingNone(config, supplier, logger);
 
-                TestObject object = assertDoesNotThrow(() -> pool.acquire());
+                TestObject object = assertDoesNotThrow(() -> pool.acquire()); // NOSONAR, a method reference gives a compiler error in Eclipse
 
                 object.release();
 
@@ -288,7 +288,7 @@ class PoolTest {
                 Pool<TestObject, None> pool = Pool.throwingNone(config, supplier, logger);
 
                 TestObject object1 = assertDoesNotThrow(() -> pool.acquire(1, TimeUnit.SECONDS));
-                TestObject object2 = assertDoesNotThrow(() -> pool.acquire());
+                TestObject object2 = assertDoesNotThrow(() -> pool.acquire()); // NOSONAR, a method reference gives a compiler error in Eclipse
 
                 object1.release();
                 object2.release();
@@ -342,7 +342,7 @@ class PoolTest {
                     TestObject object1 = assertDoesNotThrow(() -> pool.acquire(1, TimeUnit.SECONDS));
                     TestObject object2 = assertDoesNotThrow(() -> pool.acquire(Duration.ofSeconds(1)));
 
-                    assertThrows(NoSuchElementException.class, () -> pool.acquire());
+                    assertThrows(NoSuchElementException.class, () -> pool.acquire()); // NOSONAR, a method reference gives a compiler error in Eclipse
 
                     object1.release();
                     object2.release();
@@ -392,7 +392,7 @@ class PoolTest {
                     TestObject object1 = assertDoesNotThrow(() -> pool.acquire(1, TimeUnit.SECONDS));
                     TestObject object2 = assertDoesNotThrow(() -> pool.acquire(Duration.ofSeconds(1)));
 
-                    assertThrows(NoSuchElementException.class, () -> pool.acquire());
+                    assertThrows(NoSuchElementException.class, () -> pool.acquire()); // NOSONAR, a method reference gives a compiler error in Eclipse
 
                     object1.release();
                     object2.release();
@@ -447,7 +447,7 @@ class PoolTest {
                     // Instead, shutdown the pool after 100ms, and check that the acquire call throws an IllegalStateException
                     executor.schedule(pool::shutdown, 100, TimeUnit.MILLISECONDS);
 
-                    assertThrows(IllegalStateException.class, () -> pool.acquire());
+                    assertThrows(IllegalStateException.class, () -> pool.acquire()); // NOSONAR, a method reference gives a compiler error in Eclipse
 
                     object1.release();
                     object2.release();
@@ -573,11 +573,11 @@ class PoolTest {
 
                 TestObject object1 = assertDoesNotThrow(() -> pool.acquire(1, TimeUnit.SECONDS));
 
-                assertThrows(NumberFormatException.class, () -> pool.acquire());
+                assertThrows(NumberFormatException.class, () -> pool.acquire()); // NOSONAR, a method reference gives a compiler error in Eclipse
 
-                TestObject object2 = assertDoesNotThrow(() -> pool.acquire());
+                TestObject object2 = assertDoesNotThrow(() -> pool.acquire()); // NOSONAR, a method reference gives a compiler error in Eclipse
 
-                assertThrows(NoSuchElementException.class, () -> pool.acquire());
+                assertThrows(NoSuchElementException.class, () -> pool.acquire()); // NOSONAR, a method reference gives a compiler error in Eclipse
 
                 assertNotEquals(object1, object2);
 
@@ -1178,7 +1178,7 @@ class PoolTest {
             Pool<TestObject, None> pool = Pool.throwingNone(config, supplier, logger);
 
             for (int i = 0; i < 10; i++) {
-                TestObject object = assertDoesNotThrow(() -> pool.acquire());
+                TestObject object = assertDoesNotThrow(() -> pool.acquire()); // NOSONAR, a method reference gives a compiler error in Eclipse
                 object.release();
             }
 
